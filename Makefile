@@ -1,7 +1,7 @@
 # Subor:    Makefile
 
 
-PROJ=IFJ2015
+PROJ=ial
 CFLAGS=-std=gnu99 -Wall -Wextra -Werror -pedantic -pthread
 CC=gcc
 RM=rm -f
