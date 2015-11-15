@@ -17,46 +17,48 @@
 #include <string.h>
 
 /**Prototypy funkcii**/
-int find(char *string, char *pattern);
-int *KMPGraf(char *pattern, int pattern_length);
+int KMP_Find(char *string, char *pattern);
+int *KMP_FAIL_INDEX(char *pattern, int pattern_length);
 int length_of_string(char * string);
 char* concatenation(char *string1, char *string2);
 
 
-/**Vektor chyby**/
-int *KMPGraf(char *pattern, int pattern_length) 
+//////////////////////////**Vektor chyby**//////////////////////////////////////
+
+int *KMP_FAIL_INDEX(char *pattern, int pattern_length) 
 {
 	int k,r;
-	int *pi = malloc(sizeof(int) * pattern_length);
+	int *fail = malloc(sizeof(int) * pattern_length);
 
-	if (pi == NULL) {
+	if (fail == NULL) {
 		return NULL;
 	}
 
-	pi[0] = 0;
+	fail[0] = 0;
 
 	for (k = 1; k < pattern_length; k++) {
-		r = pi[k - 1];
+		r = fail[k - 1];
 
 		while ((r > 0) && (pattern[r ] != pattern[k - 1])) {
-			r = pi[r];
+			r = fail[r];
 		}
 
-		pi[k] = r + 1;
+		fail[k] = r + 1;
 	}
 	
-	return pi;
+	return fail;
 }
 
-/**Implementacia Knutth-Morris-Pratt algoritmu**/
-int KMP(char *string, char *pattern)
+///////////////**Implementacia Knutth-Morris-Pratt algoritmu**//////////////////
+
+int KMP_Find(char *string, char *pattern)
 {
 
 	int tindex = 1;
 	int pindex = 1;
 	int string_length = strlen(string); // dlzka retazca
     int pattern_length = strlen(pattern); // dlzka podretazca
-    int *pi = KMPGraf(string, pattern_length);
+    int *fail = KMP_FAIL_INDEX(string, pattern_length);
 
     while ((tindex <= string_length) && (pindex <= pattern_length)) {
     	if ((pindex == 0) || (string[tindex - 1] == pattern[pindex - 1])) { // vracia prvy vyskyt
@@ -64,12 +66,12 @@ int KMP(char *string, char *pattern)
     		tindex++;
     	}
     	else {
-    		pindex = pi[pindex - 1];
+    		pindex = fail[pindex - 1];
     	}
     }
 
-    free(pi);
-    pi = NULL;
+    free(fail);
+    fail = NULL;
 	
     if (pindex > pattern_length) {
     	return ((tindex - pattern_length) - 1);
@@ -79,14 +81,16 @@ int KMP(char *string, char *pattern)
     }
 }
 
-/**Implementacia algoritmu na zistovanie dlzky retazca**/
+/////////////**Implementacia algoritmu na zistovanie dlzky retazca**////////////
+
 int length_of_string(char * string)
 {
 	int string_length = strlen(string); // dlzka retazca	
 	return string_length;
 }
 
-/**Implementacia konkatenancie dvoch retazcov **/
+//////////////**Implementacia konkatenancie dvoch retazcov **///////////////////
+
 char* concatenation(char *string1, char *string2)
 {
 	char *result = malloc(strlen(string1) + strlen(string2) + 1);
@@ -101,18 +105,74 @@ char* concatenation(char *string1, char *string2)
     return result;
 } 
 
+////////////////////**Implementacie funkcie substring**/////////////////////////
+/*
+char* substring(char *string, int i, int n)
+{	
+	int string_length = strlen(string); // dlzka retazca
+	//char *result = malloc(strlen(string));
+	char pole[string_length];
+	char pole2[string_length];
+	int j;
+
+	if ((i > string_length) || (n + i >string_length)) {
+		return NULL;
+	}
+
+	for (j = i ; j < (i + n); j++) {
+		result[j] = string[j];
+	}
+printf("%s\n",result );
+return result;
+// opravit
+}
+*/
+//////////////////////////////**ShellSort**/////////////////////////////////////
+
+char* ShellSort(char *string)
+{
+int i,j,step,gap;
+int string_length = strlen(string); // dlzka retazca
+
+step = string_length / 2;
+
+while (step > 0) {
+
+   for (i = 0; i < string_length - step  ; i++) {
+       j =i+step;
+       char tmp = string[j];
+       while ((j >= step) && (string[j] > string[j - step])){
+           string[j] = string[j - step];
+           j -=  step;
+       }
+        string[j] = tmp;
+    }
+    if (gap == 2) { //zmena velikosti mezery
+        gap = 1;
+    } 
+    else {
+        gap = gap / 2;
+    }
+}
+return string;
+}// opravit
+
 
 
 int main() 
 {
+	//printf("%s\n",substring("123456",2,2));
+	printf("%s\n",ShellSort("987654321"));
+
 	char * str = concatenation("ahoj", "jano");
 	printf("%s\n",str );
 	free (str);
+
 	printf("%d\n", length_of_string("x\nz"));
-	printf("%d\n", KMP("cabcabcab", "ab"));
-	printf("%d\n", KMP("cccabcdefab", "de"));
-	printf("%d\n", KMP("cccabcdefab", "c"));
-	printf("%d\n", KMP("cccabcdefab", "aasdasdasda"));
-	printf("%d\n", KMP("cccabcdefab", "fab"));
+	printf("%d\n", KMP_Find("cabcabcab", "ab"));
+	printf("%d\n", KMP_Find("cccabcdefab", "de"));
+	printf("%d\n", KMP_Find("cccabcdefab", "c"));
+	printf("%d\n", KMP_Find("cccabcdefab", "aasdasdasda"));
+	printf("%d\n", KMP_Find("cccabcdefab", "fab")); 
 	return 0;
 }
