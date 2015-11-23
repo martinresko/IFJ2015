@@ -1,7 +1,7 @@
 #include <string.h>
 
-#include "stack.h"
-#include "stack.c"
+#include "list.h"
+#include "list.c"
 
 #define SIZE 14
 
@@ -29,11 +29,11 @@ const char PRECEDENCE_TABLE[SIZE][SIZE] =
 };
 
 /* funkcie precedencnej syntaktickej analyzi */
-void InitExpressionStack(StackPointer *);
-int Reduce(StackPointer *);
-void ReduceT(StackPointer *);
-void Shift(StackPointer *,char *);
+void InitExpressionList(ListPointer *);
+int Reduce(ListPointer *);
+void ReduceT(ListPointer *);
+void Shift(ListPointer *,char *);
 int ConvertCharToAccessPrecedenceTable(char *);
-char DecideShiftOrReduce(StackPointer *,char *);
-void FindLastTerminal(StackPointer *);
-void Analysis(StackPointer *);
+char DecideShiftOrReduce(ListPointer *,char *);
+void FindLastTerminal(ListPointer *);
+void Analysis(ListPointer *);
