@@ -16,8 +16,8 @@ typedef struct list {
 
 /* zoznam pre spravu zasobnika */
 typedef struct { 
-    List top_list_element;
-    List bottom_list_element;
+    List last_list_element;
+    List first_list_element;
 	List last_terminal;
 } ListPointer;
 
@@ -25,8 +25,8 @@ typedef struct {
 void Error();
 void InitList (ListPointer *);
 int EmptyList(ListPointer *);
-List Push(ListPointer *,char *);
-void Pop(ListPointer *);
-char* Top(ListPointer *);
+List InsertLast(ListPointer *,char *);
+void DeleteLast(ListPointer *);
+char* GetLast(ListPointer *);
 void PrintList(ListPointer *);
 void DestroyList(ListPointer *);

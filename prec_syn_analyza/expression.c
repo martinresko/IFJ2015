@@ -5,10 +5,10 @@ int main()
 	ListPointer list;
 	//InitList(&list);
 	//InitExpressionList(&list);
-	//Push(&list,"i");
-	//Push(&list,"i");
+	//InsertLast(&list,"i");
+	//InsertLast(&list,"i");
 	//PrintList(&list);
-	//Pop(&list);
+	//DeleteLast(&list);
 	//PrintList(&list);
 	//DestroyList(&list);
 
@@ -17,7 +17,7 @@ int main()
 	//printf("returned %c\n" , DecideShiftOrReduce(&list,input[2]));
 	//Shift(&list,input[0]);
 	//Shift(&list,"(");
-	//Push(&list,"D");
+	//InsertLast(&list,"D");
 	//Reduce(&list);
 	//PrintList(&list);
 	//printf("posledny terminal %s\n",list.last_terminal->data);
@@ -71,7 +71,7 @@ void Analysis(ListPointer *Lis)
 void InitExpressionList(ListPointer *Lis)
 {
 	InitList(Lis);
-	Lis->last_terminal=Push(Lis,"$"); /* zaciatok lista a prvy terminal */
+	Lis->last_terminal=InsertLast(Lis,"$"); /* zaciatok lista a prvy terminal */
 	Lis->last_terminal->terminal=true; /* set element as terminal */
 }
 
@@ -139,8 +139,8 @@ int Reduce(ListPointer *Lis)
 		}
 		Lis->last_terminal->terminal=false; /* pre istotu aj ked by ten operator mal za chvilu zmiznut */
 		FindLastTerminal(Lis); /* najdenie noveho terminalu */
-		Pop(Lis); /* odstanime operator a pravy operand */
-		Pop(Lis);
+		DeleteLast(Lis); /* odstanime operator a pravy operand */
+		DeleteLast(Lis);
 		return 1;
 	}
 	else
@@ -150,7 +150,7 @@ void ReduceT(ListPointer *Lis)
 {
 	printf("(D) -> D\n");
 	Lis->last_terminal->data=Lis->last_terminal->next->data;
-	Pop(Lis); /* TREBA VYRIESIT uzatvaraciu zatvorku !!!! */
+	DeleteLast(Lis); /* TREBA VYRIESIT uzatvaraciu zatvorku !!!! */
 	Lis->last_terminal->terminal=false;
 	FindLastTerminal(Lis);
 }
@@ -159,7 +159,7 @@ void ReduceT(ListPointer *Lis)
 /* char_input - prvy znak z input */
 void Shift(ListPointer *Lis,char * char_input)
 {
-	Lis->last_terminal=Push(Lis,char_input);
+	Lis->last_terminal=InsertLast(Lis,char_input);
 	Lis->last_terminal->terminal=true;
 }
 
