@@ -14,14 +14,14 @@ typedef struct list {
 	bool terminal;
 } *List;	               
 
-/* zoznam pre spravu zasobnika */
+/* zoznam pre spravu obojsmerne viazaneho zoznamu */
 typedef struct { 
     List last_list_element;
     List first_list_element;
 	List last_terminal;
 } ListPointer;
 
-/* Funkcie zasobnika */
+/* Funkcie obojsmerne viazeneho zoznamu */
 void Error();
 void InitList (ListPointer *);
 int EmptyList(ListPointer *);
