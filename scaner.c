@@ -13,19 +13,24 @@
 
 #include <ctype.h>
 #include <string.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "scaner.h"
 
 #define NUM_OF_KEYWORDS 10	//pocet klucovych slov
 #define NUM_OF_RESWORDS 5 	//pocet rezervovanych slov
+#define LEX_ERR 1
 
 tToken token; //globalna premenna reprezentujuca token
 int row = 0;  //globalna premenna reprezentujuca aktualny riadok
+int error = 0;
 
 /* Tabulka klucovych slov */
  const char *keywords[NUM_OF_KEYWORDS] = {
  	"auto\0", "cin\0", "cout\0", "double\0", "else\0",
  	"for\0", "if\0", "int\0", "return\0", "string\0"
- }
+ };
 
 /* 
 * Tabulka rezervovanych slov 
@@ -34,7 +39,7 @@ int row = 0;  //globalna premenna reprezentujuca aktualny riadok
  const char *reswords[NUM_OF_RESWORDS] = {
  	"lenght\0", "substr\0", "concat\0",
  	"find\0", "sort\0"
- }
+ };
 
 /*
 * funkcia ma dva parametre: aktualny znak a
@@ -44,15 +49,18 @@ int row = 0;  //globalna premenna reprezentujuca aktualny riadok
 */
  static void expand_token(int c, int *i){
  	(*i)++;		//inkrementujeme pocitadlo nacitanych znkov
- 	static int tmp = (*i) * 2;		//pomocna premenna na realokaciu pamate
+ 	int tmp = (*i) * 2;		//pomocna premenna na realokaciu pamate
+ 	char buffer[2]; 		//buffer pre prevod int to string.
 
  	if((*i) >= tmp){	//Ak je potreba pamat realokovat
  		tmp = (*i) * 2;
  		token.attribute = realloc(token.attribute, tmp);
- 		strcat(token.attribute, c);
+ 		sprintf(buffer, "%d", c);
+ 		strcat(token.attribute, buffer);
  	} else {
  		//Ak je dostatok pamate na novy znak a nie je potreba realokovat
- 		strcat(token.attribute, c);
+ 		sprintf(buffer, "%d", c);
+ 		strcat(token.attribute, buffer);
  	}
  } 
 
@@ -73,13 +81,15 @@ int row = 0;  //globalna premenna reprezentujuca aktualny riadok
 */
  static tState check_keyword(char *s){
 
- 	for(int j = 0; j < NUM_OF_KEYWORDS; j++){
+int j;
+
+ 	for(j = 0; j < NUM_OF_KEYWORDS; j++){
  		if(!(strcmp(s,keywords[j]))){
  			return sKeyWord;
  		}
  	}
 
- 	for(int j = 0; j < NUM_OF_RESWORDS; j++){
+ 	for(j = 0; j < NUM_OF_RESWORDS; j++){
  		if(!(strcmp(s,keywords[j]))){
  			return sResWord;
  		}
@@ -91,7 +101,7 @@ int row = 0;  //globalna premenna reprezentujuca aktualny riadok
 /*
 * doplni id tokenu.
 */
- static void fill_token(state){
+ static void fill_token(tState state){
  	token.id = state;
 }
 
@@ -104,7 +114,7 @@ int row = 0;  //globalna premenna reprezentujuca aktualny riadok
 
 /* inicializacia tokenu */
  	token.id = sStart;
- 	token.attribute = NULfL;
+ 	token.attribute = NULL;
 
 /* Cyklus while ktory reprezentuje DKA */
  	while((c = getc(file)) && (cont)){
@@ -381,7 +391,7 @@ int row = 0;  //globalna premenna reprezentujuca aktualny riadok
  				if(c == '='){ //<=
  					state = sLeorEq;
  					expand_token(c, &i);
- 				} else if(c == "<"){ // <<
+ 				} else if(c == '<'){ // <<
  					state = sCin;
  					expand_token(c, &i);
  				} else{ // <
@@ -445,4 +455,9 @@ int row = 0;  //globalna premenna reprezentujuca aktualny riadok
 
  /* Vratime token parseru */
  	return token;
+ }
+
+ int main()
+ {
+ 	return 0;
  }
