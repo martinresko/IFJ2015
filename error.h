@@ -29,3 +29,9 @@ typedef enum error_code{
     INTERN_ERR		= 99,
 
 } ERROR_CODE;
+
+typedef enum error_message{
+	WRONG_SCALE,
+	FAILED_MALLOC,
+
+} ERROR_MESSAGE;
