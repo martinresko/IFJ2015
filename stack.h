@@ -1,10 +1,13 @@
+#ifndef STACK_INCLUDED
+#define STACK_INCLUDED
+
 #include<stdio.h>
 #include<stdlib.h>
 
 /* prvok zasobniku */
 typedef struct stack {
 	struct stack *left_stack_element;
-	void *data_structure;
+	void *data;
 } *Stack;
 
 /* struktura zasobnika */
@@ -19,3 +22,5 @@ void stackPop(StackPointer *);
 void *stackTop(StackPointer *);
 int stackEmpty(StackPointer *);
 void stackDestroy(StackPointer *);
+
+#endif

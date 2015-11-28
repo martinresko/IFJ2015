@@ -1,24 +1,24 @@
 #include"stack.h"
 
-struct x
-{
-	int a;
-	char *b;
-} struktura_x = {4,"ahoj"};
-int main()
-{
-	printf("%d cislo a\n",struktura_x.a);
-	
-	StackPointer zasobnik;
-	stackInit(&zasobnik);
-	stackPush(&zasobnik,&struktura_x);
-	// plati pre premennu
-	//printf("%d cislo a zo zasobniku",*((int *)(zasobnik.top_of_stack->data_structure)));
-	// plati pre strukturu
-	//printf("%d cislo a zo zasobniku",((struct x*)(zasobnik.top_of_stack->data_structure))->a);
-	stackPop(&zasobnik);
-	return 0;
-}
+//struct x
+//{
+//	int a;
+//	char *b;
+//} struktura_x = {4,"ahoj"};
+//int main()
+//{
+//	printf("%d cislo a\n",struktura_x.a);
+//	
+//	StackPointer zasobnik;
+//	stackInit(&zasobnik);
+//	stackPush(&zasobnik,&struktura_x);
+//	// plati pre premennu
+//	//printf("%d cislo a zo zasobniku",*((int *)(zasobnik.top_of_stack->data)));
+//	// plati pre strukturu
+//	//printf("%d cislo a zo zasobniku",((struct x*)(zasobnik.top_of_stack->data))->a);
+//	stackPop(&zasobnik);
+//	return 0;
+//}
 
 /* inicializuje zasobnik */
 /* Stac - ukazatel na zasobnik */
@@ -33,7 +33,7 @@ void stackInit(StackPointer *Stac)
 void stackPush(StackPointer *Stac, void *data_struct)
 {
 	Stack helpful_pointer = malloc(sizeof(struct stack));
-	helpful_pointer->data_structure=data_struct;
+	helpful_pointer->data=data_struct;
 	helpful_pointer->left_stack_element=Stac->top_of_stack;
 	Stac->top_of_stack=helpful_pointer;
 }
@@ -47,6 +47,7 @@ void stackPop(StackPointer *Stac)
 	{	
 		helpful_pointer = Stac->top_of_stack;
 		Stac->top_of_stack=Stac->top_of_stack->left_stack_element;
+		//free(helpful_pointer->data); // POZOR to iste ako v stact destroy 
 		free(helpful_pointer);
 	}
 	else
@@ -57,7 +58,7 @@ void stackPop(StackPointer *Stac)
  * Stac - ukazatel na zasobnik */
 void *stackTop(StackPointer *Stac)
 {
-	return Stac->top_of_stack->data_structure;
+	return Stac->top_of_stack->data;
 }
 
 /* funkcia ktora zisti ci je zasobnik prazdny 
@@ -77,6 +78,7 @@ void stackDestroy(StackPointer *Stac)
 	{
 		helpful_pointer = Stac->top_of_stack;
 		Stac->top_of_stack = helpful_pointer->left_stack_element;
+		//free(helpful_pointer->data); // POZOR znamena to ze zasobnik moze obsahovat len to co sa ulozi na hromade inak to hodi error lebo nema co uvolnit 
 		free(helpful_pointer);
 	}
 }
