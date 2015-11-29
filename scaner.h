@@ -53,6 +53,7 @@ typedef enum{
 	sEscSeq,			// 38 - Escape sekvencie
 	sEscHex,			// 39 - Hexa zapisovanie v Esc sekvencii
 	sEscHex2,			// 40 - Hexa zapisovanie 2
+	sExpo 				// 41 - Nacitanie cisiel pre exponent
 
 } tState;
 
