@@ -10,7 +10,6 @@
  *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */
-FILE *file;
 /* States of the FSM */
 typedef enum{
 	sStart,				// 00 - Start

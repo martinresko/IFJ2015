@@ -19,12 +19,15 @@
 #include "scaner.h"
 #include "error.h"
 
+
 #define NUM_OF_KEYWORDS 10	//pocet klucovych slov
 #define NUM_OF_RESWORDS 5 	//pocet rezervovanych slov
 
 tToken token; //globalna premenna reprezentujuca token
 int row = 0;  //globalna premenna reprezentujuca aktualny riadok
 int error = 0;
+
+FILE *file;
 
 /* Tabulka klucovych slov */
  const char *keywords[NUM_OF_KEYWORDS] = {

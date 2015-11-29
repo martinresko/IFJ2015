@@ -15,8 +15,8 @@
  #include <stdlib.h>
  #include <stdio.h>
  #include "scaner.h"
+ #include "error.h"
 
- #define INTER_ERR 99
  #define OK_ERR 0
 
 
@@ -26,13 +26,15 @@ int main(int argc, char **argv){
 
 	if(argc != 2){
 		fprintf(stderr, "Bol zadany nespravny pocet argumentov.\n");
-		return INTER_ERR;
+		return INTERN_ERR;
 	}
 
 	if(!(file = fopen(argv[1], "r"))){
 		fprintf(stderr, "Subor sa nepodarilo otvorit.\n");
-		return INTER_ERR;
+		return INTERN_ERR;
 	}
+
+	ERROR_CODE prog();
 
 return OK_ERR;
 }

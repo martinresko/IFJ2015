@@ -10,19 +10,12 @@
  *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */
-
+ #include <stdio.h>
  #include <stdlib.h>
+ #include <string.h>
  #include "scaner.h"
  #include "error.h"
 
-ERROR_CODE prog();
-ERROR_CODE body();
-ERROR_CODE function();
-ERROR_CODE typ();
-ERROR_CODE prototype_of_definition();
-ERROR_CODE params();
-ERROR_CODE multi_params();
-ERROR_CODE stat_list();
 
 tToken token; // aktualny token
 
@@ -34,7 +27,7 @@ ERROR_CODE prog()
 {
 	ERROR_CODE error = ERR_OK;
 	token = get_Token();
-
+    printf("tu som\n");
     switch (token.id) {
         case sError: // chyba v lexikalnom analyzatore
              error = LEX_ERR;
@@ -48,8 +41,10 @@ ERROR_CODE prog()
     }
 
     if (error != ERR_OK) {
+        printf("podarillo sa\n");
         return error;
     }
+    printf("nepodarilo sa\n");
 
     return ERR_OK;
 }
@@ -321,7 +316,7 @@ ERROR_CODE multi_params()
  * @info:<stat_list> -> <command> <stat_list> /empty
  */
 
-ERROR_CODE stat_list();
+ERROR_CODE stat_list()
 {
     token = get_Token();
     ERROR_CODE error;
@@ -361,7 +356,7 @@ ERROR_CODE stat_list();
     cin >> id <multi_cin>;
     cout << <term> <multi_cout>;
  */
-ERROR_CODER command()
+ERROR_CODE command()
 {
     ERROR_CODE error;
 
@@ -390,25 +385,41 @@ ERROR_CODER command()
                 error = ERR_OK;
                 return error;
                 break;
-
             }
         default : 
             // ak dostanem return
             if(strcmp(token.attribute, "return")){
                 // zavolat expression
-                token = get_Token()
+                token = get_Token();
+                /*kontrola ci je Lex_ERR*/
+                if (token.id == sError) {
+                    error = LEX_ERR;
+                    return error;
+                // ak bol zadany ;
+                } else if (token.id == sSemicolon) {
+                    error = ERR_OK;
+                    return error;
+                // inak chyba
+                } else {
+                    error = SYN_ERR;
+                    return error;
+                }
             }
-            else if(strcmp(token.attribute, "double")){
+            else if(strcmp(token.attribute, "if")){
                 error = ERR_OK;
                 return error;
-            } else if(strcmp(token.attribute, "string")){
+            } else if(strcmp(token.attribute, "cin")){
+                error = ERR_OK;
+                return error;
+            } else if(strcmp(token.attribute, "for")){
+                error = ERR_OK;
+                return error;
+            } else if(strcmp(token.attribute, "cout")){
                 error = ERR_OK;
                 return error;
             } else {
-                error = SYN_ERR;
-                return error;
+                // zavolat funkcie assign a funkcia priradenia
             }
-
     }
 
     if (error != ERR_OK) {
@@ -418,7 +429,7 @@ ERROR_CODER command()
     return ERR_OK;
 }
 
-ERROR_CODER funkcia_priradenie()
+ERROR_CODE funkcia_priradenie()
 {
-
+ return ERR_OK;
 }
