@@ -25,7 +25,6 @@
 
 tToken token; //globalna premenna reprezentujuca token
 int row = 0;  //globalna premenna reprezentujuca aktualny riadok
-int error = 0;
 
 FILE *file;
 
@@ -47,23 +46,26 @@ FILE *file;
 /*
 * funkcia ma dva parametre: aktualny znak a
 * ukazatel na pocet nacitanych znakov.
-* Funkcia realokuje pamat pre atriut tokenu a rozsiri ho 
+* Funkcia realokuje pamat pre atribut tokenu a rozsiri ho 
 * o preve nacitany znak. 
 */
  static void expand_token(int c, int *i){
- 	(*i)++;		//inkrementujeme pocitadlo nacitanych znkov
- 	int tmp = (*i) * 2;		//pomocna premenna na realokaciu pamate
- 	char buffer[2]; 		//buffer pre prevod int to string.
-
- 	if((*i) >= tmp){	//Ak je potreba pamat realokovat
- 		tmp = (*i) * 2;
- 		token.attribute = realloc(token.attribute, tmp);
- 		sprintf(buffer, "%d", c);
- 		strcat(token.attribute, buffer);
- 	} else {
- 		//Ak je dostatok pamate na novy znak a nie je potreba realokovat
- 		sprintf(buffer, "%d", c);
- 		strcat(token.attribute, buffer);
+ 	if((*i) > 0){
+ 		if((token.attribute = (char *) realloc(token.attribute, (*i) + 2))){
+ 			token.attribute[(*i) + 1] = '\0';
+ 			token.attribute[(*i)] = c;
+ 			(*i)++;
+ 		} else{
+ 			error = INTERN_ERR;
+ 		}
+ 	} else{
+ 		if((token.attribute = (char *) malloc(2))){
+ 			token.attribute[(*i) + 1] = '\0';
+ 			token.attribute[(*i)] = c;
+ 			(*i)++;
+ 		} else{
+ 			error = INTERN_ERR;
+ 		}
  	}
  } 
 
