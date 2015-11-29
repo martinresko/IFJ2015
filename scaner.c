@@ -25,7 +25,7 @@
 
 tToken token; //globalna premenna reprezentujuca token
 int row = 0;  //globalna premenna reprezentujuca aktualny riadok
-
+ERROR_CODE error;
 FILE *file;
 
 /* Tabulka klucovych slov */
