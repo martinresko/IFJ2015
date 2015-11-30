@@ -1,3 +1,5 @@
+#include"list.h"
+
 /* Fukncia je volana pri chybe */	
 void Error()
 {
@@ -10,7 +12,6 @@ void InitList (ListPointer *Lis)
 {
 	Lis->last_list_element = NULL;
 	Lis->first_list_element = NULL; 
-	Lis->last_terminal = NULL;
 }
 /* vrati 0 ak list nieje prazdny */
 /* Lis ukazatel na list */
@@ -22,7 +23,7 @@ int EmptyList(ListPointer *Lis)
 /* vrati ukazatel na vlozeny prvok */
 /* Lis ukazatel na list */
 /* data znak ktory prvkok obsahuje */
-List InsertLast(ListPointer *Lis,char *data)
+List InsertLast(ListPointer *Lis,void *data)
 {
 	List push_element = malloc(sizeof(struct list)); /* vytvorenie mem pre novy prvok */
 	if (push_element==NULL)
@@ -33,7 +34,6 @@ List InsertLast(ListPointer *Lis,char *data)
 		push_element->data=data;
 		push_element->next=NULL;
 		push_element->prev=NULL;
-		push_element->terminal=false;
 		if (EmptyList(Lis)) /* ak je list je prazdny */ 
 		{
 			Lis->last_list_element=push_element;
@@ -75,7 +75,7 @@ void DeleteLast(ListPointer *Lis)
 }
 /* vrati data na vrchole listu */
 /* Lis ukazatel na list */
-char* GetLast(ListPointer *Lis)
+void* GetLast(ListPointer *Lis)
 {
 	return Lis->last_list_element->data;
 }
@@ -89,7 +89,7 @@ void PrintList(ListPointer *Lis)
 		List help = Lis->first_list_element;
 		while (help!=NULL)
 		{
-			printf(" %s ",help->data);
+			//printf(" %s ",help->data);
 			help=help->next;
 		}
 		printf("\n");
@@ -109,5 +109,4 @@ void DestroyList(ListPointer *Lis)
 	}
 	Lis->first_list_element=NULL;
 	Lis->last_list_element=NULL;
-	Lis->last_terminal=NULL;
 }

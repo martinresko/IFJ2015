@@ -1,3 +1,6 @@
+#ifndef LIST_INCLUDED
+#define LIST_INCLUDED
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdarg.h>
@@ -10,8 +13,7 @@
 typedef struct list {
     struct list *next;
 	struct list *prev;
-    char *data;
-	bool terminal;
+    void *data;
 } *List;	               
 
 /* zoznam pre spravu obojsmerne viazaneho zoznamu */
@@ -25,8 +27,10 @@ typedef struct {
 void Error();
 void InitList (ListPointer *);
 int EmptyList(ListPointer *);
-List InsertLast(ListPointer *,char *);
+List InsertLast(ListPointer *,void *);
 void DeleteLast(ListPointer *);
-char* GetLast(ListPointer *);
+void* GetLast(ListPointer *);
 void PrintList(ListPointer *);
 void DestroyList(ListPointer *);
+
+#endif
