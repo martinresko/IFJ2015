@@ -17,6 +17,9 @@
  #include "scaner.h"
  #include "error.h"
 
+ #define OK_ERR 0
+
+
 FILE *file;
 
 int main(int argc, char **argv){
@@ -31,5 +34,7 @@ int main(int argc, char **argv){
 		return INTERN_ERR;
 	}
 
-return ERR_OK;
+	ERROR_CODE prog();
+
+return OK_ERR;
 }

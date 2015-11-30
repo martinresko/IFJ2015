@@ -17,14 +17,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "scaner.h"
+#include "error.h"
+
 
 #define NUM_OF_KEYWORDS 10	//pocet klucovych slov
 #define NUM_OF_RESWORDS 5 	//pocet rezervovanych slov
-#define LEX_ERR 1
 
 tToken token; //globalna premenna reprezentujuca token
 int row = 0;  //globalna premenna reprezentujuca aktualny riadok
-int error = 0;
+ERROR_CODE error;
+FILE *file;
 
 /* Tabulka klucovych slov */
  const char *keywords[NUM_OF_KEYWORDS] = {
@@ -44,25 +46,55 @@ int error = 0;
 /*
 * funkcia ma dva parametre: aktualny znak a
 * ukazatel na pocet nacitanych znakov.
-* Funkcia realokuje pamat pre atriut tokenu a rozsiri ho 
+* Funkcia realokuje pamat pre atribut tokenu a rozsiri ho 
 * o preve nacitany znak. 
 */
  static void expand_token(int c, int *i){
- 	(*i)++;		//inkrementujeme pocitadlo nacitanych znkov
- 	int tmp = (*i) * 2;		//pomocna premenna na realokaciu pamate
- 	char buffer[2]; 		//buffer pre prevod int to string.
-
- 	if((*i) >= tmp){	//Ak je potreba pamat realokovat
- 		tmp = (*i) * 2;
- 		token.attribute = realloc(token.attribute, tmp);
- 		sprintf(buffer, "%d", c);
- 		strcat(token.attribute, buffer);
- 	} else {
- 		//Ak je dostatok pamate na novy znak a nie je potreba realokovat
- 		sprintf(buffer, "%d", c);
- 		strcat(token.attribute, buffer);
+ 	if((*i) > 0){
+ 		if((token.attribute = (char *) realloc(token.attribute, (*i) + 2))){
+ 			token.attribute[(*i) + 1] = '\0';
+ 			token.attribute[(*i)] = c;
+ 			(*i)++;
+ 		} else{
+ 			error = INTERN_ERR;
+ 		}
+ 	} else{
+ 		if((token.attribute = (char *) malloc(2))){
+ 			token.attribute[(*i) + 1] = '\0';
+ 			token.attribute[(*i)] = c;
+ 			(*i)++;
+ 		} else{
+ 			error = INTERN_ERR;
+ 		}
  	}
  } 
+
+/*
+* Funkcia prevadza hexadecimalne
+* cislo na cislo v desiatkovej sustave.
+*/
+ int HextoDec(char *hexa){
+ 	int i;
+ 	int value = 0;
+ 	int base = 16;
+
+ 	for (i = 0; i < 2; i++){
+ 		//Druhe cislo nenasobime 16.
+ 		if(i > 0){
+ 			base = 1;
+ 		}
+
+ 		if((hexa[i] >= '0') && (hexa[i] <= '9')){
+ 			value += ((int)hexa[i] - 48) * base;
+ 		} else if((hexa[i] >= 'a') && (hexa[i] <= 'f')){
+ 			value += ((int)hexa[i] - 55) * base;
+ 		} else if((hexa[i] >= 'A') && (hexa[i] <= 'F')){
+ 			value += ((int)hexa[i] - 87) * base;
+ 		}
+ 	}
+
+ 	return value;
+ }
 
 /*
 * funkcia ma parameter prave nacitany znak c.
@@ -110,7 +142,10 @@ int j;
  	tState state = sStart;
  	int i = 0;		// pocitadlo nacitanych znakov
  	int c;			// prave nacitany znak
+ 	int escap;		//pomocna premenna na urcenie escape sekvencii
+ 	int escap2;		// -||-
  	bool cont = true;
+ 	char hexa[3];		//spracovanie hexadecimalneho cisla.
 
 /* inicializacia tokenu */
  	token.id = sStart;
@@ -138,7 +173,11 @@ int j;
  				else if(c == '*')							state = sMult;
  				else if(c == ',')							state = sComma;
  				else if(c == EOF)							state = sEndofFile;
- 				else if(c == '"')							state = sString; 	
+ 				
+ 				else if(c == '"'){						
+ 					state = sString;
+ 					break;
+ 				} 	
 
  				//Ak sa jedna o biely znak
  				else if(isspace(c)){
@@ -281,15 +320,82 @@ int j;
  			//Ak bola nacitana uvodzovka, jedna sa o retazec.
  			case sString:{
  				if(c == '"'){
- 					expand_token(c, &i);
  					fill_token(state);
  					state = sEnd;
  				} else if((c == '\n') || (c == EOF)){
  					state = sError;
+ 				} else if(c == 92){
+ 					state = sEscSeq;
  				} else{
  					expand_token(c, &i);
  					state = sString;
  				}
+ 				break;
+ 			}
+
+ 			//Escape sekvencia v retazci.
+ 			case sEscSeq:{
+ 				if(c == '"'){
+ 					state = sString;
+ 					expand_token(c, &i);
+ 				} else if(c == 'n'){
+ 					escap = '\n';
+ 					state = sString;
+ 					expand_token(escap, &i);
+ 				} else if(c == 't'){
+ 					escap = '\t';
+ 					state = sString;
+ 					expand_token(escap, &i);
+ 				} else if(c == 92){
+ 					state = sString;
+ 					expand_token(c, &i);
+ 				} else if(c == 'x'){
+ 					escap = 'x';
+ 					state = sEscHex;
+ 				} else{
+ 					state = sString;
+ 					expand_token(92, &i);
+ 					expand_token(c, &i);
+ 				}
+ 				break;
+ 			}
+
+ 			/* 
+ 			* Zadavanie znakov pomocou escape
+ 			* sekvencie vramci retazcoveho literalu
+ 			*/
+ 			case sEscHex:{
+ 				if(isxdigit(c)){
+ 					state = sEscHex2;
+ 					escap2 = c;
+ 					hexa[0] = (char)c;
+ 				} else{
+ 					state = sString;
+ 					expand_token(92, &i);
+ 					expand_token(escap, &i);
+ 					expand_token(c, &i);
+ 				}
+ 				break;
+ 			}
+
+ 			/*
+ 			* Pokracovanie hex. v escape sekvecii
+ 			*/
+ 			case sEscHex2:{
+ 				if(isxdigit(c)){
+ 					state = sString;
+ 					hexa[1] = (char)c;
+ 					hexa[2] = '\0';
+ 					escap2 = HextoDec(hexa);
+ 					expand_token(escap2, &i);
+ 				} else{
+ 					state = sString;
+ 					expand_token(92, &i);
+ 					expand_token(escap, &i);
+ 					expand_token(escap2, &i);
+ 					expand_token(c, &i);
+ 				}
+ 				break;
  			}
 
  			//prvy znak bol '='
@@ -455,9 +561,4 @@ int j;
 
  /* Vratime token parseru */
  	return token;
- }
-
- int main()
- {
- 	return 0;
  }

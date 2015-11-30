@@ -10,8 +10,6 @@
  *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */
-
-FILE *file;
 /* States of the FSM */
 typedef enum{
 	sStart,				// 00 - Start
@@ -51,7 +49,10 @@ typedef enum{
 	sError,				// 34 - Lexikalna chyba
 	sEnd, 				// 35 - koncovy stav
 	sIsDouble,			// 36 - Zaciatok Double
-	sIsExpo2			// 37 - Pokracovanie exponentu
+	sIsExpo2,			// 37 - Pokracovanie exponentu
+	sEscSeq,			// 38 - Escape sekvencie
+	sEscHex,			// 39 - Hexa zapisovanie v Esc sekvencii
+	sEscHex2			// 40 - Hexa zapisovanie 2
 
 } tState;
 
