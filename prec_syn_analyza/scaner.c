@@ -25,8 +25,7 @@
 
 tToken token; //globalna premenna reprezentujuca token
 int row = 0;  //globalna premenna reprezentujuca aktualny riadok
-int error = 0;
-
+ERROR_CODE error;
 FILE *file;
 
 /* Tabulka klucovych slov */
@@ -47,23 +46,26 @@ FILE *file;
 /*
 * funkcia ma dva parametre: aktualny znak a
 * ukazatel na pocet nacitanych znakov.
-* Funkcia realokuje pamat pre atriut tokenu a rozsiri ho 
+* Funkcia realokuje pamat pre atribut tokenu a rozsiri ho 
 * o preve nacitany znak. 
 */
  static void expand_token(int c, int *i){
- 	(*i)++;		//inkrementujeme pocitadlo nacitanych znkov
- 	int tmp = (*i) * 2;		//pomocna premenna na realokaciu pamate
- 	char buffer[2]; 		//buffer pre prevod int to string.
-
- 	if((*i) >= tmp){	//Ak je potreba pamat realokovat
- 		tmp = (*i) * 2;
- 		token.attribute = realloc(token.attribute, tmp);
- 		sprintf(buffer, "%d", c);
- 		strcat(token.attribute, buffer);
- 	} else {
- 		//Ak je dostatok pamate na novy znak a nie je potreba realokovat
- 		sprintf(buffer, "%d", c);
- 		strcat(token.attribute, buffer);
+ 	if((*i) > 0){
+ 		if((token.attribute = (char *) realloc(token.attribute, (*i) + 2))){
+ 			token.attribute[(*i) + 1] = '\0';
+ 			token.attribute[(*i)] = c;
+ 			(*i)++;
+ 		} else{
+ 			error = INTERN_ERR;
+ 		}
+ 	} else{
+ 		if((token.attribute = (char *) malloc(2))){
+ 			token.attribute[(*i) + 1] = '\0';
+ 			token.attribute[(*i)] = c;
+ 			(*i)++;
+ 		} else{
+ 			error = INTERN_ERR;
+ 		}
  	}
  } 
 
@@ -99,10 +101,8 @@ FILE *file;
 * Ak znak nie je biely, tak ho funkcia vrati
 * spat do toku znakov, spravi opak funkcie getc().
 */
- static void undo_c(int c){
- 	if(!(isspace(c))){
+static void undo_c(int c){
  		ungetc(c, file);
- 	}
  }
 
 /*
@@ -110,7 +110,6 @@ FILE *file;
 * a postupne porovnava nacitany retazec s klucovymi slovami.
 */
  static tState check_keyword(char *s){
-
 int j;
 
  	for(j = 0; j < NUM_OF_KEYWORDS; j++){
@@ -120,7 +119,7 @@ int j;
  	}
 
  	for(j = 0; j < NUM_OF_RESWORDS; j++){
- 		if(!(strcmp(s,keywords[j]))){
+ 		if(!(strcmp(s,reswords[j]))){
  			return sResWord;
  		}
  	}
@@ -201,9 +200,10 @@ int j;
  					state = sInteger;
  					expand_token(c, &i);	//rozsirime token o jeden znak
  				} else{
+					state = sInteger;
  					fill_token(state);		//prepiseme id tokenu
  					state = sEnd;
- 					undo_c((char) c);		//posledny nacitany znak vratime spat
+ 					undo_c(c);		//posledny nacitany znak vratime spat
  				}
  				break;
  			}
@@ -220,8 +220,9 @@ int j;
  					*/
  					token.id = check_keyword(token.attribute);
  					state = sEnd;
- 					undo_c((char) c);
+ 					undo_c(c);
  				}
+ 				break;
  			}
 
  			//Prvy nacitany znak bol numericky.
@@ -239,7 +240,7 @@ int j;
  					//Nacitali sme ine ako cislo, posielame token int.
  					fill_token(state);
  					state = sEnd;
- 					undo_c((char) c);
+ 					undo_c(c);
  				}
  				break;
  			}
@@ -251,7 +252,7 @@ int j;
  					expand_token(c, &i);
  				} else {
  					state = sError;
- 					undo_c((char) c);
+ 					undo_c(c);
  				}
  				break;
  			}
@@ -268,7 +269,7 @@ int j;
  				} else{
  					fill_token(state);
  					state = sEnd;
- 					undo_c((char) c);
+ 					undo_c(c);
  				}
  				break;
  			}
@@ -285,7 +286,7 @@ int j;
  					expand_token(c, &i);
  				} else{
  					state = sError;
- 					undo_c((char) c);
+ 					undo_c(c);
  				}
  				break;
  			}
@@ -298,7 +299,7 @@ int j;
  				} else{
  					//Chyba, po znamienku nasleduje iny znak ako cislo.
  					state = sError;
- 					undo_c((char) c);
+ 					undo_c(c);
  				}
  			}
 
@@ -310,7 +311,7 @@ int j;
  				} else{
  					fill_token(state);
  					state = sEnd;
- 					undo_c((char) c);
+ 					undo_c(c);
  				}
  				break;
  			}
@@ -404,7 +405,7 @@ int j;
  				} else{
  					fill_token(state);
  					state = sEnd;
- 					undo_c((char) c);
+ 					undo_c(c);
  				}
  				break;
  			}
@@ -418,7 +419,7 @@ int j;
  				} else{
  					fill_token(state);
  					state = sEnd;
- 					undo_c((char) c);
+ 					undo_c(c);
  				}
  				break;
  			}
@@ -469,7 +470,7 @@ int j;
  				} else{
  					// ! samotny nie je lexem jazyka IFJ15
  					state = sError;
- 					undo_c((char) c);
+ 					undo_c(c);
  				}
  				break;
  			}
@@ -485,7 +486,7 @@ int j;
  				} else{ // >>
  					fill_token(state);
  					state = sEnd;
- 					undo_c((char) c);
+ 					undo_c(c);
  				}
  				break;
  			}
@@ -501,7 +502,7 @@ int j;
  				} else{ // <
  					fill_token(state);
  					state = sEnd;
- 					undo_c((char) c);
+ 					undo_c(c);
  				}
  				break;
  			}
@@ -526,7 +527,7 @@ int j;
  			case sResWord:{
  				fill_token(state);
  				state = sEnd;
- 				undo_c((char) c);
+ 				undo_c(c);
  				break;
  			}
 
@@ -539,8 +540,9 @@ int j;
 
  			//Koncovy stav DKA
  			case sEnd:{
+				undo_c(c);
+				undo_c(c);
  				cont = false;
- 				undo_c((char) c);
  				break;
  			}
  		}
