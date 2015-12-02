@@ -547,7 +547,7 @@ int j;
  		}
 
  		//Nastala lexikalna chyba
- 		if(error){
+ 		if(scaner_error){
  			break;
  		}
 

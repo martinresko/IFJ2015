@@ -11,6 +11,9 @@
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */
 /* States of the FSM */
+
+#include "error.h"
+
 typedef enum{
 	sStart,				// 00 - Start
 	sIdent,				// 01 - Identifikator
