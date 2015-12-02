@@ -42,8 +42,8 @@ typedef enum{
 	sMult,				// 27 - *
 	sEndofFile,			// 28 - End of File
 	sComma,				// 29 - ,
-	sCin,				// 30 - <<
-	sCout,				// 31 - >>
+	sCout,				// 30 - <<
+	sCin,				// 31 - >>
 	sKeyWord,			// 32 - Klucove slova
 	sResWord,			// 33 - Rezervovane slova
 	sError,				// 34 - Lexikalna chyba

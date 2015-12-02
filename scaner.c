@@ -480,7 +480,7 @@ int j;
  					state = sGrorEq;
  					expand_token(c, &i);
  				} else if(c == '>'){ // >>
- 					state = sCout;
+ 					state = sCin;
  					expand_token(c, &i);
  				} else{ // >>
  					fill_token(state);
@@ -496,7 +496,7 @@ int j;
  					state = sLeorEq;
  					expand_token(c, &i);
  				} else if(c == '<'){ // <<
- 					state = sCin;
+ 					state = sCout;
  					expand_token(c, &i);
  				} else{ // <
  					fill_token(state);
@@ -520,8 +520,8 @@ int j;
  			case sMult:			// *
  			case sEndofFile:	// EOF
  			case sComma:		// ,
- 			case sCin:			// <<
- 			case sCout:			// >>
+ 			case sCout:			// <<
+ 			case sCin:			// >>
  			case sKeyWord:
  			case sResWord:{
  				fill_token(state);
