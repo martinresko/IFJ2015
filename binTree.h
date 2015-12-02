@@ -5,6 +5,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<stdbool.h>
+#include"error.h"
 
 /* element stromu */
 typedef struct tree {
@@ -23,7 +24,7 @@ typedef struct {
 void treeInit(TreePointer *);
 void treeDestroy(TreePointer *);
 Tree treeSearch(TreePointer *, char *);
-void treeInsert(TreePointer *,char *,void *);
+ERROR_CODE treeInsert(TreePointer *,char *,void *);
 Tree treeNodesSearch(Tree, char *key);
 void treeNodesDestroy(Tree);
 
