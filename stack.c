@@ -30,12 +30,18 @@ void stackInit(StackPointer *Stac)
 /* vlozi na zasobnik novy prvok
  * Stac - ukazatel na zasobnik
  * data_struct ukazatel na datovu strukturu */
-void stackPush(StackPointer *Stac, void *data_struct)
+ERROR_CODE stackPush(StackPointer *Stac, void *data_struct)
 {
 	Stack helpful_pointer = malloc(sizeof(struct stack));
-	helpful_pointer->data=data_struct;
-	helpful_pointer->left_stack_element=Stac->top_of_stack;
-	Stac->top_of_stack=helpful_pointer;
+	if(helpful_pointer!=NULL)
+	{
+		helpful_pointer->data=data_struct;
+		helpful_pointer->left_stack_element=Stac->top_of_stack;
+		Stac->top_of_stack=helpful_pointer;
+		return OK_ERR;
+	}
+	else
+		return INTERN_ERR;
 }
 
 /* odstani prvok z vrcholu zasobniku 
@@ -47,7 +53,7 @@ void stackPop(StackPointer *Stac)
 	{	
 		helpful_pointer = Stac->top_of_stack;
 		Stac->top_of_stack=Stac->top_of_stack->left_stack_element;
-		//free(helpful_pointer->data); // POZOR to iste ako v stact destroy 
+		free(helpful_pointer->data); // POZOR to iste ako v stact destroy 
 		free(helpful_pointer);
 	}
 	else
@@ -78,7 +84,7 @@ void stackDestroy(StackPointer *Stac)
 	{
 		helpful_pointer = Stac->top_of_stack;
 		Stac->top_of_stack = helpful_pointer->left_stack_element;
-		//free(helpful_pointer->data); // POZOR znamena to ze zasobnik moze obsahovat len to co sa ulozi na hromade inak to hodi error lebo nema co uvolnit 
+		free(helpful_pointer->data); // POZOR znamena to ze zasobnik moze obsahovat len to co sa ulozi na hromade inak to hodi error lebo nema co uvolnit 
 		free(helpful_pointer);
 	}
 }

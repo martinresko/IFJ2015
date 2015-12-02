@@ -49,7 +49,7 @@ void treeNodesDestroy(Tree node)
 		treeNodesDestroy(node->left);
 	if(node->right!=NULL)
 		treeNodesDestroy(node->right);
-	//free(node->data); // POZOR znamena ze mozem do data ukladat len pointer na alokovanu pamat ak by som do dat dal pointer na int napriklad tak hodi chybu lebo nema byt aka pamat uvolnena */
+	free(node->data); // POZOR znamena ze mozem do data ukladat len pointer na alokovanu pamat ak by som do dat dal pointer na int napriklad tak hodi chybu lebo nema byt aka pamat uvolnena */
 	free(node);
 }
 /*funkcia inicializuje strom
@@ -85,7 +85,7 @@ Tree treeSearch(TreePointer *Tre,char *key)
  * Tre	- ukazatel na strom
  * key 	- kluc vkladaneho prvku
  * data - ukazatel na cokolvek co cheme uchovavat v prvku stromu */
-void treeInsert(TreePointer *Tre, char *key,void *data)
+ERROR_CODE treeInsert(TreePointer *Tre, char *key,void *data)
 {
 	if(Tre->root!=NULL) /* strom nieje prazdny */
 	{
@@ -107,7 +107,7 @@ void treeInsert(TreePointer *Tre, char *key,void *data)
 						helpful_pointer->right->key=key;
 					}
 					else
-						printf("nedostal som pamat\n");
+						return INTERN_ERR;
 				}
 				else /* list to nieje tak musim sa posunut dalej */
 					helpful_pointer=helpful_pointer->right;
@@ -125,7 +125,7 @@ void treeInsert(TreePointer *Tre, char *key,void *data)
 						helpful_pointer->left->key=key;
 					}
 					else
-						printf("nedostal som pamat\n");
+						return INTERN_ERR;
 				}
 				else /* list to nieje tak musim sa posunut dalej */
 					helpful_pointer=helpful_pointer->right;
@@ -133,7 +133,7 @@ void treeInsert(TreePointer *Tre, char *key,void *data)
 			else /*compare == 0 */
 			{
 				helpful_pointer->data=data; /* aktualizujem data */
-				return;/*nasiel som co som hladal*/
+				return OK_ERR;/*nasiel som co som hladal*/
 			}
 		}
 	}
@@ -148,6 +148,7 @@ void treeInsert(TreePointer *Tre, char *key,void *data)
 			Tre->root->key=key;
 		}
 		else
-			printf("nedostal som pamat\n");
+			return INTERN_ERR;
 	}
+	return OK_ERR;
 }

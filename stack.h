@@ -3,6 +3,7 @@
 
 #include<stdio.h>
 #include<stdlib.h>
+#include"error.h"
 
 /* prvok zasobniku */
 typedef struct stack {
@@ -17,7 +18,7 @@ typedef struct {
 
 /* funkcie zasobnika */
 void stackInit(StackPointer *);
-void stackPush(StackPointer *,void *);
+ERROR_CODE stackPush(StackPointer *,void *);
 void stackPop(StackPointer *);
 void *stackTop(StackPointer *);
 int stackEmpty(StackPointer *);
