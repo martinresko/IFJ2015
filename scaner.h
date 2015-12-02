@@ -1,7 +1,7 @@
 /**
  * Predmet: IFJ / IAL
- * Subor:     ial.c
- *            Implementacia vstavaných funkcií
+ * Subor:     scaner.h
+ *            Implementacia lexikálnej analýzy
  * Projekt:   Implementace interpretu imperativního jazyka IFJ15
  *            tým 21, varianta a/3/I
  * Autori:    <xhlava42@stud.fit.vutbr.cz>, Dominik Hlaváč Ďurán
