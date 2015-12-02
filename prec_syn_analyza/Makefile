@@ -1,7 +1,7 @@
 # MAKEFILE
 
 PROJ=expression
-FILES=list.c expression.c
+FILES= error.c scaner.c list.c expression.c
 CFLAGS=-std=gnu99 -Wall -Wextra -Werror -pedantic -pthread
 CC=gcc
 

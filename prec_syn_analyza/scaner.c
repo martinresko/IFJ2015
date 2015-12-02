@@ -10,22 +10,13 @@
  *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */
-
-#include <ctype.h>
-#include <string.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "scaner.h"
-#include "error.h"
-
 
 #define NUM_OF_KEYWORDS 10	//pocet klucovych slov
 #define NUM_OF_RESWORDS 5 	//pocet rezervovanych slov
 
 tToken token; //globalna premenna reprezentujuca token
 int row = 0;  //globalna premenna reprezentujuca aktualny riadok
-ERROR_CODE error;
 FILE *file;
 
 /* Tabulka klucovych slov */
@@ -562,3 +553,17 @@ int j;
  /* Vratime token parseru */
  	return token;
  }
+
+
+//int main()
+//{
+//	file = fopen("test", "r");
+//	int i;
+//	while(i<9)
+//	{
+//		get_Token();
+//		printf("%d\t",token.id);
+//		i++;
+//	}
+//	fclose(file);
+//}

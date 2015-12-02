@@ -5,30 +5,45 @@
 
 #include "list.h"
 #include "scaner.h"
+#include "error.h"
 
 #define SIZE 14
 
-enum LEX_SYMBOLS
+enum 
 {
-	START,OPERAND,END,UNKNOWN
+	MUL,
+	DIV,
+	PLUS,
+	MINUS,
+	LT,
+	GT,
+	LE,
+	GE,
+	EQ,
+	NE,
+	LEFT,
+	RIGHT,
+	OPERAND,
+	DOLLAR,
+	UNKNOWN
 };
 const char PRECEDENCE_TABLE[SIZE][SIZE] =
 {
-	/*				  		   *   /   +   -   <   >  <=  >=  ==  !=   (   )   OPERAND   $  */
-	[sMult]			={[sMult]='R','R','R','R','R','R','R','R','R','R','S','R','S',[END]='R'},
-	[sDivide] 		={[sMult]='R','R','R','R','R','R','R','R','R','R','S','R','S',[END]='R'},
-	[sPlus]  		={[sMult]='S','S','R','R','R','R','R','R','R','R','S','R','S',[END]='R'},
-	[sMinus] 		={[sMult]='S','S','R','R','R','R','R','R','R','R','S','R','S',[END]='R'},
-	[sLess]    		={[sMult]='S','S','S','S','R','R','R','R','R','R','S','R','S',[END]='R'},
-	[sGreater]    	={[sMult]='S','S','S','S','R','R','R','R','R','R','S','R','S',[END]='R'},
-	[sLeorEq]    	={[sMult]='S','S','S','S','R','R','R','R','R','R','S','R','S',[END]='R'},
-	[sGrorEq]    	={[sMult]='S','S','S','S','R','R','R','R','R','R','S','R','S',[END]='R'},
-	[sEqual]    	={[sMult]='S','S','S','S','R','R','R','R','R','R','S','R','S',[END]='R'},
-	[sNotEq]    	={[sMult]='S','S','S','S','R','R','R','R','R','R','S','R','S',[END]='R'},
-	[sLParenth]  	={[sMult]='S','S','S','S','S','S','S','S','S','S','S','T','S',[END]='X'},
-	[sRParenth] 	={[sMult]='R','R','R','R','R','R','R','R','R','R','X','R','X',[END]='R'},
-	[OPERAND]  		={[sMult]='R','R','R','R','R','R','R','R','R','R','X','R','X',[END]='R'},
-	[START] 	 	={[sMult]='S','S','S','S','S','S','S','S','S','S','S','P','S',[END]='X'}
+	/*			   *   /   +   -   <   >  <=  >=  ==  !=   (   )  OP   $  */
+	[MUL]		={'R','R','R','R','R','R','R','R','R','R','S','R','S','R'},
+	[DIV] 		={'R','R','R','R','R','R','R','R','R','R','S','R','S','R'},
+	[PLUS]  	={'S','S','R','R','R','R','R','R','R','R','S','R','S','R'},
+	[MINUS] 	={'S','S','R','R','R','R','R','R','R','R','S','R','S','R'},
+	[LT]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
+	[GT]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
+	[LE]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
+	[GE]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
+	[EQ]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
+	[NE]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
+	[LEFT]  	={'S','S','S','S','S','S','S','S','S','S','S','T','S','X'},
+	[RIGHT] 	={'R','R','R','R','R','R','R','R','R','R','X','R','X','R'},
+	[OPERAND]  	={'R','R','R','R','R','R','R','R','R','R','X','R','X','R'},
+	[DOLLAR] 	={'S','S','S','S','S','S','S','S','S','S','S','P','S','X'}
 };
 
 /* struktura prvku ktory sa bude vkladat do zoznamu ako teminal/neterminal */
@@ -40,14 +55,16 @@ typedef struct precedence_table_element {
 } Precedence_table_element;
 
 /* funkcie precedencnej syntaktickej analyzi */
-void InitExpressionList(ListPointer *);
-int Reduce(ListPointer *);
+ERROR_CODE expression();
+ERROR_CODE InitExpressionList(ListPointer *);
+ERROR_CODE  Reduce(ListPointer *);
 void ReduceT(ListPointer *);
-void Shift(ListPointer *,int,char *);
+ERROR_CODE Shift(ListPointer *,int,char *);
 int ConvertCharToAccessPrecedenceTable(char *);
 char DecideShiftOrReduce(ListPointer *,int);
 void FindLastTerminal(ListPointer *);
-int Analysis(ListPointer *);
+ERROR_CODE Analysis(ListPointer *);
 List insertElement(ListPointer *,int,char *);
 int expressionIdChose(int);
+int convertIdToTableAccess(int);
 #endif

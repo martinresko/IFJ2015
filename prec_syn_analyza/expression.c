@@ -3,102 +3,119 @@
 
 tToken TOKEN;/* ukazatel na token bude sluzit ako docasne ulozisko tokenu */
 
+FILE *file;
+
 int main()
 {
-	ListPointer list;
-	//InitList(&list);
-	//InitExpressionList(&list);
-	//InsertLast(&list,"i");
-	//InsertLast(&list,"i");
-	//PrintList(&list);
-	//DeleteLast(&list);
-	//PrintList(&list);
-	//DestroyList(&list);
-
-	//char *input[]={"i","+",")"};
-	
-	//printf("returned %c\n" , DecideShiftOrReduce(&list,input[2]));
-	//Shift(&list,input[0]);
-	//Shift(&list,"(");
-	//InsertLast(&list,"D");
-	//Reduce(&list);
-	//PrintList(&list);
-	//printf("posledny terminal %s\n",list.last_terminal->data);
-	Analysis(&list);
+	file = fopen("test","r");
+	ERROR_CODE ret=expression();
+	printf("skoncil som s navratovym kodom %d, token s atributom %s\n",ret,TOKEN.attribute);
+	fclose(file);
 	return EXIT_SUCCESS;
 }
 
-/* hlavna funkcia ktora vsetko koordinuje */
-/* return - 1 OK, -1 NOK */
-/* Lis - ukazatel na list */
-int Analysis(ListPointer *Lis)
+/* funkcia volana z rekuzivneho zostupu 
+ * return - navratova hodnota z error.h */
+ERROR_CODE expression()
 {
-	InitExpressionList(Lis);
+	ListPointer list;
+	ERROR_CODE return_analysis = Analysis(&list);
+	return return_analysis;
+}
+
+/* hlavna funkcia ktora vsetko koordinuje */
+/* return - z error.h */
+/* Lis - ukazatel na list */
+ERROR_CODE Analysis(ListPointer *Lis)
+{
+	if(InitExpressionList(Lis)!=OK_ERR)
+		return INTERN_ERR;
 	TOKEN = get_Token(); /* ukazatel na token bude sluzit ako docasne ulozisko tokenu */
+	if(TOKEN.id==sError)
+		return LEX_ERR;
 	bool vykonavanie_cyklu=true;
-	while(vykonavanie_cyklu) /* cyklus vykonavam pokial spracujem vsetko a na vstupe je END(;) alebo mi pride pravidlo P (toto bolo uspesne vykonanie) a neuspesne ak mi ako dalsie pravidlo prislo X alebo na vstupe je UNKNOWN id */
+	while(vykonavanie_cyklu) /* cyklus vykonavam pokial spracujem vsetko a na vstupe je DOLLAR(;) alebo mi pride pravidlo P (toto bolo uspesne vykonanie) a neuspesne ak mi ako dalsie pravidlo prislo X alebo na vstupe je UNKNOWN id */
 	{
 		char next_step=DecideShiftOrReduce(Lis,TOKEN.id); /* zistime co mame vykonat */
 		if(next_step=='R')
 		{
-			printf("Redukujeme:\n");
-			if(Reduce(Lis)==-1)
+			if(Reduce(Lis)==SYN_ERR)
 			{
 				printf("Redukcia neprabehla\n");
-				return -1;
+				vykonavanie_cyklu=false;
+				return SYN_ERR;
 			}
 		}
 		else if(next_step=='S')
 		{
-			printf("Shiftujeme:\n");
-			Shift(Lis,TOKEN.id,TOKEN.attribute);
-			TOKEN = get_Token(); /* aktualizujem token (nacitam dalsi) */
+			if( Shift(Lis,TOKEN.id,TOKEN.attribute)==OK_ERR)
+			{
+				TOKEN = get_Token(); /* aktualizujem token (nacitam dalsi) */
+				if(TOKEN.id==sError)
+					return LEX_ERR;
+			}
+			else
+				return INTERN_ERR;
 		}
 		else if(next_step=='T')
 		{
 			printf("pravidlo T:\n");
 			ReduceT(Lis);
-			get_Token(); /* spracujem ')' a rovno aj zahodim lebo som ju uz pouzil */
 			TOKEN = get_Token(); /* aktualizujem token za ')' */
-		}
-		else if(next_step=='P') /* pripad ked na posledny terminal je START a na vstupe je ) */
+			if(TOKEN.id==sError)
+				return LEX_ERR;
+			}
+		else if(next_step=='P') /* pripad ked na posledny terminal je DOLLAR a na vstupe je ) */
 		{
-			TOKEN=get_Token(); /* ulozim si ) */
-			vykonavanie_cyklu = false; /* dalej cyklus nevykonavam */
-			/* na zasobniku je posledny terminal START a na vrchole ) */
-			return 0; /* koncim uspechom */
+			if(	 (Lis->first_list_element->next)!=NULL)
+				/* ak je zasobnik vyzera $ D ), a nie $ ) lebo toto by bola chyba */
+			{
+				vykonavanie_cyklu = false; /* dalej cyklus nevykonavam */
+				/* na zasobniku je posledny terminal DOLLAR a na vrchole ) */
+				return OK_ERR; /* koncim uspechom */
+			}
+			else
+			{
+				printf("pravidlo P ale bez opedandu \n");
+				return SYN_ERR;
+			}
 		}
 		else /* next_step==X */
 		{
-			TOKEN=get_Token(); /* ulozim si token pre rekurzivny */
 			printf("Syntakticka chyba pravidlo X \n");
-			return -1; /* vratim chybu */
+			vykonavanie_cyklu=false;
+			return SYN_ERR; /* vratim chybu */
 		}
-		if( (expressionIdChose(TOKEN.id)==END) && (((struct precedence_table_element*)(Lis->last_terminal->data))->expresion_id==START) )
+
+		if( (expressionIdChose(TOKEN.id)==DOLLAR) && (((struct precedence_table_element*)(Lis->last_terminal->data))->expresion_id==DOLLAR) )
 		{
 			vykonavanie_cyklu = false;
-			TOKEN=get_Token(); /* precitam strednik */
-			return 1; /* koncim uspechom */
+			printf("koncim uspesne\n");
+			return OK_ERR; /* koncim uspechom */
 		}
 	}
+	return SYN_ERR;
 }
 
 /* inicializacia zoznamu pre precednecnu syntakcitku analyzu vlozenim $ na zoznam */
 /* Lis - ukazatel na list */
-void InitExpressionList(ListPointer *Lis)
+ERROR_CODE InitExpressionList(ListPointer *Lis)
 {
 	if(Lis!=NULL)
 	{
 		InitList(Lis);
-		Lis->last_terminal = insertElement(Lis,START,"$"); /* do zoznamu vlozim symbol zaciatku zoznamu a nastavim ho ako posledny terminal */
-		((struct precedence_table_element*)(Lis->last_terminal->data))->expresion_id=START; /* musim UNKNOWN -> START */
+		Lis->last_terminal = insertElement(Lis,DOLLAR,"$"); /* do zoznamu vlozim symbol zaciatku zoznamu a nastavim ho ako posledny terminal */
+		if(Lis->last_terminal == NULL)
+			return INTERN_ERR;
+		((struct precedence_table_element*)(Lis->last_terminal->data))->expresion_id=DOLLAR; /* musim UNKNOWN -> DOLLAR */
 	}
+	return OK_ERR;
 }
 
 /* funkcia podla posledneho terminalu na zozname vykona redukciu */
-/* return - -1 error redukcie napriklad pri operatore neboli 2 operandy, 1 redukcia prebehla ok */
+/* return - SYN_ERR error redukcie napriklad pri operatore neboli 2 operandy, OK_ERR redukcia prebehla ok */
 /* Lis - ukazatel na list */
-int Reduce(ListPointer *Lis)
+ERROR_CODE Reduce(ListPointer *Lis)
 {
 	int rule = ((struct precedence_table_element*)(Lis->last_terminal->data))->expresion_id;
 	if(rule==OPERAND) /* terminal je i*/
@@ -106,9 +123,9 @@ int Reduce(ListPointer *Lis)
 		printf(" i -> D \n");
 		((Precedence_table_element *)(Lis->last_terminal->data))->terminal=false;
 		FindLastTerminal(Lis); /* najdenie noveho terminalu */
-		return 1;
+		return OK_ERR;
 	}
-	else if((rule >= sMult ) && (rule <= sNotEq ) ) /* terminal je operand */
+	else if(( rule >= MUL ) && (rule <= NE ) ) /* terminal je operand */
 	{
 		List left_operand = Lis->last_terminal->prev;
 		List right_operand = Lis->last_terminal->next;
@@ -116,62 +133,61 @@ int Reduce(ListPointer *Lis)
 		{
 			switch(rule)
 			{
-				case(sMult):
+				case(MUL):
 					printf("MUL\n");
-					/* Doplnit semanticku akciu a generovanie kodu */
+					/* Doplnit instrukciu */
 					break;
-				case(sDivide):
+				case(DIV):
 					printf("DIV\n");
-					/* Doplnit semanticku akciu */
+					/* Doplnit instrukciu */
 					break;
-				case(sPlus):
+				case(PLUS):
 					printf("PLUS\n");
-					/* Doplnit semanticku akciu */
+					/* Doplnit instrukciu */
 					break;
-				case(sMinus):
+				case(MINUS):
 					printf("MINUS\n");
-					/* Doplnit semanticku akciu */
+					/* Doplnit instrukciu */
 					break;
-				case(sLess):
+				case(LT):
 					printf("LT\n");
-					/* Doplnit semanticku akciu */
+					/* Doplnit instrukciu */
 					break;
-				case(sGreater):
+				case(GT):
 					printf("GT\n");
-					/* Doplnit semanticku akciu */
+					/* Doplnit instrukciu */
 					break;
-				case(sLeorEq):
+				case(LE):
 					printf("LE\n");
-					/* Doplnit semanticku akciu */
+					/* Doplnit instrukciu */
 					break;
-				case(sGrorEq):
+				case(GE):
 					printf("GE\n");
-					/* Doplnit semanticku akciu */
+					/* Doplnit instrukciu */
 					break;
-				case(sEqual):
+				case(EQ):
 					printf("EQ\n");
-					/* Doplnit semanticku akciu */
+					/* Doplnit instrukciu */
 					break;
-				case(sNotEq):
+				case(NE):
 					printf("NE\n");
 					/* Doplnit semanticku akciu */
 					break;
 			}
-		   //	Lis->last_terminal->data->terminal=false; /* pre istotu aj ked by ten operator mal za chvilu zmiznut */
 			FindLastTerminal(Lis); /* najdenie noveho terminalu */
 			DeleteLast(Lis);/* odstranime pravy operand */
 			DeleteLast(Lis); /* odstanime operator */
 			/* priradenie hodnoty niekam aby som mohol pouzit lavy operand */
-			return 1;
+			return OK_ERR;
 		}
 		else
 		{
 			printf("ERRROR chyba operator\n");
-			return -1;
+			return SYN_ERR;
 		}
 	}
 	else
-		return -1;
+		return SYN_ERR;
 }
 
 /* funkcia pre pravidlo (D) -> D
@@ -185,13 +201,15 @@ void ReduceT(ListPointer *Lis)
 	FindLastTerminal(Lis); /* nastavim novy terminal */
 }
 
-/* shift vlastne iba pushne znak z input na list a nastavy novy last terminal */
+/* shift vlastne iba pushne znak z input na list */
+/* return - INTERN alebo OK */
 /* Lis - ukazatel na list */
 /* id  - id z tokenu */
 /* attribute - attribute z tokenu */
-void Shift(ListPointer *Lis,int id,char *attribute)
+ERROR_CODE Shift(ListPointer *Lis,int id,char *attribute)
 {
 	Lis->last_terminal=insertElement(Lis,id,attribute);
+	return (Lis->last_terminal==NULL)?INTERN_ERR:OK_ERR;
 }
 
 /* funkcia ma za ulohu rozhodnut ci sa ma redukovat alebo shiftovat a to podla posledneho terminalu na zozname a prveho znaku(tokenu)*/
@@ -202,6 +220,7 @@ char DecideShiftOrReduce(ListPointer *Lis,int id)
 {
 	int list_terminal = ((Precedence_table_element *)(Lis->last_terminal->data))->expresion_id;
 	int token_symbol = expressionIdChose(id);
+	printf("%s <-> %s\n",((Precedence_table_element *)(Lis->last_terminal->data))->attribute,TOKEN.attribute);
 	if(token_symbol!=UNKNOWN)
 		return PRECEDENCE_TABLE[list_terminal][token_symbol];
 	else
@@ -213,7 +232,7 @@ char DecideShiftOrReduce(ListPointer *Lis,int id)
 void FindLastTerminal(ListPointer *Lis)
 {
  	List helpful_pointer = Lis->last_terminal; 
-	if(helpful_pointer->prev==NULL) /* posledny terminal je START */
+	if(helpful_pointer->prev==NULL) /* posledny terminal je DOLLAR */
 		return; /* nic nerob */
 	else
 	{
@@ -232,7 +251,7 @@ void FindLastTerminal(ListPointer *Lis)
 }
 
 /* funkcie vlozi prvok do zoznamu, kazdy vkladany prvok je terminal
- * List		 - ukazatel na zoznam
+ * return	 - ukazatel na zoznam pri chybe NULL
  * id		 - id ziskane z tokenu
  * attribute - attribute z tokenu */
 List insertElement(ListPointer *Lis,int id,char *attribute)
@@ -244,11 +263,11 @@ List insertElement(ListPointer *Lis,int id,char *attribute)
 			elem->id=id;
 			elem->expresion_id=expressionIdChose(id);
 			elem->attribute=attribute;
-			return InsertLast(Lis,elem);
+			List ret_insertLast=InsertLast(Lis,elem);
+			return (ret_insertLast==NULL)?NULL:ret_insertLast;
 		}
 		else
-			printf("nedostal som pamat \n");
-		return NULL; /* nepodarilo sa vlozit prvok */
+			return NULL; /* nepodarilo sa vlozit prvok */
 }
 
 /* funkcia doplni expresion_id do struktury podla id v tokene 
@@ -262,14 +281,61 @@ int expressionIdChose(int id)
 	}
 	else if( (id==sMult) || (id==sDivide) || (id==sPlus) || (id==sMinus) || (id==sLess) || (id==sGreater) || (id==sLeorEq) || (id==sGrorEq) || (id==sNotEq) || (id==sLParenth) || (id==sRParenth) || (id==sEqual) )
 	{
-		return id;			
+		return convertIdToTableAccess(id);			
 	}
 	else if( id == sSemicolon )
 	{
-		return END;
+		return DOLLAR;
 	}
 	else
 	{
 		return UNKNOWN; /* nezname id */
 	}
+}
+
+/* funkcie zmeni zmeni id tokenu aby sa dal pouzit do tabulky 
+ * return - zmenene id alebo UNKNOWN pri neznamom id
+ * id 	  - id ziskane z tokenu */
+int convertIdToTableAccess(int id)
+{
+	switch (id)
+	{
+		case(sMult):
+			return MUL; 
+			break;
+		case(sDivide):
+			return DIV;
+			break;
+		case(sPlus):
+			return PLUS;
+			break;
+		case(sMinus):
+			return MINUS;
+			break;
+		case(sLess):
+			return LT;
+			break;
+		case(sGreater):
+			return GT;
+			break;
+		case(sLeorEq):
+			return LE;
+			break;
+		case(sGrorEq):
+			return GE;
+			break;
+		case(sEqual):
+			return EQ;
+			break;
+		case(sNotEq):
+			return NE;
+			break;
+		case(sLParenth):
+			return LEFT;
+			break;
+		case(sRParenth):
+			return RIGHT;
+			break;
+	}
+	return UNKNOWN;
 }

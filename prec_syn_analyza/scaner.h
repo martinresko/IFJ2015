@@ -11,6 +11,19 @@
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */
 /* States of the FSM */
+#ifndef SCANER_INCLUDED
+#define SCANER_INCLUDED
+
+#include <ctype.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "scaner.h"
+#include "error.h"
+
+ERROR_CODE error;
+
 typedef enum{
 	sStart,				// 00 - Start
 	sIdent,				// 01 - Identifikator
@@ -67,3 +80,5 @@ extern tToken token;
 
 /* Deklaracia funkcie get_Token */
 tToken get_Token();
+
+#endif
