@@ -1,11 +1,5 @@
 #include"list.h"
 
-/* Fukncia je volana pri chybe */	
-void Error()
-{
-    printf ("*ERROR* The program has performed an illegal operation.\n");
-}
-
 /* inicializuje list */
 /* Lis ukazatel na list */
 void InitList (ListPointer *Lis)
@@ -20,14 +14,14 @@ int EmptyList(ListPointer *Lis)
 	return(Lis->first_list_element==NULL ? TRUE : FALSE);
 }
 /* vlozi novy prvok na vrchol listu + jeho data */
-/* vrati ukazatel na vlozeny prvok */
+/* vrati ukazatel na vlozeny prvok ak */
 /* Lis ukazatel na list */
 /* data znak ktory prvkok obsahuje */
 List InsertLast(ListPointer *Lis,void *data)
 {
 	List push_element = malloc(sizeof(struct list)); /* vytvorenie mem pre novy prvok */
 	if (push_element==NULL)
-		Error();
+		return NULL;
 	else /* malloc sa podaril */
 	{
 		/* inicializacia vkladaneho prvku */
@@ -53,9 +47,7 @@ List InsertLast(ListPointer *Lis,void *data)
 void DeleteLast(ListPointer *Lis)
 {
 	if(EmptyList(Lis))
-	{
-		Error(); /* chyba nieje co odstranovat */
-	}
+		return;
 	else
 	{
 		if(Lis->last_list_element==Lis->first_list_element) /* ak list ma iba jeden element */
@@ -71,7 +63,6 @@ void DeleteLast(ListPointer *Lis)
 			Lis->last_list_element->next=NULL;
 		}
 	}
-	
 }
 /* vrati data na vrchole listu */
 /* Lis ukazatel na list */
