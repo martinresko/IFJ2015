@@ -14,8 +14,16 @@
  /**
  * @info: chybove stavy
  */
+
+#ifndef ERROR_INCLUDED
+#define ERROR_INCLUDED
+
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <string.h> 
+ 
 typedef enum error_code{
-    ERR_OK			= 0,
+    OK_ERR			= 0,
     LEX_ERR 		= 1,
     SYN_ERR			= 2,
     SEM_UNDEF_ERR	= 3, //sém. chyba–nedefin fc./prem., redefi fc./perm.
@@ -26,12 +34,17 @@ typedef enum error_code{
     UNINITI_ERR		= 8,
     ZERO_DIV_ERR	= 9,
     RUNNING_ERR		= 10,
-    INTERN_ERR		= 99,
+    INTERN_ERR		= 99
 
 } ERROR_CODE;
 
 typedef enum error_message{
 	WRONG_SCALE,
-	FAILED_MALLOC,
+	FAILED_MALLOC
 
 } ERROR_MESSAGE;
+
+void call_error(ERROR_CODE tmp, ERROR_MESSAGE pom);
+void call_error_message(ERROR_MESSAGE pom);
+
+#endif
