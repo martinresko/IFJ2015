@@ -10,3 +10,55 @@
  *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */
+
+/* Hlavickove subory */
+#include "error.h"
+#include "table_of_symbols.h"
+#include "parser.h"
+
+/* definujeme si premennu na uchovanie chyby */
+ERROR_CODE run_error;
+
+typedef enum{
+//Presun
+	iMOV,
+//Aritmeticke operacie
+	iADD,
+	iSUB,
+	iMUL,
+	iDIV,
+//Logicke operacie
+	iGREATER,
+	iLESS,
+	iEGREATER,
+	iELESS,
+	iEQUAL,
+	iNEQUAL,
+//Skoky
+	iJMP,
+	iJZ,
+	iJNZ,
+//Volania funkcii
+	iCALL,
+//Vstavane funkcie
+	iSORT,
+	iLEN,
+	iSUBSTR,
+	iFIND,
+	iCONCAT,
+//Vstupno-vystupne operacie
+	iWRITE,
+	iREAD,
+//Zasobnikove operacie
+	iPUSP,
+	iPOP,
+	iTOP,
+	iTOPPOP,
+	iEMPTY,
+	iINIT,
+//Navratova hodnota
+	iRET,
+//Navestia
+	iLABEL
+	
+} tInstrT;
