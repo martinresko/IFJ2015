@@ -65,5 +65,8 @@ typedef struct{
 /* Globalna premenna */
 extern tToken token;
 
+/* Lexikalna chyba */
+ERROR_CODE scaner_error;
+
 /* Deklaracia funkcie get_Token */
 tToken get_Token();

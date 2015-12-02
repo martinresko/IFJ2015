@@ -25,7 +25,6 @@
 
 tToken token; //globalna premenna reprezentujuca token
 int row = 0;  //globalna premenna reprezentujuca aktualny riadok
-ERROR_CODE error;
 FILE *file;
 
 /* Tabulka klucovych slov */
@@ -56,7 +55,7 @@ FILE *file;
  			token.attribute[(*i)] = c;
  			(*i)++;
  		} else{
- 			error = INTERN_ERR;
+ 			scaner_error = INTERN_ERR;
  		}
  	} else{
  		if((token.attribute = (char *) malloc(2))){
@@ -64,7 +63,7 @@ FILE *file;
  			token.attribute[(*i)] = c;
  			(*i)++;
  		} else{
- 			error = INTERN_ERR;
+ 			scaner_error = INTERN_ERR;
  		}
  	}
  } 
@@ -533,7 +532,7 @@ int j;
 
  			//Nastala lexikalna chyba
  			case sError:{
- 				error = LEX_ERR;
+ 				scaner_error = LEX_ERR;
  				cont = false;
  				break;
  			}
