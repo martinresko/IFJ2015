@@ -24,7 +24,7 @@
 /* Stac - ukazatel na zasobnik */
 void stackInit(StackPointer *Stac)
 {
-	Stack->top_of_stack = NULL;
+	Stac->top_of_stack = NULL;
 }
 
 /* vlozi na zasobnik novy prvok
