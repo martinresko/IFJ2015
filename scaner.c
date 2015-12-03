@@ -11,14 +11,8 @@
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */
 
-#include <ctype.h>
-#include <string.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "scaner.h"
-#include "error.h"
 
+#include "scaner.h"
 
 #define NUM_OF_KEYWORDS 10	//pocet klucovych slov
 #define NUM_OF_RESWORDS 5 	//pocet rezervovanych slov
@@ -58,26 +52,23 @@ FILE *file;
  			scaner_error = INTERN_ERR;
  		}
  	} else{
- 		if((token.attribute = (char *) malloc(2))){
  			token.attribute[(*i) + 1] = '\0';
  			token.attribute[(*i)] = c;
  			(*i)++;
- 		} else{
- 			scaner_error = INTERN_ERR;
- 		}
  	}
  } 
+
 
 /*
 * Funkcia prevadza hexadecimalne
 * cislo na cislo v desiatkovej sustave.
 */
- int HextoDec(char *hexa){
+int HextoDec(char *hexa){
  	int i;
  	int value = 0;
  	int base = 16;
 
- 	for (i = 0; i < 2; i++){
+	for (i = 0; i < 2; i++){
  		//Druhe cislo nenasobime 16.
  		if(i > 0){
  			base = 1;
@@ -93,7 +84,7 @@ FILE *file;
  	}
 
  	return value;
- }
+}
 
 /*
 * funkcia ma parameter prave nacitany znak c.
@@ -101,7 +92,9 @@ FILE *file;
 * spat do toku znakov, spravi opak funkcie getc().
 */
 static void undo_c(int c){
+	if(!(isspace(c))){
  		ungetc(c, file);
+ 	}
  }
 
 /*
@@ -133,6 +126,18 @@ int j;
  	token.id = state;
 }
 
+/*
+* Funkcia inicializuje retazec pre token.
+*/
+ static void init_string(int *i){
+ 	token.attribute = (char *) malloc((*i));
+ 	if(token.attribute == NULL){
+ 		scaner_error = INTERN_ERR;
+ 	} else{
+ 		token.attribute[(*i)] = '\0';
+ 	}
+ }
+
 /* Funkcia spusti konecny automat na spracovanie lexemu */
  tToken get_Token(){
  	tState state = sStart;
@@ -145,7 +150,7 @@ int j;
 
 /* inicializacia tokenu */
  	token.id = sStart;
- 	token.attribute = NULL;
+ 	init_string(&i);
 
 /* Cyklus while ktory reprezentuje DKA */
  	while((c = getc(file)) && (cont)){
@@ -480,7 +485,7 @@ int j;
  					state = sGrorEq;
  					expand_token(c, &i);
  				} else if(c == '>'){ // >>
- 					state = sCout;
+ 					state = sCin;
  					expand_token(c, &i);
  				} else{ // >>
  					fill_token(state);
@@ -496,7 +501,7 @@ int j;
  					state = sLeorEq;
  					expand_token(c, &i);
  				} else if(c == '<'){ // <<
- 					state = sCin;
+ 					state = sCout;
  					expand_token(c, &i);
  				} else{ // <
  					fill_token(state);
@@ -520,8 +525,8 @@ int j;
  			case sMult:			// *
  			case sEndofFile:	// EOF
  			case sComma:		// ,
- 			case sCin:			// <<
- 			case sCout:			// >>
+ 			case sCout:			// <<
+ 			case sCin:			// >>
  			case sKeyWord:
  			case sResWord:{
  				fill_token(state);
@@ -533,6 +538,7 @@ int j;
  			//Nastala lexikalna chyba
  			case sError:{
  				scaner_error = LEX_ERR;
+ 				fill_token(state);
  				cont = false;
  				break;
  			}
@@ -547,7 +553,7 @@ int j;
  		}
 
  		//Nastala lexikalna chyba
- 		if(error){
+ 		if(scaner_error){
  			break;
  		}
 

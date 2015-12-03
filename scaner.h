@@ -10,15 +10,22 @@
  *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */
+
+#include "error.h"
++#include <ctype.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 /* States of the FSM */
 typedef enum{
 	sStart,				// 00 - Start
-	sIdent,				// 01 - Identifikator
-	sInteger,			// 02 - Celociselny literal
-	sDouble,			// 03 - Desatinny literal
+	sIdent,				// 01 - Identifikator				//Koncovy stav
+	sInteger,			// 02 - Celociselny Literal 		//Koncovy stav
+	sDouble,			// 03 - Desatinny Literal 			//KOncovy stav
 	sIsExpo,			// 04 - Zaciatok exponentu
-	sExpo, 				// 05 - Literal s exponentom
-	sString,			// 06 - Retazcovy literal
+	sExpo, 				// 05 - Literal s exponentom 		//Koncovy stav
+	sString,			// 06 - Retazcovy literal 			//Koncovy stav
 	sNull,				// 07 - Stav na odstranenie prebytocnych nul
 	sAssign,			// 08 - =
 	sEqual,				// 09 - ==
@@ -42,12 +49,13 @@ typedef enum{
 	sMult,				// 27 - *
 	sEndofFile,			// 28 - End of File
 	sComma,				// 29 - ,
-	sCin,				// 30 - <<
-	sCout,				// 31 - >>
-	sKeyWord,			// 32 - Klucove slova
-	sResWord,			// 33 - Rezervovane slova
+	sCout,				// 30 - <<
+	sCin,				// 31 - >>
+	sKeyWord,			// 32 - Klucove slova				//Koncovy stav
+	sResWord,			// 33 - Rezervovane slova			//Koncovy stav
 	sError,				// 34 - Lexikalna chyba
 	sEnd, 				// 35 - koncovy stav
+	/* pomocne stavy */
 	sIsDouble,			// 36 - Zaciatok Double
 	sIsExpo2,			// 37 - Pokracovanie exponentu
 	sEscSeq,			// 38 - Escape sekvencie

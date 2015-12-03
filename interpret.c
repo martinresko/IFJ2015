@@ -10,3 +10,18 @@
  *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */
+
+//Hlavickovy subor pre interpret
+#include "interpret.h"
+
+ERROR_CODE interpret(Table_symbols table){
+	run_error = stackInit(stack);
+	run_error = rec_interpret();
+}
+
+ERROR_CODE rec_interpret(){
+	
+	switch(instrPtr->type){
+		case 
+	}
+}
