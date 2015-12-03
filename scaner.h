@@ -12,7 +12,7 @@
  */
 
 #include "error.h"
-+#include <ctype.h>
+#include <ctype.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
