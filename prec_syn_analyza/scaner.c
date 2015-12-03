@@ -15,6 +15,7 @@
 #define NUM_OF_KEYWORDS 10	//pocet klucovych slov
 #define NUM_OF_RESWORDS 5 	//pocet rezervovanych slov
 
+//int AKO_SA_MAS = 42;
 tToken token; //globalna premenna reprezentujuca token
 int row = 0;  //globalna premenna reprezentujuca aktualny riadok
 FILE *file;

@@ -1,13 +1,15 @@
 #include"expression.h"
-#include"scaner.h"
 
 tToken TOKEN;/* ukazatel na token bude sluzit ako docasne ulozisko tokenu */
 
 FILE *file;
 
+//extern int AKO_SA_MAS;
+
 int main()
 {
 	file = fopen("test","r");
+//	printf("GLOOBAL %d\n",AKO_SA_MAS);
 	ERROR_CODE ret=expression();
 	printf("skoncil som s navratovym kodom %d, token s atributom %s\n",ret,TOKEN.attribute);
 	fclose(file);
@@ -30,30 +32,42 @@ ERROR_CODE Analysis(ListPointer *Lis)
 {
 	if(InitExpressionList(Lis)!=OK_ERR)
 		return INTERN_ERR;
-	TOKEN = get_Token(); /* ukazatel na token bude sluzit ako docasne ulozisko tokenu */
-	if(TOKEN.id==sError)
-		return LEX_ERR;
+	//if(get_first_token==false)
+	//{
+		TOKEN = get_Token(); /* ukazatel na token bude sluzit ako docasne ulozisko tokenu */
+		if(TOKEN.id==sError)
+			return LEX_ERR;
+	//}
+	//else
+	//{
+	//	TOKEN=RECURSE_TOKEN;
+	//}
+	
 	bool vykonavanie_cyklu=true;
 	while(vykonavanie_cyklu) /* cyklus vykonavam pokial spracujem vsetko a na vstupe je DOLLAR(;) alebo mi pride pravidlo P (toto bolo uspesne vykonanie) a neuspesne ak mi ako dalsie pravidlo prislo X alebo na vstupe je UNKNOWN id */
 	{
 		char next_step=DecideShiftOrReduce(Lis,TOKEN.id); /* zistime co mame vykonat */
 		if(next_step=='R')
 		{
-			if(Reduce(Lis)==SYN_ERR)
+			ERROR_CODE return_reduce = Reduce(Lis);
+			if(return_reduce!=OK_ERR)
 			{
 				printf("Redukcia neprabehla\n");
 				vykonavanie_cyklu=false;
-				return SYN_ERR;
+				return return_reduce;
 			}
 		}
 		else if(next_step=='S')
 		{
-			if( Shift(Lis,TOKEN.id,TOKEN.attribute)==OK_ERR)
+			ERROR_CODE return_shift=Shift(Lis,TOKEN.id,TOKEN.attribute);
+			if(return_shift==OK_ERR)
 			{
 				TOKEN = get_Token(); /* aktualizujem token (nacitam dalsi) */
 				if(TOKEN.id==sError)
 					return LEX_ERR;
 			}
+			else if(return_shift==SEM_UNDEF_ERR)
+				return SEM_UNDEF_ERR;
 			else
 				return INTERN_ERR;
 		}
@@ -64,14 +78,15 @@ ERROR_CODE Analysis(ListPointer *Lis)
 			TOKEN = get_Token(); /* aktualizujem token za ')' */
 			if(TOKEN.id==sError)
 				return LEX_ERR;
-			}
+		}
 		else if(next_step=='P') /* pripad ked na posledny terminal je DOLLAR a na vstupe je ) */
 		{
 			if(	 (Lis->first_list_element->next)!=NULL)
-				/* ak je zasobnik vyzera $ D ), a nie $ ) lebo toto by bola chyba */
+			/* ak je zasobnik vyzera $ D ), a nie $ ) lebo toto by bola chyba */
 			{
 				vykonavanie_cyklu = false; /* dalej cyklus nevykonavam */
 				/* na zasobniku je posledny terminal DOLLAR a na vrchole ) */
+				printf("koncim uspesne\n");
 				return OK_ERR; /* koncim uspechom */
 			}
 			else
@@ -131,46 +146,68 @@ ERROR_CODE Reduce(ListPointer *Lis)
 		List right_operand = Lis->last_terminal->next;
 		if( ( (left_operand!=NULL) && (((Precedence_table_element *)(left_operand->data))->expresion_id==OPERAND) ) && ( (right_operand!=NULL) && (((Precedence_table_element *)(right_operand->data))->expresion_id==OPERAND) ) )/* ci okolo operatoru nieco je a ci su to operandy */
 		{
+			int left_id=((Precedence_table_element *)(left_operand->data))->id;
+			int right_id=((Precedence_table_element *)(right_operand->data))->id;
 			switch(rule)
 			{
 				case(MUL):
 					printf("MUL\n");
+					if( left_id==sString || right_id==sString)
+						return SEM_TYPE_ERR;
 					/* Doplnit instrukciu */
 					break;
 				case(DIV):
 					printf("DIV\n");
+					if( left_id==sString || right_id==sString )
+						return SEM_TYPE_ERR;
 					/* Doplnit instrukciu */
 					break;
 				case(PLUS):
 					printf("PLUS\n");
+					if( left_id==sString || right_id==sString )
+						return SEM_TYPE_ERR;
 					/* Doplnit instrukciu */
 					break;
 				case(MINUS):
 					printf("MINUS\n");
+					if( left_id==sString || right_id==sString )
+						return SEM_TYPE_ERR; /* chyba v pripade ze jeden alebo oba operatory su string */
 					/* Doplnit instrukciu */
 					break;
 				case(LT):
 					printf("LT\n");
+					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
+						return SEM_TYPE_ERR;
 					/* Doplnit instrukciu */
 					break;
 				case(GT):
 					printf("GT\n");
+					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
+						return SEM_TYPE_ERR;
 					/* Doplnit instrukciu */
 					break;
 				case(LE):
 					printf("LE\n");
+					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
+						return SEM_TYPE_ERR;
 					/* Doplnit instrukciu */
 					break;
 				case(GE):
 					printf("GE\n");
+					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
+						return SEM_TYPE_ERR;
 					/* Doplnit instrukciu */
 					break;
 				case(EQ):
 					printf("EQ\n");
+					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
+						return SEM_TYPE_ERR;
 					/* Doplnit instrukciu */
 					break;
 				case(NE):
 					printf("NE\n");
+					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
+						return SEM_TYPE_ERR;
 					/* Doplnit semanticku akciu */
 					break;
 			}
@@ -209,6 +246,11 @@ void ReduceT(ListPointer *Lis)
 ERROR_CODE Shift(ListPointer *Lis,int id,char *attribute)
 {
 	Lis->last_terminal=insertElement(Lis,id,attribute);
+	//if(id==sIdent) /* skontrolujem semantiku vkladaneho prvku */
+	//{
+	//	if(searchFunctionVariable(table.actual_function,attribute)==NULL) /* ci sa premenna nachacha v tabulke symbolov */
+	//		return SEM_UNDEF_ERR;/* nenasiel som v tabulke err pouzivanie nedefinovanej premennej */
+	//}
 	return (Lis->last_terminal==NULL)?INTERN_ERR:OK_ERR;
 }
 
@@ -275,7 +317,7 @@ List insertElement(ListPointer *Lis,int id,char *attribute)
  * id 	  - id ziskane z tokenu */
 int expressionIdChose(int id)
 {
-	if( (id==sIdent) || (id==sInteger) || (id==sDouble) || (id==sIsExpo) || (id==sIsDouble) || (id==sIsExpo2) || (id==sExpo) )
+	if( (id==sIdent) || (id==sInteger) || (id==sDouble) || (id==sExpo) || (id==sString) )
 	{
 		return OPERAND;
 	}
