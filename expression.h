@@ -9,6 +9,7 @@
 
 #define SIZE 14
 
+extern int AKO_SA_MAS;
 enum 
 {
 	MUL,
