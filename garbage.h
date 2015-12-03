@@ -10,12 +10,16 @@
  *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */
+#ifndef GARBAGE_INCLUDED
+#define GARBAGE_INCLUDED
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <assert.h>
 #include "strings.h"
+#include "error.h"
+ 
 #define MMU_SIZE 32
 
 
@@ -69,3 +73,6 @@ void memtableinicialization(gmemtable* T, size_t size);
 void memtabledispose(gmemtable* T);
 gmemtableitem* memfindout(gmemtable* T, intptr_t key);
 size_t hash(intptr_t key, size_t size);
+
+
+#endif

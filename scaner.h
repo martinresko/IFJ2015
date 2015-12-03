@@ -10,13 +10,16 @@
  *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */
+#ifndef SCANER_INCLUDED
+#define SCANER_INCLUDED
 
-#include "error.h"
+
 #include <ctype.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "error.h"
 /* States of the FSM */
 typedef enum{
 	sStart,				// 00 - Start
@@ -78,3 +81,5 @@ ERROR_CODE scaner_error;
 
 /* Deklaracia funkcie get_Token */
 tToken get_Token();
+
+#endif

@@ -9,7 +9,7 @@
 
 #define SIZE 14
 
-extern int AKO_SA_MAS;
+//extern int AKO_SA_MAS;
 enum 
 {
 	MUL,
@@ -28,24 +28,8 @@ enum
 	DOLLAR,
 	UNKNOWN
 };
-const char PRECEDENCE_TABLE[SIZE][SIZE] =
-{
-	/*			   *   /   +   -   <   >  <=  >=  ==  !=   (   )  OP   $  */
-	[MUL]		={'R','R','R','R','R','R','R','R','R','R','S','R','S','R'},
-	[DIV] 		={'R','R','R','R','R','R','R','R','R','R','S','R','S','R'},
-	[PLUS]  	={'S','S','R','R','R','R','R','R','R','R','S','R','S','R'},
-	[MINUS] 	={'S','S','R','R','R','R','R','R','R','R','S','R','S','R'},
-	[LT]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
-	[GT]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
-	[LE]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
-	[GE]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
-	[EQ]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
-	[NE]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
-	[LEFT]  	={'S','S','S','S','S','S','S','S','S','S','S','T','S','X'},
-	[RIGHT] 	={'R','R','R','R','R','R','R','R','R','R','X','R','X','R'},
-	[OPERAND]  	={'R','R','R','R','R','R','R','R','R','R','X','R','X','R'},
-	[DOLLAR] 	={'S','S','S','S','S','S','S','S','S','S','S','P','S','X'}
-};
+
+extern const char PRECEDENCE_TABLE[SIZE][SIZE];
 
 /* struktura prvku ktory sa bude vkladat do zoznamu ako teminal/neterminal */
 typedef struct precedence_table_element {

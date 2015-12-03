@@ -1,6 +1,26 @@
-#include"expression.h"
+#include "expression.h"
 
-tToken TOKEN;/* ukazatel na token bude sluzit ako docasne ulozisko tokenu */
+tToken token_expression;/* ukazatel na token bude sluzit ako docasne ulozisko tokenu */
+
+
+const char PRECEDENCE_TABLE[SIZE][SIZE] =
+{
+	/*			   *   /   +   -   <   >  <=  >=  ==  !=   (   )  OP   $  */
+	[MUL]		={'R','R','R','R','R','R','R','R','R','R','S','R','S','R'},
+	[DIV] 		={'R','R','R','R','R','R','R','R','R','R','S','R','S','R'},
+	[PLUS]  	={'S','S','R','R','R','R','R','R','R','R','S','R','S','R'},
+	[MINUS] 	={'S','S','R','R','R','R','R','R','R','R','S','R','S','R'},
+	[LT]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
+	[GT]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
+	[LE]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
+	[GE]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
+	[EQ]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
+	[NE]    	={'S','S','S','S','R','R','R','R','R','R','S','R','S','R'},
+	[LEFT]  	={'S','S','S','S','S','S','S','S','S','S','S','T','S','X'},
+	[RIGHT] 	={'R','R','R','R','R','R','R','R','R','R','X','R','X','R'},
+	[OPERAND]  	={'R','R','R','R','R','R','R','R','R','R','X','R','X','R'},
+	[DOLLAR] 	={'S','S','S','S','S','S','S','S','S','S','S','P','S','X'}
+};
 
 //FILE *file;
 //
@@ -25,6 +45,7 @@ ERROR_CODE expression()
 	return return_analysis;
 }
 
+
 /* hlavna funkcia ktora vsetko koordinuje */
 /* return - z error.h */
 /* Lis - ukazatel na list */
@@ -34,8 +55,8 @@ ERROR_CODE Analysis(ListPointer *Lis)
 		return INTERN_ERR;
 	//if(get_first_token==false)
 	//{
-		TOKEN = get_Token(); /* ukazatel na token bude sluzit ako docasne ulozisko tokenu */
-		if(TOKEN.id==sError)
+		token_expression = get_Token(); /* ukazatel na token bude sluzit ako docasne ulozisko tokenu */
+		if(token_expression.id==sError)
 			return LEX_ERR;
 	//}
 	//else
@@ -46,7 +67,7 @@ ERROR_CODE Analysis(ListPointer *Lis)
 	bool vykonavanie_cyklu=true;
 	while(vykonavanie_cyklu) /* cyklus vykonavam pokial spracujem vsetko a na vstupe je DOLLAR(;) alebo mi pride pravidlo P (toto bolo uspesne vykonanie) a neuspesne ak mi ako dalsie pravidlo prislo X alebo na vstupe je UNKNOWN id */
 	{
-		char next_step=DecideShiftOrReduce(Lis,TOKEN.id); /* zistime co mame vykonat */
+		char next_step=DecideShiftOrReduce(Lis,token_expression.id); /* zistime co mame vykonat */
 		if(next_step=='R')
 		{
 			ERROR_CODE return_reduce = Reduce(Lis);
@@ -59,11 +80,11 @@ ERROR_CODE Analysis(ListPointer *Lis)
 		}
 		else if(next_step=='S')
 		{
-			ERROR_CODE return_shift=Shift(Lis,TOKEN.id,TOKEN.attribute);
+			ERROR_CODE return_shift=Shift(Lis,token_expression.id,token_expression.attribute);
 			if(return_shift==OK_ERR)
 			{
-				TOKEN = get_Token(); /* aktualizujem token (nacitam dalsi) */
-				if(TOKEN.id==sError)
+				token_expression = get_Token(); /* aktualizujem token (nacitam dalsi) */
+				if(token_expression.id==sError)
 					return LEX_ERR;
 			}
 			else if(return_shift==SEM_UNDEF_ERR)
@@ -75,8 +96,8 @@ ERROR_CODE Analysis(ListPointer *Lis)
 		{
 			printf("pravidlo T:\n");
 			ReduceT(Lis);
-			TOKEN = get_Token(); /* aktualizujem token za ')' */
-			if(TOKEN.id==sError)
+			token_expression = get_Token(); /* aktualizujem token za ')' */
+			if(token_expression.id==sError)
 				return LEX_ERR;
 		}
 		else if(next_step=='P') /* pripad ked na posledny terminal je DOLLAR a na vstupe je ) */
@@ -102,7 +123,7 @@ ERROR_CODE Analysis(ListPointer *Lis)
 			return SYN_ERR; /* vratim chybu */
 		}
 
-		if( (expressionIdChose(TOKEN.id)==DOLLAR) && (((struct precedence_table_element*)(Lis->last_terminal->data))->expresion_id==DOLLAR) )
+		if( (expressionIdChose(token_expression.id)==DOLLAR) && (((struct precedence_table_element*)(Lis->last_terminal->data))->expresion_id==DOLLAR) )
 		{
 			vykonavanie_cyklu = false;
 			printf("koncim uspesne\n");
@@ -262,7 +283,7 @@ char DecideShiftOrReduce(ListPointer *Lis,int id)
 {
 	int list_terminal = ((Precedence_table_element *)(Lis->last_terminal->data))->expresion_id;
 	int token_symbol = expressionIdChose(id);
-	printf("%s <-> %s\n",((Precedence_table_element *)(Lis->last_terminal->data))->attribute,TOKEN.attribute);
+	printf("%s <-> %s\n",((Precedence_table_element *)(Lis->last_terminal->data))->attribute,token_expression.attribute);
 	if(token_symbol!=UNKNOWN)
 		return PRECEDENCE_TABLE[list_terminal][token_symbol];
 	else

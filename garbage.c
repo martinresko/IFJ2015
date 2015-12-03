@@ -12,7 +12,7 @@
  */
 
 #include "garbage.h"
-#include "error.c"
+
 
 gmemcount memtable;
 

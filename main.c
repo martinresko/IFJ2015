@@ -15,11 +15,11 @@
  #include <stdlib.h>
  #include <stdio.h>
  #include "scaner.h"
- #include "error.h"
+ #include "parser.h"
 
  #define OK_ERR 0
 
-
+ERROR_CODE error;
 FILE *file;
 
 int main(int argc, char **argv){
@@ -33,8 +33,10 @@ int main(int argc, char **argv){
 		fprintf(stderr, "Subor sa nepodarilo otvorit.\n");
 		return INTERN_ERR;
 	}
+	
+	error = prog();
 
-	ERROR_CODE prog();
+ fclose(file);
 
-return OK_ERR;
+return error;
 }
