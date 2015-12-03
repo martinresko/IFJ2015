@@ -52,6 +52,7 @@ void DeleteLast(ListPointer *Lis)
 	{
 		if(Lis->last_list_element==Lis->first_list_element) /* ak list ma iba jeden element */
 		{
+			free(Lis->last_list_element->data);
 			free(Lis->last_list_element);
 			Lis->last_list_element=NULL;
 			Lis->first_list_element=NULL;
@@ -59,6 +60,7 @@ void DeleteLast(ListPointer *Lis)
 		else
 		{
 			Lis->last_list_element=Lis->last_list_element->prev; /* nastav vrchol listu na predposledny prvok */
+			free(Lis->last_list_element->next->data);
 			free(Lis->last_list_element->next);
 			Lis->last_list_element->next=NULL;
 		}
@@ -95,6 +97,7 @@ void DestroyList(ListPointer *Lis)
 	while(Lis->first_list_element!=NULL)
 	{
 		helpful_pointer = Lis->first_list_element->next;
+		free(Lis->first_list_element->data);
 		free(Lis->first_list_element);
 		Lis->first_list_element=helpful_pointer;
 	}
