@@ -11,14 +11,8 @@
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */
 
-#include <ctype.h>
-#include <string.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "scaner.h"
-#include "error.h"
 
+#include "scaner.h"
 
 #define NUM_OF_KEYWORDS 10	//pocet klucovych slov
 #define NUM_OF_RESWORDS 5 	//pocet rezervovanych slov
