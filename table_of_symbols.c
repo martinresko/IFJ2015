@@ -1,95 +1,95 @@
 #include"table_of_symbols.h"
 
-int main()
-{
-	Table_symbols tabulka;
-	globalTableOfSymbolsInit(&tabulka);
-	// funkcia
-	insertFunction(&tabulka,"funkcia1",1);
-	Function_GTS *a=NULL;
-	a=searchFunction(&tabulka,"funkcia1");
-	if(a!=NULL)
-		//printf("%d\n",a->return_type);
-		printf("%d\n",a->return_type);
-	else
-		printf("nenasiel som \n");
-	
-	// parameter do funkcie
-	insertFunctionParam(tabulka.actual_function,"param1",2);
-	Variable *b=NULL;
-	b=searchFunctionParam(a,"param1");
-	if(b!=NULL)
-		printf("%d\n",b->typ);
-	else
-		printf("!!!!!!nenasiel som parameter \n");
-	//premenna prvy blok
-	pushBlock(a);
-	insertFunctionVariableToStack(tabulka.actual_function,"premenna1",9);
-	Variable *c=NULL;
-	c=searchFunctionVariable(a,"param1");
-	if(c!=NULL)
-		printf("%d\n",c->typ);
-	else
-		printf("!!!!!!!!!!nenasiel som \n");
-	// druhy blok
-	pushBlock(a);
-	insertFunctionVariableToStack(a,"premenna2",98);
-	Variable *d=NULL;
-	d=searchFunctionVariable(a,"premenna1");
-	if(d!=NULL)
-		printf("%d\n",d->typ);
-	else
-		printf("!!!!!!!!!!nenasiel som \n");
-	// druha funkcia 
-	insertFunction(&tabulka,"funkcia2",1);
-	Function_GTS *e=NULL;
-	e=searchFunction(&tabulka,"funkcia2");
-	if(e!=NULL)
-		//printf("%d\n",a->return_type);
-		printf("%d\n",e->return_type);
-	else
-		printf("nenasiel som \n");
-	
-	// parameter do funkcie
-	insertFunctionParam(tabulka.actual_function,"param1",2);
-	Variable *f=NULL;
-	f=searchFunctionParam(e,"param1");
-	if(f!=NULL)
-		printf("%d\n",f->typ);
-	else
-		printf("!!!!!!nenasiel som parameter \n");
-	//premenna prvy blok
-	pushBlock(e);
-	insertFunctionVariableToStack(tabulka.actual_function,"premenna1",9);
-	Variable *g=NULL;
-	g=searchFunctionVariable(e,"param1");
-	if(g!=NULL)
-		printf("%d\n",g->typ);
-	else
-		printf("!!!!!!!!!!nenasiel som \n");
-	// druhy blok
-	pushBlock(e);
-	insertFunctionVariableToStack(e,"premenna2",98);
-	Variable *h=NULL;
-	h=searchFunctionVariable(e,"premenna1");
-	if(h!=NULL)
-		printf("%d\n",h->typ);
-	else
-		printf("!!!!!!!!!!nenasiel som \n");
-
-	destroyGTS(&tabulka); 
-	return 0;
-}
-
-/* inicializuje globalnu tabulku symbolov
- * gts_table - ukazatel na strukturu GTS */
-void globalTableOfSymbolsInit(Table_symbols *gts_table)
-{
-	if(gts_table!=NULL)
-		treeInit(&(gts_table->functions));
-		gts_table->actual_function=NULL;
-}
-
+//int main()
+//{
+//	Table_symbols tabulka;
+//	globalTableOfSymbolsInit(&tabulka);
+//	// funkcia
+//	insertFunction(&tabulka,"funkcia1",1);
+//	Function_GTS *a=NULL;
+//	a=searchFunction(&tabulka,"funkcia1");
+//	if(a!=NULL)
+//		//printf("%d\n",a->return_type);
+//		printf("%d\n",a->return_type);
+//	else
+//		printf("nenasiel som \n");
+//	
+//	// parameter do funkcie
+//	insertFunctionParam(tabulka.actual_function,"param1",2);
+//	Variable *b=NULL;
+//	b=searchFunctionParam(a,"param1");
+//	if(b!=NULL)
+//		printf("%d\n",b->typ);
+//	else
+//		printf("!!!!!!nenasiel som parameter \n");
+//	//premenna prvy blok
+//	pushBlock(a);
+//	insertFunctionVariableToStack(tabulka.actual_function,"premenna1",9);
+//	Variable *c=NULL;
+//	c=searchFunctionVariable(a,"param1");
+//	if(c!=NULL)
+//		printf("%d\n",c->typ);
+//	else
+//		printf("!!!!!!!!!!nenasiel som \n");
+//	// druhy blok
+//	pushBlock(a);
+//	insertFunctionVariableToStack(a,"premenna2",98);
+//	Variable *d=NULL;
+//	d=searchFunctionVariable(a,"premenna1");
+//	if(d!=NULL)
+//		printf("%d\n",d->typ);
+//	else
+//		printf("!!!!!!!!!!nenasiel som \n");
+//	// druha funkcia 
+//	insertFunction(&tabulka,"funkcia2",1);
+//	Function_GTS *e=NULL;
+//	e=searchFunction(&tabulka,"funkcia2");
+//	if(e!=NULL)
+//		//printf("%d\n",a->return_type);
+//		printf("%d\n",e->return_type);
+//	else
+//		printf("nenasiel som \n");
+//	
+//	// parameter do funkcie
+//	insertFunctionParam(tabulka.actual_function,"param1",2);
+//	Variable *f=NULL;
+//	f=searchFunctionParam(e,"param1");
+//	if(f!=NULL)
+//		printf("%d\n",f->typ);
+//	else
+//		printf("!!!!!!nenasiel som parameter \n");
+//	//premenna prvy blok
+//	pushBlock(e);
+//	insertFunctionVariableToStack(tabulka.actual_function,"premenna1",9);
+//	Variable *g=NULL;
+//	g=searchFunctionVariable(e,"param1");
+//	if(g!=NULL)
+//		printf("%d\n",g->typ);
+//	else
+//		printf("!!!!!!!!!!nenasiel som \n");
+//	// druhy blok
+//	pushBlock(e);
+//	insertFunctionVariableToStack(e,"premenna2",98);
+//	Variable *h=NULL;
+//	h=searchFunctionVariable(e,"premenna1");
+//	if(h!=NULL)
+//		printf("%d\n",h->typ);
+//	else
+//		printf("!!!!!!!!!!nenasiel som \n");
+//
+//	destroyGTS(&tabulka); 
+//	return 0;
+//}
+//
+///* inicializuje globalnu tabulku symbolov
+// * gts_table - ukazatel na strukturu GTS */
+//void globalTableOfSymbolsInit(Table_symbols *gts_table)
+//{
+//	if(gts_table!=NULL)
+//		treeInit(&(gts_table->functions));
+//		gts_table->actual_function=NULL;
+//}
+//
 /* vlozi do GTS funkciu 
  * return - intern ak nedostanem pamat alebo dobry ukazatel inak OK
  * gts_table - ukazatal na GTS strom

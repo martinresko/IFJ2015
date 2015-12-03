@@ -2,19 +2,19 @@
 
 tToken TOKEN;/* ukazatel na token bude sluzit ako docasne ulozisko tokenu */
 
-FILE *file;
-
-//extern int AKO_SA_MAS;
-
-int main()
-{
-	file = fopen("test","r");
-//	printf("GLOOBAL %d\n",AKO_SA_MAS);
-	ERROR_CODE ret=expression();
-	printf("skoncil som s navratovym kodom %d, token s atributom %s\n",ret,TOKEN.attribute);
-	fclose(file);
-	return EXIT_SUCCESS;
-}
+//FILE *file;
+//
+////extern int AKO_SA_MAS;
+//
+//int main()
+//{
+//	file = fopen("test","r");
+////	printf("GLOOBAL %d\n",AKO_SA_MAS);
+//	ERROR_CODE ret=expression();
+//	printf("skoncil som s navratovym kodom %d, token s atributom %s\n",ret,TOKEN.attribute);
+//	fclose(file);
+//	return EXIT_SUCCESS;
+//}
 
 /* funkcia volana z rekuzivneho zostupu 
  * return - navratova hodnota z error.h */
