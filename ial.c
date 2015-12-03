@@ -9,12 +9,12 @@
  *            <xdomon00@stud.fit.vutbr.cz>, Dávid Domonkoš
  *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
- */
- 
+ */ 
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "error.c"
 
 /**Prototypy funkcii**/
 int KMP_Find(char *string, char *pattern);
@@ -31,6 +31,7 @@ int *KMP_FAIL_INDEX(char *pattern, int pattern_length)
 	int *fail = malloc(sizeof(int) * pattern_length);
 
 	if (fail == NULL) {
+		call_error(INTERN_ERR, FAILED_MALLOC);
 		return NULL;
 	}
 
@@ -96,6 +97,7 @@ char* concatenation(char *string1, char *string2)
 	char *result = malloc(strlen(string1) + strlen(string2) + 1);
 
 	if (result == NULL) {
+		call_error(INTERN_ERR, FAILED_MALLOC);
 		return NULL;
 	}
 
@@ -106,34 +108,36 @@ char* concatenation(char *string1, char *string2)
 } 
 
 ////////////////////**Implementacie funkcie substring**/////////////////////////
-/*
+
 char* substring(char *string, int i, int n)
 {	
-	int string_length = strlen(string); // dlzka retazca
-	//char *result = malloc(strlen(string));
-	char pole[string_length];
-	char pole2[string_length];
-	int j;
+	
+	int string_len = strlen(string); // dlzka retazca
 
-	if ((i > string_length) || (n + i >string_length)) {
-		return NULL;
+	char *result = malloc(strlen(string));
+	if (result == NULL) {
+		call_error(INTERN_ERR, FAILED_MALLOC);
+		return "";
 	}
 
-	for (j = i ; j < (i + n); j++) {
-		result[j] = string[j];
-	}
-printf("%s\n",result );
+	if ((i >= string_len) || ((i + n) >= string_len) || (n >= string_len) || (i < 0)){
+		free(result); 
+		call_error(SEM_TYPE_ERR,WRONG_SCALE);
+		return "";
+		}
+
+	strncpy(result,string+i,n);
 return result;
 // opravit
 }
-*/
-//////////////////////////////**ShellSort**/////////////////////////////////////
 
+//////////////////////////////**ShellSort**/////////////////////////////////////
+/*
 char* ShellSort(char *string)
 {
-int i,j,step,gap;
+int i,j,step;
 int string_length = strlen(string); // dlzka retazca
-
+int *result = malloc(sizeof(char) * string_length);
 step = string_length / 2;
 
 while (step > 0) {
@@ -154,25 +158,118 @@ while (step > 0) {
         gap = gap / 2;
     }
 }
-return string;
-}// opravit
+*/
+
+///////////////////////**MY SHELLSORT**///////////////////////////////////
+/*
+void shellsort(char *string){
+
+int i,gap;
+int j = 0;
+int string_length = strlen(string);
+char pom;
+gap = string_length / 2;
+
+printf("%d\n",string_length);
+printf("%d\n",gap);
 
 
+while ( gap > 0 ) {
 
+	for( i = 0; i < string_length - gap ; i++) {
+		j= i + gap;
+		pom = string[j];
+		printf("pred while\n");
+		while (j >= gap && string[j] > string[j-gap]) {
+			string[j] = string[j-gap];
+			printf("po while");
+			j = j-gap;
+		}
+		string[j] = pom;
+	}
+	if ( gap == 2) {
+		gap = 1;
+	}
+	else {
+		gap = gap / 2;
+	}
+ 	}
+//return string;
+}*/
+
+void shell(char *items, int count)  
+  {  
+  
+    register int i, j, gap, k;  
+    char x, a[5];  
+  
+    a[0]=9; a[1]=5; a[2]=3; a[3]=2; a[4]=1;  
+  
+    for(k=0; k < 5; k++) {  
+      gap = a[k];  
+      for(i=gap; i < count; ++i) {  
+        x = items[i];  
+        for(j=i-gap; (x < items[j]) && (j >= 0); j=j-gap)  
+          items[j+gap] = items[j];  
+        items[j+gap] = x;  
+      }  
+    }  
+  }  
+
+
+/*void strsort (char *array)
+{
+      int string_length = strlen(array);	
+      int gap, i, j;
+      char *a, *b, tmp;
+ 
+      for (gap = 0; ++gap < string_length ; )
+            gap *= 2;
+      while (gap /= 2)
+      {
+            for (i = gap; i < string_length ; i++)
+            {
+                  for (j = i - gap; ;j -= gap)
+                  {
+                        a = array + j;
+                        b = a + gap;
+                        if (strcmp(*a, *b) <= 0)
+                              break;
+                        tmp = *a;
+                        *a = *b;
+                        *b = tmp;
+                        if (j < gap)
+                              break;
+                  }
+            }
+      }
+printf("%s\n",array);
+}*/
+/*
 int main() 
 {
-	//printf("%s\n",substring("123456",2,2));
-	printf("%s\n",ShellSort("987654321"));
+	
+	char* a;
+	char* tt = substring("hatatitla",2,5); //neriesi free...
+	printf("%s\n",tt );
+	if (tt != "")
+		free(tt);
 
+	char s[] = "987654321";
+	shell(s,strlen(s));
+	//shellsort(s);
+	printf("string je %s\n",s);
+	
+	//printf("%s\n",shellsort("987654321"));
 	char * str = concatenation("ahoj", "jano");
 	printf("%s\n",str );
 	free (str);
 
-	printf("%d\n", length_of_string("x\nz"));
+	printf("%d\n", length_of_string("xhos"));
 	printf("%d\n", KMP_Find("cabcabcab", "ab"));
 	printf("%d\n", KMP_Find("cccabcdefab", "de"));
 	printf("%d\n", KMP_Find("cccabcdefab", "c"));
 	printf("%d\n", KMP_Find("cccabcdefab", "aasdasdasda"));
 	printf("%d\n", KMP_Find("cccabcdefab", "fab")); 
 	return 0;
-}
+}*/
