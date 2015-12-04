@@ -9,7 +9,6 @@
 
 #define SIZE 14
 
-//extern int AKO_SA_MAS;
 enum 
 {
 	MUL,
@@ -40,7 +39,7 @@ typedef struct precedence_table_element {
 } Precedence_table_element;
 
 /* funkcie precedencnej syntaktickej analyzi */
-ERROR_CODE expression();
+ERROR_CODE expression(int,int);
 ERROR_CODE InitExpressionList(ListPointer *);
 ERROR_CODE  Reduce(ListPointer *);
 void ReduceT(ListPointer *);
@@ -48,8 +47,10 @@ ERROR_CODE Shift(ListPointer *,int,char *);
 int ConvertCharToAccessPrecedenceTable(char *);
 char DecideShiftOrReduce(ListPointer *,int);
 void FindLastTerminal(ListPointer *);
-ERROR_CODE Analysis(ListPointer *);
+ERROR_CODE Analysis(ListPointer *,int,int);
 List insertElement(ListPointer *,int,char *);
 int expressionIdChose(int);
 int convertIdToTableAccess(int);
+int changeTypeOf(int,int,int);
+
 #endif

@@ -1,7 +1,10 @@
 #include "expression.h"
 
-tToken token_expression;/* ukazatel na token bude sluzit ako docasne ulozisko tokenu */
+#define TAKEN_FIRST_TOKEN 1
+#define NOT_TAKEN_FIRST_TOKEN 0
 
+tToken token_expression;/* ukazatel na token bude sluzit ako docasne ulozisko tokenu */
+extern tToken token; /* token s rekurzivneho zostupu */
 
 const char PRECEDENCE_TABLE[SIZE][SIZE] =
 {
@@ -24,46 +27,49 @@ const char PRECEDENCE_TABLE[SIZE][SIZE] =
 
 //FILE *file;
 //
-////extern int AKO_SA_MAS;
+//tToken token;
 //
 //int main()
 //{
 //	file = fopen("test","r");
-////	printf("GLOOBAL %d\n",AKO_SA_MAS);
-//	ERROR_CODE ret=expression();
-//	printf("skoncil som s navratovym kodom %d, token s atributom %s\n",ret,TOKEN.attribute);
+//	token.attribute="2";
+//	token.id=sInteger;
+//	int control=sInteger;
+//	ERROR_CODE ret=expression(TAKEN_FIRST_TOKEN,control);
+//	printf("skoncil som s navratovym kodom %d, token s atributom %s\n",ret,token_expression.attribute);
+//
 //	fclose(file);
 //	return EXIT_SUCCESS;
 //}
 
 /* funkcia volana z rekuzivneho zostupu 
  * return - navratova hodnota z error.h */
-ERROR_CODE expression()
+ERROR_CODE expression(int first_token,int control_type)
 {
 	ListPointer list;
-	ERROR_CODE return_analysis = Analysis(&list);
+	ERROR_CODE return_analysis = Analysis(&list,first_token,control_type);
 	return return_analysis;
 }
-
 
 /* hlavna funkcia ktora vsetko koordinuje */
 /* return - z error.h */
 /* Lis - ukazatel na list */
-ERROR_CODE Analysis(ListPointer *Lis)
+ERROR_CODE Analysis(ListPointer *Lis,int first_token,int type_control)
 {
 	if(InitExpressionList(Lis)!=OK_ERR)
 		return INTERN_ERR;
-	//if(get_first_token==false)
-	//{
+	if(first_token==NOT_TAKEN_FIRST_TOKEN)
+	{
 		token_expression = get_Token(); /* ukazatel na token bude sluzit ako docasne ulozisko tokenu */
 		if(token_expression.id==sError)
 			return LEX_ERR;
-	//}
-	//else
-	//{
-	//	TOKEN=RECURSE_TOKEN;
-	//}
-	
+	}
+	else /* ak mi rekurzivny zostup zobral prvy token */
+	{
+		token_expression=token;
+		printf("id tokenu:%d token:%s\n",token_expression.id,token_expression.attribute);
+	}
+
 	bool vykonavanie_cyklu=true;
 	while(vykonavanie_cyklu) /* cyklus vykonavam pokial spracujem vsetko a na vstupe je DOLLAR(;) alebo mi pride pravidlo P (toto bolo uspesne vykonanie) a neuspesne ak mi ako dalsie pravidlo prislo X alebo na vstupe je UNKNOWN id */
 	{
@@ -107,6 +113,14 @@ ERROR_CODE Analysis(ListPointer *Lis)
 			{
 				vykonavanie_cyklu = false; /* dalej cyklus nevykonavam */
 				/* na zasobniku je posledny terminal DOLLAR a na vrchole ) */
+				if(type_control!=sEnd) /* sEnd oznacuje ze nechcem kontrolovat typ */
+				{
+					if( ((Precedence_table_element *)(Lis->first_list_element->next->data))->id != type_control ) /* ak nesedia typy na lavej a pravej strane */
+					{
+						printf("nesedia typy lavej a pravej strane\n");
+						return SEM_TYPE_ERR;
+					}
+				}
 				printf("koncim uspesne\n");
 				return OK_ERR; /* koncim uspechom */
 			}
@@ -126,6 +140,14 @@ ERROR_CODE Analysis(ListPointer *Lis)
 		if( (expressionIdChose(token_expression.id)==DOLLAR) && (((struct precedence_table_element*)(Lis->last_terminal->data))->expresion_id==DOLLAR) )
 		{
 			vykonavanie_cyklu = false;
+			if(type_control!=sEnd) /* sEnd oznacuje ze nechcem kontrolovat typ */
+			{
+				if( ((Precedence_table_element *)(Lis->first_list_element->next->data))->id != type_control ) /* ak nesedia typy na lavej a pravej strane */
+				{
+					printf("nesedia typy lavej a pravej strane\n");
+					return SEM_TYPE_ERR;
+				}
+			}
 			printf("koncim uspesne\n");
 			return OK_ERR; /* koncim uspechom */
 		}
@@ -175,67 +197,76 @@ ERROR_CODE Reduce(ListPointer *Lis)
 					printf("MUL\n");
 					if( left_id==sString || right_id==sString)
 						return SEM_TYPE_ERR;
+					left_id=changeTypeOf(left_id,right_id,MUL); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(DIV):
 					printf("DIV\n");
 					if( left_id==sString || right_id==sString )
 						return SEM_TYPE_ERR;
+					left_id=changeTypeOf(left_id,right_id,DIV); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(PLUS):
 					printf("PLUS\n");
 					if( left_id==sString || right_id==sString )
 						return SEM_TYPE_ERR;
+					left_id=changeTypeOf(left_id,right_id,PLUS); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(MINUS):
 					printf("MINUS\n");
 					if( left_id==sString || right_id==sString )
 						return SEM_TYPE_ERR; /* chyba v pripade ze jeden alebo oba operatory su string */
+					left_id=changeTypeOf(left_id,right_id,MINUS); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(LT):
 					printf("LT\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
+					left_id=changeTypeOf(left_id,right_id,LT); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(GT):
 					printf("GT\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
+					left_id=changeTypeOf(left_id,right_id,GT); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(LE):
 					printf("LE\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
+					left_id=changeTypeOf(left_id,right_id,LE); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(GE):
 					printf("GE\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
+					left_id=changeTypeOf(left_id,right_id,GE); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(EQ):
 					printf("EQ\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
+					left_id=changeTypeOf(left_id,right_id,EQ); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(NE):
 					printf("NE\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
+					left_id=changeTypeOf(left_id,right_id,NE); /* pretypovanie */
 					/* Doplnit semanticku akciu */
 					break;
 			}
 			FindLastTerminal(Lis); /* najdenie noveho terminalu */
 			DeleteLast(Lis);/* odstranime pravy operand */
 			DeleteLast(Lis); /* odstanime operator */
-			/* priradenie hodnoty niekam aby som mohol pouzit lavy operand */
 			return OK_ERR;
 		}
 		else
@@ -401,4 +432,35 @@ int convertIdToTableAccess(int id)
 			break;
 	}
 	return UNKNOWN;
+}
+
+/* funkcie podla operatoru vykona pretypovanie
+ * return - vrati hodnotu na ktory typ ma byt pretypovany 
+ * left_id - id laveho operandu
+ * right_id - id praveho operandu
+ * operator - typ operatoru ( delenie, nasobenie, scitanie,...) */
+int changeTypeOf(int left_id,int right_id,int operator)
+{
+ 	if(operator==PLUS || operator==MINUS || operator==MUL)
+	{
+		if(left_id==right_id)
+			return left_id;
+		else
+			return sDouble;
+	}
+	else if(OPERAND==DIV)
+	{
+		if(left_id==sInteger && right_id==sInteger)
+			return sInteger;
+		else
+			return sDouble;
+	}
+	else /* operatory <, > , <= , => ,== , != */
+	{
+		if(left_id==right_id)
+			return sInteger;
+		else /* ak je porovnavane int<->double alebo vice versa */
+			return sDouble;
+	}
+	return sError; /* tu by sa nemalo dostat nikdy */
 }
