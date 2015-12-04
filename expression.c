@@ -3,8 +3,11 @@
 #define TAKEN_FIRST_TOKEN 1
 #define NOT_TAKEN_FIRST_TOKEN 0
 
+#define AUTO 9
+
 tToken token_expression;/* ukazatel na token bude sluzit ako docasne ulozisko tokenu */
 extern tToken token; /* token s rekurzivneho zostupu */
+int typ_pre_auto;
 
 const char PRECEDENCE_TABLE[SIZE][SIZE] =
 {
@@ -34,8 +37,8 @@ const char PRECEDENCE_TABLE[SIZE][SIZE] =
 //	file = fopen("test","r");
 //	token.attribute="2";
 //	token.id=sInteger;
-//	int control=sInteger;
-//	ERROR_CODE ret=expression(TAKEN_FIRST_TOKEN,control);
+//	int control=sDouble;
+//	ERROR_CODE ret=expression(NOT_TAKEN_FIRST_TOKEN,control);
 //	printf("skoncil som s navratovym kodom %d, token s atributom %s\n",ret,token_expression.attribute);
 //
 //	fclose(file);
@@ -48,6 +51,7 @@ ERROR_CODE expression(int first_token,int control_type)
 {
 	ListPointer list;
 	ERROR_CODE return_analysis = Analysis(&list,first_token,control_type);
+	DestroyList(&list);
 	return return_analysis;
 }
 
@@ -115,6 +119,11 @@ ERROR_CODE Analysis(ListPointer *Lis,int first_token,int type_control)
 				/* na zasobniku je posledny terminal DOLLAR a na vrchole ) */
 				if(type_control!=sEnd) /* sEnd oznacuje ze nechcem kontrolovat typ */
 				{
+					if(type_control == AUTO )
+					{
+						typ_pre_auto = ((Precedence_table_element *)(Lis->first_list_element->next->data))->id;
+						return OK_ERR;
+					}
 					if( ((Precedence_table_element *)(Lis->first_list_element->next->data))->id != type_control ) /* ak nesedia typy na lavej a pravej strane */
 					{
 						printf("nesedia typy lavej a pravej strane\n");
@@ -142,6 +151,12 @@ ERROR_CODE Analysis(ListPointer *Lis,int first_token,int type_control)
 			vykonavanie_cyklu = false;
 			if(type_control!=sEnd) /* sEnd oznacuje ze nechcem kontrolovat typ */
 			{
+				if(type_control == AUTO )
+				{
+					typ_pre_auto = ((Precedence_table_element *)(Lis->first_list_element->next->data))->id;
+					return OK_ERR;
+				}
+
 				if( ((Precedence_table_element *)(Lis->first_list_element->next->data))->id != type_control ) /* ak nesedia typy na lavej a pravej strane */
 				{
 					printf("nesedia typy lavej a pravej strane\n");
@@ -197,70 +212,70 @@ ERROR_CODE Reduce(ListPointer *Lis)
 					printf("MUL\n");
 					if( left_id==sString || right_id==sString)
 						return SEM_TYPE_ERR;
-					left_id=changeTypeOf(left_id,right_id,MUL); /* pretypovanie */
+					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,MUL); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(DIV):
 					printf("DIV\n");
 					if( left_id==sString || right_id==sString )
 						return SEM_TYPE_ERR;
-					left_id=changeTypeOf(left_id,right_id,DIV); /* pretypovanie */
+					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,DIV); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(PLUS):
 					printf("PLUS\n");
 					if( left_id==sString || right_id==sString )
 						return SEM_TYPE_ERR;
-					left_id=changeTypeOf(left_id,right_id,PLUS); /* pretypovanie */
+					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,PLUS); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(MINUS):
 					printf("MINUS\n");
 					if( left_id==sString || right_id==sString )
 						return SEM_TYPE_ERR; /* chyba v pripade ze jeden alebo oba operatory su string */
-					left_id=changeTypeOf(left_id,right_id,MINUS); /* pretypovanie */
+					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,MINUS); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(LT):
 					printf("LT\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
-					left_id=changeTypeOf(left_id,right_id,LT); /* pretypovanie */
+					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,LT); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(GT):
 					printf("GT\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
-					left_id=changeTypeOf(left_id,right_id,GT); /* pretypovanie */
+					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,GT); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(LE):
 					printf("LE\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
-					left_id=changeTypeOf(left_id,right_id,LE); /* pretypovanie */
+					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,LE); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(GE):
 					printf("GE\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
-					left_id=changeTypeOf(left_id,right_id,GE); /* pretypovanie */
+					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,GE); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(EQ):
 					printf("EQ\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
-					left_id=changeTypeOf(left_id,right_id,EQ); /* pretypovanie */
+					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,EQ); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(NE):
 					printf("NE\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
-					left_id=changeTypeOf(left_id,right_id,NE); /* pretypovanie */
+					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,NE); /* pretypovanie */
 					/* Doplnit semanticku akciu */
 					break;
 			}
@@ -444,9 +459,13 @@ int changeTypeOf(int left_id,int right_id,int operator)
  	if(operator==PLUS || operator==MINUS || operator==MUL)
 	{
 		if(left_id==right_id)
+		{
 			return left_id;
+		}
 		else
+		{
 			return sDouble;
+		}
 	}
 	else if(OPERAND==DIV)
 	{

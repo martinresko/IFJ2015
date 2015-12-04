@@ -50,7 +50,7 @@ FILE *file;
  			token.attribute[(*i)] = c;
  			(*i)++;
  		} else{
- 			free(token.attribute);
+ 			//free(token.attribute);
  			scaner_error = INTERN_ERR;
  		}
  	} else{
@@ -94,9 +94,9 @@ int HextoDec(char *hexa){
 * spat do toku znakov, spravi opak funkcie getc().
 */
 static void undo_c(int c){
-	if(!(isspace(c))){
+	//if(!(isspace(c))){
  		ungetc(c, file);
- 	}
+ 	//}
  }
 
 /*
@@ -132,10 +132,10 @@ int j;
 * Funkcia inicializuje retazec pre token.
 */
  static void init_string(int *i){
- 	free(PomUk);
+ 	//free(PomUk);
  	token.attribute = (char *) malloc((*i)+2);
  	if(token.attribute == NULL){
- 		free(token.attribute);
+ 		//free(token.attribute);
  		scaner_error = INTERN_ERR;
  	} else{
  		token.attribute[(*i)] = '\0';
