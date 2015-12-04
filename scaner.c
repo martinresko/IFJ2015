@@ -49,7 +49,6 @@ FILE *file;
  			token.attribute[(*i)] = c;
  			(*i)++;
  		} else{
- 			free(token.attribute);
  			scaner_error = INTERN_ERR;
  		}
  	} else{
