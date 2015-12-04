@@ -131,7 +131,7 @@ int j;
 * Funkcia inicializuje retazec pre token.
 */
  static void init_string(int *i){
- 	free(PomUks);
+ 	free(PomUk);
  	token.attribute = (char *) malloc((*i)+2);
  	if(token.attribute == NULL){
  		scaner_error = INTERN_ERR;
