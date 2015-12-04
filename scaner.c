@@ -19,6 +19,7 @@
 
 tToken token; //globalna premenna reprezentujuca token
 int row = 0;  //globalna premenna reprezentujuca aktualny riadok
+char *PomUk;
 FILE *file;
 
 /* Tabulka klucovych slov */
@@ -130,7 +131,7 @@ int j;
 * Funkcia inicializuje retazec pre token.
 */
  static void init_string(int *i){
- 	free(token.attribute);
+ 	free(PomUks);
  	token.attribute = (char *) malloc((*i)+2);
  	if(token.attribute == NULL){
  		scaner_error = INTERN_ERR;
@@ -148,7 +149,7 @@ int j;
  	int escap2;		// -||-
  	bool cont = true;
  	char hexa[3];		//spracovanie hexadecimalneho cisla.
-
+ 	PomUk = token.attribute;
 /* inicializacia tokenu */
  	token.id = sStart;
  	init_string(&i);
