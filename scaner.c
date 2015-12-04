@@ -49,6 +49,7 @@ FILE *file;
  			token.attribute[(*i)] = c;
  			(*i)++;
  		} else{
+ 			free(token.attribute);
  			scaner_error = INTERN_ERR;
  		}
  	} else{
@@ -130,8 +131,10 @@ int j;
 * Funkcia inicializuje retazec pre token.
 */
  static void init_string(int *i){
- 	token.attribute = (char *) malloc((*i));
+ 	free(token.attribute);
+ 	token.attribute = (char *) malloc((*i)+2);
  	if(token.attribute == NULL){
+ 		free(token.attribute);
  		scaner_error = INTERN_ERR;
  	} else{
  		token.attribute[(*i)] = '\0';
