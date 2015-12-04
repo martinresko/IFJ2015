@@ -50,6 +50,7 @@ FILE *file;
  			token.attribute[(*i)] = c;
  			(*i)++;
  		} else{
+ 			free(token.attribute);
  			scaner_error = INTERN_ERR;
  		}
  	} else{
@@ -134,6 +135,7 @@ int j;
  	free(PomUk);
  	token.attribute = (char *) malloc((*i)+2);
  	if(token.attribute == NULL){
+ 		free(token.attribute);
  		scaner_error = INTERN_ERR;
  	} else{
  		token.attribute[(*i)] = '\0';
