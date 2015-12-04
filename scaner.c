@@ -79,9 +79,9 @@ int HextoDec(char *hexa){
  		if((hexa[i] >= '0') && (hexa[i] <= '9')){
  			value += ((int)hexa[i] - 48) * base;
  		} else if((hexa[i] >= 'a') && (hexa[i] <= 'f')){
- 			value += ((int)hexa[i] - 55) * base;
- 		} else if((hexa[i] >= 'A') && (hexa[i] <= 'F')){
  			value += ((int)hexa[i] - 87) * base;
+ 		} else if((hexa[i] >= 'A') && (hexa[i] <= 'F')){
+ 			value += ((int)hexa[i] - 55) * base;
  		}
  	}
 
