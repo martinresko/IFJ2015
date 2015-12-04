@@ -316,6 +316,7 @@ int j;
  					state = sExpo;
  					expand_token(c, &i);
  				} else{
+ 					state = sDouble;
  					fill_token(state);
  					state = sEnd;
  					undo_c(c);

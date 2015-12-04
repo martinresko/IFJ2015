@@ -15,6 +15,9 @@
 #include "error.h"
 #include "table_of_symbols.h"
 #include "parser.h"
+#include "stack.h"
+#include "list.h"
+#include "binTree.h"
 
 /* definujeme si premennu na uchovanie chyby */
 ERROR_CODE run_error;
@@ -60,5 +63,4 @@ typedef enum{
 	iRET,
 //Navestia
 	iLABEL
-	
 } tInstrT;

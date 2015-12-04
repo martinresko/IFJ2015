@@ -14,14 +14,9 @@
 //Hlavickovy subor pre interpret
 #include "interpret.h"
 
-ERROR_CODE interpret(Table_symbols table){
-	run_error = stackInit(stack);
-	run_error = rec_interpret();
+ERROR_CODE init_interpret(Table_Symbols *table){
+	StackPointer *Stack;
+	stackInit(Stack);
+	run_error = interpret()
 }
 
-ERROR_CODE rec_interpret(){
-	
-	switch(instrPtr->type){
-		case 
-	}
-}

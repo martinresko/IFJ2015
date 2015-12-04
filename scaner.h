@@ -27,7 +27,7 @@ typedef enum{
 	sInteger,			// 02 - Celociselny Literal 		//Koncovy stav
 	sDouble,			// 03 - Desatinny Literal 			//KOncovy stav
 	sIsExpo,			// 04 - Zaciatok exponentu
-	sExpo, 				// 05 - Literal s exponentom 		//Koncovy stav
+	sExpo, 				// 05 - Literal s exponentom
 	sString,			// 06 - Retazcovy literal 			//Koncovy stav
 	sNull,				// 07 - Stav na odstranenie prebytocnych nul
 	sAssign,			// 08 - =
