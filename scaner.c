@@ -149,7 +149,6 @@ int j;
  	int escap2;		// -||-
  	bool cont = true;
  	char hexa[3];		//spracovanie hexadecimalneho cisla.
- 	PomUk = token.attribute;
 /* inicializacia tokenu */
  	token.id = sStart;
  	init_string(&i);
@@ -567,6 +566,7 @@ int j;
  		}
  	}
 
+ 	PomUk = token.attribute;
  /* Vratime token parseru */
  	return token;
  }
