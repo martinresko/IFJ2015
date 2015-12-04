@@ -62,5 +62,10 @@ typedef enum{
 //Navratova hodnota
 	iRET,
 //Navestia
-	iLABEL
+	iLABEL,
+//Operacie s ramcami
+	iINITFR,
+	iDISPFR,
+	iWRITEFR,
+	iREADFR
 } tInstrT;

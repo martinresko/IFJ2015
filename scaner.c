@@ -134,7 +134,6 @@ int j;
  	free(token.attribute);
  	token.attribute = (char *) malloc((*i)+2);
  	if(token.attribute == NULL){
- 		free(token.attribute);
  		scaner_error = INTERN_ERR;
  	} else{
  		token.attribute[(*i)] = '\0';
