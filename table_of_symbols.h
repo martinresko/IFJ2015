@@ -38,7 +38,7 @@ Variable *searchFunctionParam(Function_GTS *,char *);
 ERROR_CODE pushBlock(Function_GTS *);
 void popBlock(Function_GTS *);
 ERROR_CODE insertFunctionVariableToStack(Function_GTS *, char *,int);
-Variable *searchFunctionVariable(Function_GTS *,char *);
+Variable *searchFunctionVariableInStack(Function_GTS *,char *);
 Variable *findInList(ListPointer *, char *);
 
 void SymbolTableStackDestoy(Function_GTS *);

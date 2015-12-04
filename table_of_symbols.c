@@ -26,7 +26,7 @@
 //	pushBlock(a);
 //	insertFunctionVariableToStack(tabulka.actual_function,"premenna1",9);
 //	Variable *c=NULL;
-//	c=searchFunctionVariable(a,"param1");
+//	c=searchFunctionVariableInStack(a,"param1");
 //	if(c!=NULL)
 //		printf("%d\n",c->typ);
 //	else
@@ -35,7 +35,7 @@
 //	pushBlock(a);
 //	insertFunctionVariableToStack(a,"premenna2",98);
 //	Variable *d=NULL;
-//	d=searchFunctionVariable(a,"premenna1");
+//	d=searchFunctionVariableInStack(a,"premenna1");
 //	if(d!=NULL)
 //		printf("%d\n",d->typ);
 //	else
@@ -62,7 +62,7 @@
 //	pushBlock(e);
 //	insertFunctionVariableToStack(tabulka.actual_function,"premenna1",9);
 //	Variable *g=NULL;
-//	g=searchFunctionVariable(e,"param1");
+//	g=searchFunctionVariableInStack(e,"param1");
 //	if(g!=NULL)
 //		printf("%d\n",g->typ);
 //	else
@@ -71,7 +71,7 @@
 //	pushBlock(e);
 //	insertFunctionVariableToStack(e,"premenna2",98);
 //	Variable *h=NULL;
-//	h=searchFunctionVariable(e,"premenna1");
+//	h=searchFunctionVariableInStack(e,"premenna1");
 //	if(h!=NULL)
 //		printf("%d\n",h->typ);
 //	else
@@ -242,7 +242,7 @@ ERROR_CODE insertFunctionVariableToStack(Function_GTS *function, char *variable_
  * return - NULL ak nic nenasiel alebo pointer na Parameter alebo Pointer na Variable
  * function - ukazatel na funkciu
  * variable_name - meno hladanej premennej */
-Variable *searchFunctionVariable(Function_GTS *function, char *variable_name)
+Variable *searchFunctionVariableInStack(Function_GTS *function, char *variable_name)
 {
 	if(function!=NULL)
 	{
