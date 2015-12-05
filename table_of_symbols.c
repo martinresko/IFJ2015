@@ -1,4 +1,4 @@
-#include"table_of_symbols.h"
+#include "table_of_symbols.h"
 
 //int main()
 //{
@@ -80,16 +80,16 @@
 //	destroyGTS(&tabulka); 
 //	return 0;
 //}
-//
-///* inicializuje globalnu tabulku symbolov
-// * gts_table - ukazatel na strukturu GTS */
-//void globalTableOfSymbolsInit(Table_symbols *gts_table)
-//{
-//	if(gts_table!=NULL)
-//		treeInit(&(gts_table->functions));
-//		gts_table->actual_function=NULL;
-//}
-//
+
+/* inicializuje globalnu tabulku symbolov
+ * gts_table - ukazatel na strukturu GTS */
+void globalTableOfSymbolsInit(Table_symbols *gts_table)
+{
+	if(gts_table!=NULL)
+		treeInit(&(gts_table->functions));
+		gts_table->actual_function=NULL;
+}
+
 /* vlozi do GTS funkciu 
  * return - intern ak nedostanem pamat alebo dobry ukazatel inak OK
  * gts_table - ukazatal na GTS strom
@@ -180,7 +180,7 @@ Variable *searchFunctionParam(Function_GTS *function,char *variable_name)
  * function - ukazatel na funkciu */
 ERROR_CODE pushBlock(Function_GTS *function)
 {
-	if(function!=NULL)
+	 if(function!=NULL)
 	{
 		TreePointer *zasobnik=malloc(sizeof(TreePointer*));
 		if(zasobnik!=NULL)
@@ -188,6 +188,7 @@ ERROR_CODE pushBlock(Function_GTS *function)
 			treeInit(zasobnik);
 			if((stackPush(&(function->symbol_table_of_block),zasobnik)==INTERN_ERR))
 					return INTERN_ERR;
+			printf("PUSHOL SOM OK\n");
 			return OK_ERR;
 		}
 		else
@@ -210,6 +211,7 @@ void popBlock(Function_GTS *function)
 		{
 			treeDestroy(stackTop(&(function->symbol_table_of_block)));
 			stackPop(&(function->symbol_table_of_block));
+			printf("POPOL SOM OK\n");
 		}
 	}
 }
@@ -252,6 +254,7 @@ Variable *searchFunctionVariableInStack(Function_GTS *function, char *variable_n
 		Variable *found_param = findInList(&(function->params),variable_name);
 		if(found_param!=NULL)
 			return found_param;/* ak som nasiel parameter */
+		
 		/* ak som to nenasiel ako parameter tak hladam v zasobniku blokov */
 		Stack store_top_stack=function->symbol_table_of_block.top_of_stack; /* ulozim si vrchol originalny vrchol zasobnika */
 		while(stackEmpty(&(function->symbol_table_of_block))==0) /* kym neprejdem cely zasobnik */
@@ -268,6 +271,7 @@ Variable *searchFunctionVariableInStack(Function_GTS *function, char *variable_n
 				function->symbol_table_of_block.top_of_stack=function->symbol_table_of_block.top_of_stack->left_stack_element;/* nenasiel som posuniem idem hladat hlbsie v zasobniku */
 			}
 		}
+		function->symbol_table_of_block.top_of_stack=store_top_stack; /* prenastavim vrchol zasobnika ak nenajdem */
 		return NULL;
 	}
 	return NULL;

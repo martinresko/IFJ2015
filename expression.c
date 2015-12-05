@@ -7,6 +7,8 @@
 
 tToken token_expression;/* ukazatel na token bude sluzit ako docasne ulozisko tokenu */
 extern tToken token; /* token s rekurzivneho zostupu */
+extern Table_symbols symbol_table;
+
 int typ_pre_auto;
 
 const char PRECEDENCE_TABLE[SIZE][SIZE] =
@@ -156,7 +158,7 @@ ERROR_CODE Analysis(ListPointer *Lis,int first_token,int type_control)
 					typ_pre_auto = ((Precedence_table_element *)(Lis->first_list_element->next->data))->id;
 					return OK_ERR;
 				}
-
+				printf("vrchol %d typ_control %d\n",((Precedence_table_element *)(Lis->first_list_element->next->data))->id, type_control);
 				if( ((Precedence_table_element *)(Lis->first_list_element->next->data))->id != type_control ) /* ak nesedia typy na lavej a pravej strane */
 				{
 					printf("nesedia typy lavej a pravej strane\n");
@@ -313,11 +315,24 @@ void ReduceT(ListPointer *Lis)
 ERROR_CODE Shift(ListPointer *Lis,int id,char *attribute)
 {
 	Lis->last_terminal=insertElement(Lis,id,attribute);
-	//if(id==sIdent) /* skontrolujem semantiku vkladaneho prvku */
-	//{
-	//	if(searchFunctionVariable(table.actual_function,attribute)==NULL) /* ci sa premenna nachacha v tabulke symbolov */
-	//		return SEM_UNDEF_ERR;/* nenasiel som v tabulke err pouzivanie nedefinovanej premennej */
-	//}
+	if(id==sIdent) /* skontrolujem semantiku vkladaneho prvku */
+	{
+		Variable *polozka_identifikatoru = searchFunctionVariableInStack(symbol_table.actual_function,attribute);
+		if( polozka_identifikatoru == NULL) /* ci sa premenna nachacha v tabulke symbolov */
+			return SEM_UNDEF_ERR;/* nenasiel som v tabulke err pouzivanie nedefinovanej premennej */
+		switch (polozka_identifikatoru->typ) /* prenastavim sIdent na typ */
+		{
+			case sInteger :
+				((Precedence_table_element *)(Lis->last_terminal->data))->id=sInteger;
+			break;
+			case  sString :
+				((Precedence_table_element *)(Lis->last_terminal->data))->id=sString;
+			break;
+			case  sDouble : 
+				((Precedence_table_element *)(Lis->last_terminal->data))->id=sDouble;
+			break;
+		}
+	}
 	return (Lis->last_terminal==NULL)?INTERN_ERR:OK_ERR;
 }
 

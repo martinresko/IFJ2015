@@ -6,6 +6,7 @@
 #include "list.h"
 #include "scaner.h"
 #include "error.h"
+#include "table_of_symbols.h"
 
 #define SIZE 14
 

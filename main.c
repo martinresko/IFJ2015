@@ -16,11 +16,13 @@
  #include <stdio.h>
  #include "scaner.h"
  #include "parser.h"
+ #include "table_of_symbols.h"
 
  #define OK_ERR 0
 
 ERROR_CODE error;
 FILE *file;
+Table_symbols symbol_table;
 
 int main(int argc, char **argv){
 
@@ -35,8 +37,10 @@ int main(int argc, char **argv){
 	}
 	
 	error = prog();
+	printf(" koniec programu navratovi kod je %d\n",error );
 
- fclose(file);
+	destroyGTS(&symbol_table);
+	fclose(file);
 
 return error;
 }

@@ -5,9 +5,9 @@
 #include<stdlib.h>
 #include<string.h>
 
-#include"binTree.h"
-#include"stack.h"
-#include"list.h"
+#include "binTree.h"
+#include "stack.h"
+#include "list.h"
 
 /* Struktura funkcie v globalnej tabulke symbolov, len pre funkcie */
 typedef struct function_GTS {
