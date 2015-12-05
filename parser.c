@@ -16,6 +16,8 @@
 #define AUTO 9
 #define TAKEN_FIRST_TOKEN 1
 #define NOT_TAKEN_FIRST_TOKEN 0
+#define TRUE 1
+#define FALSE 0 
 
 tToken token; // aktualny token
 extern tToken token_expression;
@@ -33,7 +35,7 @@ int type_for_expression;
 ERROR_CODE prog()
 {
     globalTableOfSymbolsInit(&symbol_table);
-    printf("som v prog\n");
+    //printff("som v prog\n");
 	ERROR_CODE error = OK_ERR;
 	token = get_Token();
 
@@ -45,16 +47,16 @@ ERROR_CODE prog()
              break;
         // koniec suboru
         case sEndofFile: 
-             printf("koniec1\n"); 
+             //printff("koniec1\n"); 
             error = SYN_ERR;
             break;
         // ak dostanem hocico ine
         default :
-            printf("Body\n");
+            //printff("Body\n");
             error = body();
             break;
     }
-    printf("Program vystup %d\n", error );
+    //printff("Program vystup %d\n", error );
     if (error != OK_ERR) {
         return error;
     }
@@ -69,7 +71,7 @@ ERROR_CODE prog()
 
 ERROR_CODE body()
 {
-    printf("som v body\n");
+    //printff("som v body\n");
     ERROR_CODE error;
 
     switch (token.id) {
@@ -79,12 +81,12 @@ ERROR_CODE body()
              break;
         /*koniec suboru po uz jedej funkcii min */     
         case sEndofFile :
-            printf("koniec2\n");
+            //printff("koniec2\n");
             error = OK_ERR;
             return error;
             break;
         default :
-             printf("idem do funkcion\n");
+             //printff("idem do funkcion\n");
             error = function();
             if (error != OK_ERR) {
                 return error;
@@ -98,7 +100,7 @@ ERROR_CODE body()
     if (error != OK_ERR) {
         return error;
     }
-    printf("Program vystup %d\n", error );
+    //printff("Program vystup %d\n", error );
 
     return OK_ERR;
 }
@@ -110,7 +112,7 @@ ERROR_CODE body()
 ERROR_CODE function()
 {
     // skontrolovat este rezzervovane slova
-    printf("som vo funkcion\n");
+    //printff("som vo funkcion\n");
     ERROR_CODE error;
 
     error = typ();
@@ -127,13 +129,13 @@ ERROR_CODE function()
     }
     /*kontrola ci je to rezervovane slovo*/
     if (token.id == sResWord) {
-        printf("chyba pokus o redefiniciu vstavanej funkcie\n");
+        //printff("chyba pokus o redefiniciu vstavanej funkcie\n");
         error = SEM_UNDEF_ERR;
         return error;
     }
     /*kontrola ci je to ID*/
     if (token.id != sIdent) {
-        printf("Nieje id\n");
+        //printff("Nieje id\n");
         error = SYN_ERR;
         return error;
     }
@@ -143,7 +145,7 @@ ERROR_CODE function()
     if (error != OK_ERR){
         return error;
     }
-    printf("je id\n");
+    //printff("je id\n");
     token = get_Token();
     /*kontrola ci je Lex_ERR*/
     if (token.id == sError) {
@@ -152,17 +154,17 @@ ERROR_CODE function()
     }
     /*kontrola ci je to "("*/
     if (token.id != sLParenth) {
-        printf("nieje to (\n");
+        //printff("nieje to (\n");
         error = SYN_ERR;
         return error;
     }
-    printf("je to (\n");
+    //printff("je to (\n");
     error = params();
 
     if (error != OK_ERR){
         return error;
     }
-   	printf("idem do prototype_of_definition\n");
+   	//printff("idem do prototype_of_definition\n");
     error = prototype_of_definition();
 
     if (error != OK_ERR){
@@ -178,38 +180,38 @@ ERROR_CODE function()
 
 ERROR_CODE typ()
 {
-    printf("som v typ\n");
-    printf("%s\n",token.attribute );
+    //printff("som v typ\n");
+    //printff("%s\n",token.attribute );
     ERROR_CODE error = OK_ERR;
 
     if (token.id == sKeyWord) {
 
         if(!(strcmp(token.attribute, "int"))) { 
-            printf("je to int\n");
+            //printff("je to int\n");
             type_of_element_to_table_of_symbols = sInteger;
             error = OK_ERR;
             return error;
         }
         if(!(strcmp(token.attribute, "double"))) {
-            printf("je to double\n");
+            //printff("je to double\n");
             type_of_element_to_table_of_symbols = sDouble;
             error = OK_ERR;
             return error;
         }
         if(!(strcmp(token.attribute, "string"))) {
-            printf("je to string\n");
+            //printff("je to string\n");
             type_of_element_to_table_of_symbols = sString;
             error = OK_ERR;
             return error;
         }
         if(!(strcmp(token.attribute, "auto"))) {
-            printf("je to auto\n");
+            //printff("je to auto\n");
             error = 20;
             return error;
         }
     }
     else {
-        printf("je to zly typ\n");
+        //printff("je to zly typ\n");
         error = SYN_ERR;
         return error;
     }
@@ -223,7 +225,7 @@ ERROR_CODE typ()
 
 ERROR_CODE params()
 {
-    printf("som v prams\n");
+    //printff("som v prams\n");
     ERROR_CODE error;
 
     token = get_Token();
@@ -238,18 +240,18 @@ ERROR_CODE params()
     if (error != OK_ERR) {
         /*kontrola je v spravnom tvare*/
         if (token.id != sRParenth) {
-            printf("nieje )\n");
+            //printff("nieje )\n");
             error = SYN_ERR;
             return error;
         }
         /*ak nema funkcia ziadny parameter*/
         else {
-            printf("je )\n");
+            //printff("je )\n");
             error = OK_ERR;
         }
     }  /*ak ma funkcia parameter*/
     else {
-        printf("ma viac parametrov\n");
+        //printff("ma viac parametrov\n");
         token = get_Token();
         /*kontrola ci je Lex_ERR*/
         if (token.id == sError) {
@@ -283,7 +285,7 @@ ERROR_CODE params()
 
 ERROR_CODE multi_params()
 {
-    printf("som v multi params\n");
+    //printff("som v multi params\n");
     token = get_Token();
     ERROR_CODE error;
     
@@ -295,13 +297,13 @@ ERROR_CODE multi_params()
             break;
         /*pokila dostanem ")" je len jedne parameter a vraciam sa*/
         case sRParenth :
-            printf("je to )\n");
+            //printff("je to )\n");
             error = OK_ERR;
             return error;
             break;
         /*pokila dostanem ciarku tak moze byt viac parametrov a pokracujem*/
         case sComma :
-            printf("je to ciarka\n");
+            //printff("je to ciarka\n");
             token = get_Token();
             /*kontrola ci je Lex_ERR*/
             if (token.id == sError) {
@@ -332,7 +334,7 @@ ERROR_CODE multi_params()
             if (error != OK_ERR) {
                 return error;
             }
-            printf("je to ID\n");
+            //printff("je to ID\n");
             error = multi_params();
 
             if (error != OK_ERR) {
@@ -340,7 +342,7 @@ ERROR_CODE multi_params()
             }
             break;
         default :
-        	printf("je to zle\n");
+        	//printff("je to zle\n");
             error = SYN_ERR;
             return error;
             break;
@@ -359,7 +361,7 @@ ERROR_CODE multi_params()
 
 ERROR_CODE prototype_of_definition()
 {
-    printf("som v prototype_of_definition\n");
+    //printff("som v prototype_of_definition\n");
     ERROR_CODE error;
 
     token = get_Token();
@@ -371,7 +373,7 @@ ERROR_CODE prototype_of_definition()
             return error;
             break;    
         case sSemicolon :
-        	printf("dostal som ; je to prototyp\n");
+        	//printff("dostal som ; je to prototyp\n");
             // ak dostanem ; tak nieje funkcia definovana
             symbol_table.actual_function->defined = FALSE;
             error = OK_ERR;
@@ -381,13 +383,13 @@ ERROR_CODE prototype_of_definition()
             // ak dostanem { tak je uz funkcia definovana
             symbol_table.actual_function->defined = TRUE;
             // pushnem blok
-            printf("IDEM pushnut blok \n");
+            //printff("IDEM pushnut blok \n");
             error = pushBlock(symbol_table.actual_function);
             if (error != OK_ERR) {
                 return error;
             }
 
-            printf("idem do stat list\n");
+            //printff("idem do stat list\n");
             error = stat_list();
             break;
         default :
@@ -409,12 +411,11 @@ ERROR_CODE prototype_of_definition()
 
 ERROR_CODE stat_list()
 {
-    printf("som v stat list\n");
+    //printff("som v stat list\n");
     token = get_Token();
     ERROR_CODE error;
 
-    if(stackEmpty(&(symbol_table.actual_function->symbol_table_of_block)))
-        	printf("PRAZDNY zasobnik v stat list \n");
+   
 
     switch (token.id) {
         /*pokila lexer vrati lex error*/
@@ -424,21 +425,26 @@ ERROR_CODE stat_list()
             break;
         /*ak som dostal "}"*/
         case sRSetPar :
-            printf("dostal som }\n");
+            //printff("dostal som }\n");
             // popujem zasobnik
             popBlock(symbol_table.actual_function);
+
+            if( (stackEmpty(&(symbol_table.actual_function->symbol_table_of_block))) && (symbol_table.actual_function->return_occured == FALSE) ) {
+            	error = SYN_ERR;
+            	return error;
+            }
+
             error = OK_ERR;
             return error;
             break;
         case sEndofFile :
-            printf("som na konci suboru\n");
+            //printff("som na konci suboru\n");
             error = SYN_ERR;
             return error;
             break;
         default :
-            printf("idem do command\n");
-			if(stackEmpty(&(symbol_table.actual_function->symbol_table_of_block)))
-        		printf("PRAZDNY zasobnik v stat na IDEM DO COMMAND \n");
+            //printff("idem do command\n");
+			
             error = command();
             if (error != OK_ERR) {
                 return error;
@@ -470,10 +476,9 @@ ERROR_CODE stat_list()
 
 ERROR_CODE command()
 {
-    printf("som v command\n");
+    //printff("som v command\n");
     ERROR_CODE error;
-    if(stackEmpty(&(symbol_table.actual_function->symbol_table_of_block)))
-        	printf("PRAZDNY zasobnik v command \n");
+    
 
     switch (token.id) {
         /*pokila lexer vrati lex error*/
@@ -483,8 +488,8 @@ ERROR_CODE command()
             break;
         /*pokial dostaanem ";"*/
         case sSemicolon :
-            printf("dostal som ;\n");
-            error = OK_ERR;
+            //printff("dostal som ;\n");
+            error = SYN_ERR;
             return error;
             break;
         /*
@@ -496,7 +501,7 @@ ERROR_CODE command()
             if (error != OK_ERR) {
                 return error;
             }
-        	printf("dostal som {\n");
+        	//printff("dostal som {\n");
         	error = stat_list();
 
         	if (error != OK_ERR) {
@@ -507,10 +512,8 @@ ERROR_CODE command()
          * id<funkcia_priradenie>;
         */
         case sIdent :
-            printf("idem do funkcia_priradenie\n");
-			if(stackEmpty(&(symbol_table.actual_function->symbol_table_of_block)))
-        		printf("PRAZDNY zasobnik IDEM do FUNKCIA PRIRADENIE\n");
-            
+            //printff("idem do funkcia_priradenie\n");
+            ;
             Variable *premenna_na_odvodenie_typu = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
             if(premenna_na_odvodenie_typu!=NULL){
             	type_for_expression = premenna_na_odvodenie_typu->typ;
@@ -529,12 +532,12 @@ ERROR_CODE command()
                     break;
                 /*pokial dostaanem ";"*/
                 case sSemicolon :
-                    printf("dostal som ;\n");
+                    //printff("dostal som ;\n");
                     error = OK_ERR;
                     return error;
                     break;
                 default : 
-                    printf("chyba v command v ID\n");               
+                    //printff("chyba v command v ID\n");               
                     error = SYN_ERR;
                     return error;
                     break;
@@ -545,9 +548,10 @@ ERROR_CODE command()
              *return expresion ;
              */
             if(!(strcmp(token.attribute, "return"))){
-                printf("volam expression\n");
+                //printff("volam expression\n");
+                symbol_table.actual_function->return_occured = TRUE;
                 // predam do expression aktualny typ funkcie
-                printf("navratova hodnota funkcie   %d\n",symbol_table.actual_function->return_type );
+                //printff("navratova hodnota funkcie   %d\n",symbol_table.actual_function->return_type );
                 error = expression(NOT_TAKEN_FIRST_TOKEN, symbol_table.actual_function->return_type);
                 token = token_expression;
 
@@ -562,7 +566,7 @@ ERROR_CODE command()
                     return error;
                 // ak bol zadany ;
                 } else if (token.id == sSemicolon) {
-                	printf("dostal som ;\n");
+                	//printff("dostal som ;\n");
                     error = OK_ERR;
                     return error;
                 // inak chyba
@@ -575,7 +579,7 @@ ERROR_CODE command()
              *if ( expresion ) {<stat_list>} else { <stat_list>}
              */
             else if(!(strcmp(token.attribute, "if"))){
-                printf("som v if\n");
+                //printff("som v if\n");
                 token = get_Token();
 
                 if (token.id == sError) {
@@ -584,11 +588,11 @@ ERROR_CODE command()
                 }
                 // ak dostanem (
                 if(token.id != sLParenth) {
-                    printf("nieje (\n");
+                    //printff("nieje (\n");
                     error = SYN_ERR;
                     return error;
                 }
-                printf("je (\n");
+                //printff("je (\n");
 
                 error = expression(NOT_TAKEN_FIRST_TOKEN, sEnd); // expression
                 token = token_expression;
@@ -604,7 +608,7 @@ ERROR_CODE command()
                 }
 
                 if(token.id != sRParenth) {
-                    printf("nieje )\n");
+                    //printff("nieje )\n");
                     error = SYN_ERR;
                     return error;
                 }
@@ -617,7 +621,7 @@ ERROR_CODE command()
                 }
 
                 if(token.id != sLSetPar) {
-                    printf("nieje {\n");
+                    //printff("nieje {\n");
                     error = SYN_ERR;
                     return error;
                 }
@@ -627,7 +631,7 @@ ERROR_CODE command()
                 if (error != OK_ERR) {
                     return error;
                 }
-                printf("je {\n");
+                //printff("je {\n");
 
                 error = stat_list();
 
@@ -643,11 +647,11 @@ ERROR_CODE command()
                 }
 
                 if((strcmp(token.attribute, "else"))){
-                    printf("nieje else\n");
+                    //printff("nieje else\n");
                     error = SYN_ERR;
                     return error;
                 }
-                printf("je else\n");
+                //printff("je else\n");
 
                 // ak dostanem {
                 token = get_Token();
@@ -658,21 +662,19 @@ ERROR_CODE command()
                 }
 
                 if(token.id != sLSetPar) {
-                    printf("nieje {\n");
+                    //printff("nieje {\n");
                     error = SYN_ERR;
                     
 
                     return error;
                 }
-                printf("e {\n");
+                //printff("e {\n");
                 	error = pushBlock(symbol_table.actual_function);
 
 		            if (error != OK_ERR) {
 		                return error;
 		            }
-                   if(stackEmpty(&(symbol_table.actual_function->symbol_table_of_block)))
-        		   printf("PRAZDNY zasobnik v ELSE\n");
-
+                  
                 error = stat_list();
 
                 if (error != OK_ERR) {
@@ -685,7 +687,7 @@ ERROR_CODE command()
              *<command> -> cin >> id <multi_cin>;
              */   
             else if(!(strcmp(token.attribute, "cin"))){
-            	printf("som v cin\n");
+            	//printff("som v cin\n");
                 token = get_Token ();
 
                 switch (token.id) {
@@ -695,7 +697,7 @@ ERROR_CODE command()
                         return error;
                         break;
                     case sCin :
-                    	printf("dostal som >>\n");
+                    	//printff("dostal som >>\n");
                         token = get_Token ();
 
                         switch (token.id) {
@@ -705,7 +707,7 @@ ERROR_CODE command()
                                 return error;
                                 break;
                             case sIdent :
-                            	printf("dostal som ID\n");
+                            	//printff("dostal som ID\n");
                                 error = OK_ERR;
                                 break;
                             default :
@@ -720,7 +722,7 @@ ERROR_CODE command()
 
                         break;
                     default :
-                    	printf("chyba v cin\n");
+                    	//printff("chyba v cin\n");
                         error = SYN_ERR;
                         return error;
                         break;
@@ -750,7 +752,7 @@ ERROR_CODE command()
                     return error;
                 }
 
-            	printf("som vo for\n");
+            	//printff("som vo for\n");
                 token = get_Token();
 
                 if (token.id == sError) {
@@ -759,18 +761,18 @@ ERROR_CODE command()
                 }
                 // ak dostanem (
                 if(token.id != sLParenth) {
-                    printf("nieje (\n");
+                    //printff("nieje (\n");
                     error = SYN_ERR;
                     return error;
                 }
-                printf("dostal som (\n");
+                //printff("dostal som (\n");
                 token = get_Token();
 
                 if (token.id == sError) {
                     error = LEX_ERR;
                     return error;
                 }
-                printf("idem do for definition\n");
+                //printff("idem do for definition\n");
                 error = for_definition();
 
                 if (error != OK_ERR) {
@@ -779,11 +781,11 @@ ERROR_CODE command()
 
                 // ak dostanem ;
                 if(token.id != sSemicolon) {
-                    printf("nieje ;\n");
+                    //printff("nieje ;\n");
                     error = SYN_ERR;
                     return error;
                 }
-                printf("dostal som ;\n");
+                //printff("dostal som ;\n");
 
                 error = expression(NOT_TAKEN_FIRST_TOKEN, sEnd); // expression opravit este
                 token = token_expression;
@@ -793,11 +795,11 @@ ERROR_CODE command()
                 }
 
                 if(token.id != sSemicolon) {
-                    printf("nieje ;\n");
+                    //printff("nieje ;\n");
                     error = SYN_ERR;
                     return error;
                 }
-                printf("dostal som ;\n");
+                //printff("dostal som ;\n");
 
                 token = get_Token();
 
@@ -807,11 +809,11 @@ ERROR_CODE command()
                 }
 
                 if(token.id != sIdent) {
-                    printf("nieje ID\n");
+                    //printff("nieje ID\n");
                     error = SYN_ERR;
                     return error;
                 }
-                printf("je ID\n");
+                //printff("je ID\n");
                 Variable *variable_for_search = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
                 if(variable_for_search == NULL) {
                 	error = SEM_UNDEF_ERR;
@@ -826,11 +828,11 @@ ERROR_CODE command()
                 }
 
                 if(token.id != sAssign) {
-                    printf("nieje =\n");
+                    //printff("nieje =\n");
                     error = SYN_ERR;
                     return error;
                 }
-                printf("dostal som =\n");
+                //printff("dostal som =\n");
 
                 error = expression(NOT_TAKEN_FIRST_TOKEN,variable_for_search->typ); // expression opravit este
                 token = token_expression;
@@ -840,7 +842,7 @@ ERROR_CODE command()
                 }
                 // ak dostanem (
                 if(token.id != sRParenth) {
-                    printf("nieje )\n");
+                    //printff("nieje )\n");
                     error = SYN_ERR;
                     return error;
                 }
@@ -854,11 +856,11 @@ ERROR_CODE command()
                 }
 
                 if(token.id != sLSetPar) {
-                    printf("nieje {\n");
+                    //printff("nieje {\n");
                     error = SYN_ERR;
                     return error;
                 }
-                printf("je {\n");
+                //printff("je {\n");
 
                 error = stat_list();
 
@@ -873,7 +875,7 @@ ERROR_CODE command()
              * cout << <term> <multi_cout>;
              */
             else if(!(strcmp(token.attribute, "cout"))){
-            	printf("som v cout\n");
+            	//printff("som v cout\n");
                 token = get_Token ();
 
                 switch (token.id) {
@@ -883,8 +885,8 @@ ERROR_CODE command()
                         return error;
                         break;
                     case sCout :
-                    	printf("dostal som <<\n");
-                    	printf("idem do term\n");
+                    	//printff("dostal som <<\n");
+                    	//printff("idem do term\n");
                         error = term();
 
                         if (error != OK_ERR) {
@@ -892,7 +894,7 @@ ERROR_CODE command()
                         }
                         break;
                     default :
-                    	printf("chyba v cout\n");
+                    	//printff("chyba v cout\n");
                         error = SYN_ERR;
                         return error;
                         break;
@@ -901,7 +903,7 @@ ERROR_CODE command()
                 if (error != OK_ERR) {
                     return error;
                 }
-                printf("idem do multi_cout\n");
+                //printff("idem do multi_cout\n");
                 error = multi_cout();
 
                 if (error != OK_ERR) {
@@ -910,7 +912,7 @@ ERROR_CODE command()
 
                 return OK_ERR;
             } else {
-            	printf("idem do assign\n");
+            	//printff("idem do assign\n");
                 error = assign();
 
                 if (error != OK_ERR) {
@@ -936,14 +938,12 @@ ERROR_CODE command()
 
 ERROR_CODE funkcia_priradenie()
 {
-	printf("som vo funkcia_priradenie\n");
+	//printff("som vo funkcia_priradenie\n");
 
     ERROR_CODE error;
     token = get_Token();
 
-    if(stackEmpty(&(symbol_table.actual_function->symbol_table_of_block)))
-        		printf("PRAZDNY zasobnik v stat na FUNKCIA PRIRADENIA\n");
-
+    
     switch (token.id) {
         /*pokial lexer vrati lex error*/
         case sError: 
@@ -952,8 +952,8 @@ ERROR_CODE funkcia_priradenie()
             break;
         /*ak dostanem ( idem do arguments*/
         case sLParenth :
-        	printf("je to (\n");
-        	printf("idem do arguments\n");
+        	//printff("je to (\n");
+        	//printff("idem do arguments\n");
             error = arguments();
 
             if (error != OK_ERR) {
@@ -970,12 +970,12 @@ ERROR_CODE funkcia_priradenie()
                     break;
                 // dostal som ) 
                 case sRParenth :
-                	printf("dostal som )\n");
+                	//printff("dostal som )\n");
                     error = OK_ERR;
                     return error;
                     break;
                 default :
-                	printf("chyba v hodnota_priradenia\n");
+                	//printff("chyba v hodnota_priradenia\n");
                     error = SYN_ERR;
                     return error;
                     break;
@@ -983,7 +983,7 @@ ERROR_CODE funkcia_priradenie()
             break;
         /*ak som dostal = tak idem do deklaracia*/
         case sAssign :
-        	printf("idem do declaration\n");
+        	//printff("idem do declaration\n");
             error = declaration();
 
             if (error != OK_ERR) {
@@ -992,7 +992,7 @@ ERROR_CODE funkcia_priradenie()
 
             break;
         default :
-        	printf("chyba v hodnota_priradenia\n");
+        	//printff("chyba v hodnota_priradenia\n");
             error = SYN_ERR;
             return error;
             break;
@@ -1013,7 +1013,7 @@ ERROR_CODE funkcia_priradenie()
 
 ERROR_CODE arguments()
 {
-	printf("som v arguments\n");
+	//printff("som v arguments\n");
     ERROR_CODE error;
     token = get_Token();
 
@@ -1024,8 +1024,8 @@ ERROR_CODE arguments()
             return error;
             break;
         case sIdent :
-        	printf("dostal som ID\n");
-        	printf("idem do multi_arguments\n");
+        	//printff("dostal som ID\n");
+        	//printff("idem do multi_arguments\n");
             error = multi_arguments();
 
             if (error != OK_ERR) {
@@ -1033,7 +1033,7 @@ ERROR_CODE arguments()
             }
             break;
         default :
-        	printf("chyba v arguments\n");
+        	//printff("chyba v arguments\n");
             error = SYN_ERR;
             return error;
             break;
@@ -1054,7 +1054,7 @@ ERROR_CODE arguments()
 
 ERROR_CODE multi_arguments()
 {
-	printf("som v multi_arguments\n");
+	//printff("som v multi_arguments\n");
     ERROR_CODE error;
     token = get_Token();
 
@@ -1066,7 +1066,7 @@ ERROR_CODE multi_arguments()
             break;
         // ak som dostal ciarku
         case sComma :
-        	printf("dostal som ,\n");
+        	//printff("dostal som ,\n");
             token = get_Token();
 
             switch (token.id) {
@@ -1076,11 +1076,11 @@ ERROR_CODE multi_arguments()
                     return error;
                     break;
                 case sIdent :
-                	printf("dostal som ID\n");
+                	//printff("dostal som ID\n");
                     error = OK_ERR;
                     break;
                  default :
-                 	printf("dostal som chybu\n");
+                 	//printff("dostal som chybu\n");
                     error = SYN_ERR;
                     return error;
                     break;
@@ -1089,7 +1089,7 @@ ERROR_CODE multi_arguments()
             break;
         // ak som dostal )
         case sRParenth :
-        	printf("dostal som )\n");
+        	//printff("dostal som )\n");
             error = OK_ERR;
             return error;
             break;
@@ -1098,7 +1098,7 @@ ERROR_CODE multi_arguments()
             return error;
             break;
     }
-    printf("idem do multi multi_arguments\n");
+    //printff("idem do multi multi_arguments\n");
     error = multi_arguments();
 
     if (error != OK_ERR) {
@@ -1116,7 +1116,7 @@ ERROR_CODE multi_arguments()
 
 ERROR_CODE multi_cin()
 {
-	printf("som v multi_cin\n");
+	//printff("som v multi_cin\n");
     ERROR_CODE error;
     token = get_Token ();
 
@@ -1127,11 +1127,11 @@ ERROR_CODE multi_cin()
             return error;
             break;
         case sSemicolon :
-        	printf("dostal som ;\n");
+        	//printff("dostal som ;\n");
             error = OK_ERR;
             return error;
         case sCin :
-        	printf("dostal som >>\n");
+        	//printff("dostal som >>\n");
             token = get_Token ();
 
             switch (token.id) {
@@ -1141,7 +1141,7 @@ ERROR_CODE multi_cin()
                     return error;
                     break;
                 case sIdent :
-                	printf("dostal som ID\n");
+                	//printff("dostal som ID\n");
                     error = OK_ERR;
                     break;
                 default :
@@ -1164,7 +1164,7 @@ ERROR_CODE multi_cin()
     if (error != OK_ERR) {
         return error;
     }
-    printf("idem do multi_cin\n");
+    //printff("idem do multi_cin\n");
     error = multi_cin();
 
     if (error != OK_ERR) {
@@ -1183,7 +1183,7 @@ ERROR_CODE multi_cin()
 
 ERROR_CODE multi_cout()
 {
-	printf("som v multi_cout\n");
+	//printff("som v multi_cout\n");
     ERROR_CODE error;
     token = get_Token ();
 
@@ -1194,11 +1194,11 @@ ERROR_CODE multi_cout()
             return error;
             break;
         case sSemicolon :
-        	printf("dostal som ;\n");
+        	//printff("dostal som ;\n");
             error = OK_ERR;
             return error;
         case sCout :
-        	printf("dostal som <<\n");
+        	//printff("dostal som <<\n");
             error = term();
 
             if (error != OK_ERR) {
@@ -1206,7 +1206,7 @@ ERROR_CODE multi_cout()
             }
             break;
         default :
-        	printf("dostal som chybu\n");
+        	//printff("dostal som chybu\n");
             error = SYN_ERR;
             return error;
             break;
@@ -1215,7 +1215,7 @@ ERROR_CODE multi_cout()
     if (error != OK_ERR) {
         return error;
     }
-    printf("idem do multi_cout\n");
+    //printff("idem do multi_cout\n");
     error = multi_cout();
 
     if (error != OK_ERR) {
@@ -1233,17 +1233,16 @@ ERROR_CODE multi_cout()
 
 ERROR_CODE assign()
 {
-	printf("som v assign\n");
+	//printff("som v assign\n");
     ERROR_CODE error;
 
-    if(stackEmpty(&(symbol_table.actual_function->symbol_table_of_block)))
-        	printf("PRAZDNY zasobnik v assign \n");
+    
 
     error = typ();
-    printf("%s\n", token.attribute );
+    //printff("%s\n", token.attribute );
     if (error == OK_ERR) {
 
-    	printf("idem do inicialization\n");
+    	//printff("idem do inicialization\n");
         error = inicialization();
 
         if (error != OK_ERR) {
@@ -1251,7 +1250,7 @@ ERROR_CODE assign()
         } 
     }
     else {
-    	printf("idem do fun_auto\n");
+    	//printff("idem do fun_auto\n");
         error = fun_auto();
 
         if (error != OK_ERR) {
@@ -1274,18 +1273,17 @@ ERROR_CODE assign()
 
 ERROR_CODE declaration()
 {
-	printf("som v declaration\n");
+	//printff("som v declaration\n");
     ERROR_CODE error;
 
-    if(stackEmpty(&(symbol_table.actual_function->symbol_table_of_block)))
-        		printf("PRAZDNY zasobnik v stat na DECLARATION\n");
+   
 
     if(token.id != sAssign) {
-    	printf("nedostal som =\n");
+    	//printff("nedostal som =\n");
         error = SYN_ERR;
     }
-    printf("dostal som =\n");
-    printf("idem do hodnota_priradenia\n");
+    //printff("dostal som =\n");
+    //printff("idem do hodnota_priradenia\n");
     error = hodnota_priradenia();
 
     if (error != OK_ERR) {
@@ -1303,9 +1301,8 @@ ERROR_CODE declaration()
 
 ERROR_CODE hodnota_priradenia()
 {	
-	printf("hodnota_priradenia\n");
-	if(stackEmpty(&(symbol_table.actual_function->symbol_table_of_block)))
-        		printf("PRAZDNY zasobnik v stat na ;\n");
+	//printff("hodnota_priradenia\n");
+	
     ERROR_CODE error;
     token = get_Token();
     // ak dostanem lexiklanu chybu LEX_ERR
@@ -1322,7 +1319,7 @@ ERROR_CODE hodnota_priradenia()
         	function_for_searching = searchFunction(&symbol_table,token.attribute);
 
 			if (function_for_searching == NULL) {
-        		printf("volam expression\n");
+        		//printff("volam expression\n");
         		error = expression(TAKEN_FIRST_TOKEN,type_for_expression); // expression opravit este
                 token = token_expression;
 
@@ -1349,7 +1346,7 @@ ERROR_CODE hodnota_priradenia()
 			        return error;
 			    }
 			    token = get_Token();
-			    printf("hodnota priradenia token atribute %s\n",token.attribute );
+			    //printff("hodnota priradenia token atribute %s\n",token.attribute );
 			break;
         	}
         default :
@@ -1374,7 +1371,7 @@ return OK_ERR;
 
 ERROR_CODE term()
 {
-	printf("som v term\n");
+	//printff("som v term\n");
     ERROR_CODE error;
     token = get_Token ();
     // ak dostanem lexiklanu chybu LEX_ERR
@@ -1385,13 +1382,13 @@ ERROR_CODE term()
     } else if((token.id == sIdent) || (token.id == sInteger) || 
         (token.id == sDouble) || (token.id == sString) ) 
     {
-    	printf("dostal som ID alebo cislo alebo string\n");
+    	//printff("dostal som ID alebo cislo alebo string\n");
         error = OK_ERR;
         return error;
     }
     // inak ak dostanem nieco ine SYN_ERR
     else {
-    	printf("chyba v term\n");
+    	//printff("chyba v term\n");
         error = SYN_ERR;
         return error;
     }
@@ -1410,11 +1407,10 @@ ERROR_CODE term()
 
 ERROR_CODE fun_auto()
 {
-	printf("som vo fun_auto\n");
+	//printff("som vo fun_auto\n");
     ERROR_CODE error;
     
-    if(stackEmpty(&(symbol_table.actual_function->symbol_table_of_block)))
-        	printf("PRAZDNY zasobnik v fun auto \n");
+    
 
     if(!(strcmp(token.attribute, "auto"))) {
         token = get_Token();
@@ -1425,12 +1421,12 @@ ERROR_CODE fun_auto()
         }
 
         if(token.id != sIdent) {
-        	printf("dostal som ID\n");
+        	//printff("dostal som ID\n");
             error = SYN_ERR;
             return error;
         }
         error = insertFunctionVariableToStack(symbol_table.actual_function,token.attribute,AUTO);
-        printf("stale som v aute\n");
+        //printff("stale som v aute\n");
         /* premenna ukazuje na aktualne vlozenu polozku */
         Variable *premenna_auto = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
         if (error != OK_ERR) {
@@ -1445,11 +1441,11 @@ ERROR_CODE fun_auto()
         }
 
         if(token.id != sAssign) {
-        	printf("nedostal som =\n");
+        	//printff("nedostal som =\n");
             error = SYN_ERR;
             return error;
         }
-        printf("dostal som =\n");
+        //printff("dostal som =\n");
         error = expression(NOT_TAKEN_FIRST_TOKEN,AUTO); // expression opravit este
         
         if (error != OK_ERR) {
@@ -1473,7 +1469,7 @@ ERROR_CODE fun_auto()
             return error;
             break;
         case sSemicolon :
-        	printf("dostal som ;\n");
+        	//printff("dostal som ;\n");
             error = OK_ERR;
             return error;
             break;
@@ -1501,7 +1497,7 @@ ERROR_CODE fun_auto()
 
 ERROR_CODE inicialization()
 {
-	printf("som v inicialization\n");
+	//printff("som v inicialization\n");
     ERROR_CODE error;
 
     error = typ();
@@ -1520,7 +1516,7 @@ ERROR_CODE inicialization()
     }
 
     if(token.id != sIdent) {
-    	printf("dostal som ID\n");
+    	//printff("dostal som ID\n");
         error = SYN_ERR;
         return error;
     }
@@ -1531,7 +1527,7 @@ ERROR_CODE inicialization()
     if (error != OK_ERR) {
         return error;
     }
-    printf("idem do declaration_orc\n");
+    //printff("idem do declaration_orc\n");
     error = declaration_or();
 
     if (error != OK_ERR) {
@@ -1549,7 +1545,7 @@ ERROR_CODE inicialization()
 
 ERROR_CODE declaration_or()
 {
-	printf("som v declaration_or\n");
+	//printff("som v declaration_or\n");
     ERROR_CODE error;
     token = get_Token();
 
@@ -1559,12 +1555,12 @@ ERROR_CODE declaration_or()
     }
 
     if (token.id == sSemicolon) {
-    	printf("dostal som ;\n");
+    	//printff("dostal som ;\n");
         error = OK_ERR;
         return error;
     }
     else {
-    	printf("idem do declaration\n");
+    	//printff("idem do declaration\n");
         error = declaration();
 
         if (error != OK_ERR) {
@@ -1586,11 +1582,11 @@ ERROR_CODE declaration_or()
 
 ERROR_CODE for_definition()
 {
-	printf("som v for_definition\n");
+	//printff("som v for_definition\n");
     ERROR_CODE error;
 
     if(!(strcmp(token.attribute, "auto"))){
-    	printf("idem do fun_auto\n");
+    	//printff("idem do fun_auto\n");
         error = fun_auto();
 
         if (error != OK_ERR) {
@@ -1598,7 +1594,7 @@ ERROR_CODE for_definition()
         }
     }
     else {
-    	printf("idem do for_deklaration\n");
+    	//printff("idem do for_deklaration\n");
         error = for_deklaration();
 
         if (error != OK_ERR) {
@@ -1621,7 +1617,7 @@ ERROR_CODE for_definition()
 
 ERROR_CODE for_deklaration() 
 {
-	printf("som v for_deklaration\n");
+	//printff("som v for_deklaration\n");
     ERROR_CODE error;
     error = typ();
 
@@ -1634,11 +1630,11 @@ ERROR_CODE for_deklaration()
         }
 
         if(token.id != sIdent) {
-        	printf("nedostal som ID\n");
+        	//printff("nedostal som ID\n");
             error = SYN_ERR;
             return error;
         }
-        printf("dostal som ID\n");
+        //printff("dostal som ID\n");
         // vkladam do tabulky symbolov typ a id
         error = insertFunctionVariableToStack(symbol_table.actual_function,token.attribute,type_of_element_to_table_of_symbols);
 
@@ -1652,7 +1648,7 @@ ERROR_CODE for_deklaration()
             error = LEX_ERR;
             return error;
         }
-        printf("idem do foo\n");
+        //printff("idem do foo\n");
         error = foo();
 
         if (error != OK_ERR) {
@@ -1680,7 +1676,7 @@ ERROR_CODE for_deklaration()
 
 ERROR_CODE foo() 
 {
-	printf("som v foo\n");
+	//printff("som v foo\n");
     ERROR_CODE error;
 
     switch (token.id) {
@@ -1690,7 +1686,7 @@ ERROR_CODE foo()
             return error;
             break;
         case sSemicolon :
-        	printf("dostal som ;\n");
+        	//printff("dostal som ;\n");
             error = OK_ERR;
             return error;
             break;

@@ -5,7 +5,7 @@
 #include<stdlib.h>
 #include<string.h>
 
-#include "binTree.h"
+#include "bintree.h"
 #include "stack.h"
 #include "list.h"
 
@@ -16,6 +16,7 @@ typedef struct function_GTS {
 	void *pointer_to_instructions; /* ukazatel na instrukcnu pasku !! treba doplnit upravit ukazatel na co typicky ukazatel na dvojsmerne viazany zozname alebo jeho prvu polozku ... */
 	int defined; /* funkcia definovana ? */
 	int return_type; /* navratova hodnota funkcie */
+	int return_occured; /* kontrola ci funkcia obsahuje return */
 } Function_GTS;
 
 /* Struktura pre jednotlive premenne v TS */

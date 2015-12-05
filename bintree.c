@@ -1,4 +1,4 @@
-#include"binTree.h"
+#include"bintree.h"
 
 //int main()
 //{

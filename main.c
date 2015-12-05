@@ -37,7 +37,7 @@ int main(int argc, char **argv){
 	}
 	
 	error = prog();
-	printf(" koniec programu navratovi kod je %d\n",error );
+	//printf(" koniec programu navratovi kod je %d\n",error );
 
 	destroyGTS(&symbol_table);
 	fclose(file);

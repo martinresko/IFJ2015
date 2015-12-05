@@ -9,11 +9,11 @@ if (a < 0)
 } 
 else 
 {
-	double vysl = 0;
-	//vysl = factorial(a);
+	int vysl = 0;
+	vysl = factorial(a);
 	int neg = 0 - vysl;
 	cout << "Vysledek: " << vysl << " (zaporny: " << neg << ")\n";
 }
-return 0;
+//return 0;
 }
 

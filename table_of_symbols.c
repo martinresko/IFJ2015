@@ -1,5 +1,8 @@
 #include "table_of_symbols.h"
 
+#define TRUE 1
+#define FALSE 0
+
 //int main()
 //{
 //	Table_symbols tabulka;
@@ -105,7 +108,8 @@ ERROR_CODE insertFunction(Table_symbols *gts_table,char *function_name,int retur
 			InitList(&(func->params));
 			stackInit(&(func->symbol_table_of_block));
 			func->pointer_to_instructions=NULL;
-			func->defined=0; /* ZMENIT Z MAGIC NUMBER */ 
+			func->defined=FALSE;
+			func->return_occured=FALSE;
 			func->return_type=return_type; 
 			if( (treeInsert(&(gts_table->functions),function_name,func))==INTERN_ERR) /* do GTS stromu vlozim strukturu Function_GTS pod klucom meno danej funkcie */
 				return INTERN_ERR;
@@ -188,7 +192,7 @@ ERROR_CODE pushBlock(Function_GTS *function)
 			treeInit(zasobnik);
 			if((stackPush(&(function->symbol_table_of_block),zasobnik)==INTERN_ERR))
 					return INTERN_ERR;
-			printf("PUSHOL SOM OK\n");
+			//printf("PUSHOL SOM OK\n");
 			return OK_ERR;
 		}
 		else
@@ -205,13 +209,13 @@ void popBlock(Function_GTS *function)
 	{
 		if(stackEmpty(&(function->symbol_table_of_block)))
 		{
-			printf("chces popnut prazdny zasobnik \n");
+			//printf("chces popnut prazdny zasobnik \n");
 		}
 		else /* zasobnik prazdny nieje mozem popnut blok */
 		{
 			treeDestroy(stackTop(&(function->symbol_table_of_block)));
 			stackPop(&(function->symbol_table_of_block));
-			printf("POPOL SOM OK\n");
+			//printf("POPOL SOM OK\n");
 		}
 	}
 }

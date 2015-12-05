@@ -1,17 +1,22 @@
-#Subor:    Makefile
-
-PROJ=table_of_symbols
-FILES=list.c stack.c binTree.c table_of_symbols.c error.c expression.c garbage.c parser.c scaner.c main.c
-CFLAGS=-std=gnu99 -Wall -Wextra -Werror -pedantic -pthread
-CC=gcc
-RM=rm -f
-
-all : $(PROJ)
-
-$(PROJ) : $(FILES)
-		$(CC) $(CFLAGS) -o $@ $(FILES) -lm
-
-clean :
-	$(RM) *.o $(PROJ) 
+# Subor:    Makefile
 
 
+CC = gcc
+CFLAGS = -Wall -std=c99 -pedantic -W
+BIN = projekt
+RM=rm -f -v
+OBJECTS = main.o scaner.o parser.o list.o expression.o table_of_symbols.o stack.o bintree.o
+
+all: $(OBJECTS) error.h 
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(BIN)
+
+scaner.o: scaner.c scaner.h
+main.o: main.c
+parser.o: parser.c parser.h
+expression.o: expression.c expression.h
+list.o: list.c list.h
+table_of_symbols.o: table_of_symbols.c table_of_symbols.h
+stack.o: stack.c stack.h
+binTree.o: bintree.c bintree.h
+clean:
+	$(RM) *.o $(BIN)
