@@ -1,3 +1,16 @@
+/**
+ * Predmet: IFJ / IAL
+ * Subor:     table_of_symbols.c
+ *            Implementacia tabulky symbolov
+ * Projekt:   Implementace interpretu imperativního jazyka IFJ15
+ *            tým 21, varianta a/3/I
+ * Autori:    <xhlava42@stud.fit.vutbr.cz>, Dominik Hlaváč Ďurán
+ *            <xdurco00@stud.fit.vutbr.cz>, Marián Ďurčo
+ *            <xdomon00@stud.fit.vutbr.cz>, Dávid Domonkoš
+ *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
+ *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
+**/
+
 #include "table_of_symbols.h"
 
 #define TRUE 1
@@ -102,7 +115,7 @@ ERROR_CODE insertFunction(Table_symbols *gts_table,char *function_name,int retur
 {
 	if(gts_table!=NULL)
 	{
-		Function_GTS *func=malloc(sizeof(struct function_GTS));
+		Function_GTS *func=memmalloc(sizeof(struct function_GTS));
 		if(func!=NULL)
 		{
 			InitList(&(func->params));
@@ -114,6 +127,7 @@ ERROR_CODE insertFunction(Table_symbols *gts_table,char *function_name,int retur
 			if( (treeInsert(&(gts_table->functions),function_name,func))==INTERN_ERR) /* do GTS stromu vlozim strukturu Function_GTS pod klucom meno danej funkcie */
 				return INTERN_ERR;
 			gts_table->actual_function=func; /* ulozim si vlozenu funkciu do aktualnej */
+			printf("PRIDAL SOM FUNKCIU\n"); 
 			return OK_ERR;
 		}
 		else
@@ -134,6 +148,7 @@ Function_GTS *searchFunction(Table_symbols *gts_table, char *function_name)
 	{
 		Tree helpful_pointer=NULL;
 		helpful_pointer=treeSearch(&(gts_table->functions),function_name);
+		printf("HLADAM FUNKCIU\n"); 
 		return (helpful_pointer!=NULL)?(Function_GTS*)(helpful_pointer->data):NULL; /* ak som funkciu nasiel tak vratim ukazatel na Function_GTS strukturu ak som nenasiel tak vratim NULL */
 	}
 	return NULL;
@@ -148,12 +163,13 @@ ERROR_CODE insertFunctionParam(Function_GTS *function,char *variable_name,int va
 {
 	if(function!=NULL)
 	{
-		Variable *param=malloc(sizeof(struct variable));
+		Variable *param=memmalloc(sizeof(struct variable));
 		if(param!=NULL)
 		{
 			param->name=variable_name;
 			param->typ=variable_typ;
 			InsertLast(&(function->params),param);
+			printf("PRIDAVAM PARAMETER\n"); 
 			return OK_ERR;
 		}
 		else
@@ -174,6 +190,7 @@ Variable *searchFunctionParam(Function_GTS *function,char *variable_name)
 	{
 		Variable *helpful_pointer=NULL;
 		helpful_pointer=findInList(&(function->params),variable_name);
+		printf("HLADAM PARAMETER\n"); 
 		return (helpful_pointer!=NULL)?(Variable *)(helpful_pointer):NULL;
 	}
 	return NULL;
@@ -186,13 +203,13 @@ ERROR_CODE pushBlock(Function_GTS *function)
 {
 	 if(function!=NULL)
 	{
-		TreePointer *zasobnik=malloc(sizeof(TreePointer*));
+		TreePointer *zasobnik=memmalloc(sizeof(TreePointer*));
 		if(zasobnik!=NULL)
 		{
 			treeInit(zasobnik);
 			if((stackPush(&(function->symbol_table_of_block),zasobnik)==INTERN_ERR))
 					return INTERN_ERR;
-			//printf("PUSHOL SOM OK\n");
+			printf("PUSHOL SOM OK\n");
 			return OK_ERR;
 		}
 		else
@@ -209,13 +226,14 @@ void popBlock(Function_GTS *function)
 	{
 		if(stackEmpty(&(function->symbol_table_of_block)))
 		{
+			;
 			//printf("chces popnut prazdny zasobnik \n");
 		}
 		else /* zasobnik prazdny nieje mozem popnut blok */
 		{
 			treeDestroy(stackTop(&(function->symbol_table_of_block)));
 			stackPop(&(function->symbol_table_of_block));
-			//printf("POPOL SOM OK\n");
+			printf("POPOL SOM OK\n");
 		}
 	}
 }
@@ -229,13 +247,14 @@ ERROR_CODE insertFunctionVariableToStack(Function_GTS *function, char *variable_
 {
 	if(function!=NULL)
 	{
-		Variable *var=malloc(sizeof(struct variable));
+		Variable *var=memmalloc(sizeof(struct variable));
 		if(var!=NULL)
 		{
 			var->typ=variable_typ;
 			var->name=variable_name;
 			if((treeInsert(stackTop(&(function->symbol_table_of_block)),variable_name,var)==INTERN_ERR))
 					return INTERN_ERR;
+			printf("VKLADAM PREMENNU\n"); 
 			return OK_ERR;
 		}
 		else
@@ -252,9 +271,6 @@ Variable *searchFunctionVariableInStack(Function_GTS *function, char *variable_n
 {
 	if(function!=NULL)
 	{
-		//Tree helpful_pointer=NULL;
-		//helpful_pointer = treeSearch(stackTop(&(function->symbol_table_of_block)),variable_name);
-		//return (helpful_pointer!=NULL)?(Variable *)(helpful_pointer->data):NULL;
 		Variable *found_param = findInList(&(function->params),variable_name);
 		if(found_param!=NULL)
 			return found_param;/* ak som nasiel parameter */
@@ -268,6 +284,7 @@ Variable *searchFunctionVariableInStack(Function_GTS *function, char *variable_n
 			if(helpful_pointer!=NULL)
 			{
 				function->symbol_table_of_block.top_of_stack=store_top_stack; /* nastavim originaly vrchol */
+				printf("NASIEL SOM PREMENNU\n"); 
 				return (Variable *)(helpful_pointer->data); /* nasiel som */
 			}
 			else
@@ -276,6 +293,7 @@ Variable *searchFunctionVariableInStack(Function_GTS *function, char *variable_n
 			}
 		}
 		function->symbol_table_of_block.top_of_stack=store_top_stack; /* prenastavim vrchol zasobnika ak nenajdem */
+		printf("NENASIEL SOM PREMENNU\n"); 
 		return NULL;
 	}
 	return NULL;

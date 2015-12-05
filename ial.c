@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "error.c"
+#include "garbage.h"
 
 /**Prototypy funkcii**/
 int KMP_Find(char *string, char *pattern);
@@ -28,7 +29,7 @@ char* concatenation(char *string1, char *string2);
 int *KMP_FAIL_INDEX(char *pattern, int pattern_length) 
 {
 	int k,r;
-	int *fail = malloc(sizeof(int) * pattern_length);
+	int *fail = memmalloc(sizeof(int) * pattern_length);
 
 	if (fail == NULL) {
 		call_error(INTERN_ERR, FAILED_MALLOC);
@@ -71,7 +72,7 @@ int KMP_Find(char *string, char *pattern)
     	}
     }
 
-    free(fail);
+    memfree(fail);
     fail = NULL;
 	
     if (pindex > pattern_length) {
@@ -94,7 +95,7 @@ int length_of_string(char * string)
 
 char* concatenation(char *string1, char *string2)
 {
-	char *result = malloc(strlen(string1) + strlen(string2) + 1);
+	char *result = memmalloc(strlen(string1) + strlen(string2) + 1);
 
 	if (result == NULL) {
 		call_error(INTERN_ERR, FAILED_MALLOC);
@@ -114,14 +115,14 @@ char* substring(char *string, int i, int n)
 	
 	int string_len = strlen(string); // dlzka retazca
 
-	char *result = malloc(strlen(string));
+	char *result = memmalloc(strlen(string));
 	if (result == NULL) {
 		call_error(INTERN_ERR, FAILED_MALLOC);
 		return "";
 	}
 
 	if ((i >= string_len) || ((i + n) >= string_len) || (n >= string_len) || (i < 0)){
-		free(result); 
+		memfree(result); 
 		call_error(SEM_TYPE_ERR,WRONG_SCALE);
 		return "";
 		}
@@ -137,7 +138,7 @@ char* ShellSort(char *string)
 {
 int i,j,step;
 int string_length = strlen(string); // dlzka retazca
-int *result = malloc(sizeof(char) * string_length);
+int *result = memmalloc(sizeof(char) * string_length);
 step = string_length / 2;
 
 while (step > 0) {
@@ -253,7 +254,7 @@ int main()
 	char* tt = substring("hatatitla",2,5); //neriesi free...
 	printf("%s\n",tt );
 	if (tt != "")
-		free(tt);
+		memfree(tt);
 
 	char s[] = "987654321";
 	shell(s,strlen(s));
@@ -263,7 +264,7 @@ int main()
 	//printf("%s\n",shellsort("987654321"));
 	char * str = concatenation("ahoj", "jano");
 	printf("%s\n",str );
-	free (str);
+	memfree (str);
 
 	printf("%d\n", length_of_string("xhos"));
 	printf("%d\n", KMP_Find("cabcabcab", "ab"));

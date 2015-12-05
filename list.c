@@ -1,3 +1,16 @@
+/**
+ * Predmet: IFJ / IAL
+ * Subor:     list.c
+ *            Implementacia dvojsmerne viazaneho zoznamu
+ * Projekt:   Implementace interpretu imperativního jazyka IFJ15
+ *            tým 21, varianta a/3/I
+ * Autori:    <xhlava42@stud.fit.vutbr.cz>, Dominik Hlaváč Ďurán
+ *            <xdurco00@stud.fit.vutbr.cz>, Marián Ďurčo
+ *            <xdomon00@stud.fit.vutbr.cz>, Dávid Domonkoš
+ *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
+ *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
+ */
+
 #include"list.h"
 
 /* inicializuje list */
@@ -19,10 +32,10 @@ int EmptyList(ListPointer *Lis)
 /* data znak ktory prvkok obsahuje */
 List InsertLast(ListPointer *Lis,void *data)
 {
-	List push_element = malloc(sizeof(struct list)); /* vytvorenie mem pre novy prvok */
+	List push_element = memmalloc(sizeof(struct list)); /* vytvorenie mem pre novy prvok */
 	if (push_element==NULL)
 		return NULL;
-	else /* malloc sa podaril */
+	else /* memmalloc sa podaril */
 	{
 		/* inicializacia vkladaneho prvku */
 		push_element->data=data;
@@ -52,16 +65,16 @@ void DeleteLast(ListPointer *Lis)
 	{
 		if(Lis->last_list_element==Lis->first_list_element) /* ak list ma iba jeden element */
 		{
-			free(Lis->last_list_element->data);
-			free(Lis->last_list_element);
+			memfree(Lis->last_list_element->data);
+			memfree(Lis->last_list_element);
 			Lis->last_list_element=NULL;
 			Lis->first_list_element=NULL;
 		}
 		else
 		{
 			Lis->last_list_element=Lis->last_list_element->prev; /* nastav vrchol listu na predposledny prvok */
-			free(Lis->last_list_element->next->data);
-			free(Lis->last_list_element->next);
+			memfree(Lis->last_list_element->next->data);
+			memfree(Lis->last_list_element->next);
 			Lis->last_list_element->next=NULL;
 		}
 	}
@@ -97,8 +110,8 @@ void DestroyList(ListPointer *Lis)
 	while(Lis->first_list_element!=NULL)
 	{
 		helpful_pointer = Lis->first_list_element->next;
-		free(Lis->first_list_element->data);
-		free(Lis->first_list_element);
+		memfree(Lis->first_list_element->data);
+		memfree(Lis->first_list_element);
 		Lis->first_list_element=helpful_pointer;
 	}
 	Lis->first_list_element=NULL;

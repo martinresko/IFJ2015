@@ -45,12 +45,12 @@ FILE *file;
 */
  static void expand_token(int c, int *i){
  	if((*i) > 0){
- 		if((token.attribute = (char *) realloc(token.attribute, (*i) + 2))){
+ 		if((token.attribute = (char *) memrealloc(token.attribute, (*i) + 2))){
  			token.attribute[(*i) + 1] = '\0';
  			token.attribute[(*i)] = c;
  			(*i)++;
  		} else{
- 			//free(token.attribute);
+ 			//memfree(token.attribute);
  			scaner_error = INTERN_ERR;
  		}
  	} else{
@@ -132,10 +132,10 @@ int j;
 * Funkcia inicializuje retazec pre token.
 */
  static void init_string(int *i){
- 	//free(PomUk);
- 	token.attribute = (char *) malloc((*i)+2);
+ 	//memfree(PomUk);
+ 	token.attribute = (char *) memmalloc((*i)+2);
  	if(token.attribute == NULL){
- 		//free(token.attribute);
+ 		//memfree(token.attribute);
  		scaner_error = INTERN_ERR;
  	} else{
  		token.attribute[(*i)] = '\0';

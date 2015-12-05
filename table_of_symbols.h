@@ -1,3 +1,16 @@
+/**
+ * Predmet: IFJ / IAL
+ * Subor:     table_of_symbols.h
+ *            Hlavickovy subor tabulky symbolov
+ * Projekt:   Implementace interpretu imperativního jazyka IFJ15
+ *            tým 21, varianta a/3/I
+ * Autori:    <xhlava42@stud.fit.vutbr.cz>, Dominik Hlaváč Ďurán
+ *            <xdurco00@stud.fit.vutbr.cz>, Marián Ďurčo
+ *            <xdomon00@stud.fit.vutbr.cz>, Dávid Domonkoš
+ *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
+ *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
+**/
+
 #ifndef TABLEOFSYMBOLS_INCLUDED
 #define TABLEOFSYMBOLS_INCLUDED
 
@@ -8,6 +21,7 @@
 #include "bintree.h"
 #include "stack.h"
 #include "list.h"
+#include "garbage.h"
 
 /* Struktura funkcie v globalnej tabulke symbolov, len pre funkcie */
 typedef struct function_GTS {

@@ -17,7 +17,7 @@
 #include "parser.h"
 #include "stack.h"
 #include "list.h"
-#include "binTree.h"
+#include "bintree.h"
 
 /* definujeme si premennu na uchovanie chyby */
 ERROR_CODE run_error;

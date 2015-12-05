@@ -1,7 +1,7 @@
 /**
  * Predmet: IFJ / IAL
- * Subor:     ial.c
- *            Implementacia vstavaných funkcií
+ * Subor:     main.c
+ *            Main funkcia programu
  * Projekt:   Implementace interpretu imperativního jazyka IFJ15
  *            tým 21, varianta a/3/I
  * Autori:    <xhlava42@stud.fit.vutbr.cz>, Dominik Hlaváč Ďurán
@@ -17,6 +17,7 @@
  #include "scaner.h"
  #include "parser.h"
  #include "table_of_symbols.h"
+ #include "garbage.h"
 
  #define OK_ERR 0
 
@@ -25,6 +26,8 @@ FILE *file;
 Table_symbols symbol_table;
 
 int main(int argc, char **argv){
+
+	meminitialization();/* init garbage */
 
 	if(argc != 2){
 		fprintf(stderr, "Bol zadany nespravny pocet argumentov.\n");
@@ -37,10 +40,11 @@ int main(int argc, char **argv){
 	}
 	
 	error = prog();
-	//printf(" koniec programu navratovi kod je %d\n",error );
+	printf(" koniec programu navratovi kod je %d\n",error );
 
 	destroyGTS(&symbol_table);
 	fclose(file);
-
+	
+	memallfree(); /* volanie garbage aby upratal */
 return error;
 }

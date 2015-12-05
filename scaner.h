@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "error.h"
+#include "garbage.h"
 /* States of the FSM */
 typedef enum{
 	sStart,				// 00 - Start

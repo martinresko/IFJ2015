@@ -1,3 +1,16 @@
+/**
+ * Predmet: IFJ / IAL
+ * Subor:     list.h
+ *            Hlavickovy subor dvojsmerne viazaneho zoznamu
+ * Projekt:   Implementace interpretu imperativního jazyka IFJ15
+ *            tým 21, varianta a/3/I
+ * Autori:    <xhlava42@stud.fit.vutbr.cz>, Dominik Hlaváč Ďurán
+ *            <xdurco00@stud.fit.vutbr.cz>, Marián Ďurčo
+ *            <xdomon00@stud.fit.vutbr.cz>, Dávid Domonkoš
+ *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
+ *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
+ */
+
 #ifndef LIST_INCLUDED
 #define LIST_INCLUDED
 
@@ -5,6 +18,7 @@
 #include<stdlib.h>
 #include<stdarg.h>
 #include<stdbool.h>
+#include"garbage.h"
 
 #define TRUE 1
 #define FALSE 0

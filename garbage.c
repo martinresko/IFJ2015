@@ -1,6 +1,6 @@
 /**
  * Predmet: IFJ / IAL
- * Subor:     ial.c
+ * Subor:     garbage.c
  *            Implementacia spravy pamete
  * Projekt:   Implementace interpretu imperativního jazyka IFJ15
  *            tým 21, varianta a/3/I
@@ -12,7 +12,6 @@
  */
 
 #include "garbage.h"
-
 
 gmemcount memtable;
 

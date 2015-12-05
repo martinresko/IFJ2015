@@ -1,7 +1,7 @@
 /**
  * Predmet: IFJ / IAL
- * Subor:     ial.c
- *            Implementacia spravy pamete
+ * Subor:     garbare.h
+ *            Hlavickovy subor spravy pamete
  * Projekt:   Implementace interpretu imperativního jazyka IFJ15
  *            tým 21, varianta a/3/I
  * Autori:    <xhlava42@stud.fit.vutbr.cz>, Dominik Hlaváč Ďurán
@@ -10,6 +10,7 @@
  *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */
+ 
 #ifndef GARBAGE_INCLUDED
 #define GARBAGE_INCLUDED
 
@@ -17,6 +18,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <assert.h>
+
 #include "strings.h"
 #include "error.h"
  
@@ -57,14 +59,15 @@ typedef struct memory_counters{
 extern gmemcount memtable;
 
 //prototypy
-void meminitialization();
-void* memmalloc(size_t size);
-void* memrealloc(void* ptr, size_t size);
-void* memcalloc(size_t num, size_t size);
-void* memfopen(const char* filename, const char* mode);
-void memfree(void* ptr);
-void memfclose(void* ptr);
-void memallfree();
+void meminitialization(); /* inicializacia */
+void* memmalloc(size_t size); /* malloc () */
+void* memrealloc(void* ptr, size_t size); /* realloc() */
+void* memcalloc(size_t num, size_t size); /* calloc() */
+void* memfopen(const char* filename, const char* mode); /* otvori subor */
+void memfree(void* ptr); /* nahrada za funkciu free() */
+void memfclose(void* ptr); /* zavrie subor */
+void memallfree(); /* vsetko uvolni */
+
 gmemtable* memorytablecreate();
 gmemtableitem* memtitemcreate(intptr_t key);
 void memtdestroy(gmemtable* T);
@@ -73,6 +76,5 @@ void memtableinicialization(gmemtable* T, size_t size);
 void memtabledispose(gmemtable* T);
 gmemtableitem* memfindout(gmemtable* T, intptr_t key);
 size_t hash(intptr_t key, size_t size);
-
 
 #endif

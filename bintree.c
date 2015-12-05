@@ -1,3 +1,16 @@
+/**
+ * Predmet: IFJ / IAL
+ * Subor:     bintree.c
+ *            Implementacia binarneho stromu
+ * Projekt:   Implementace interpretu imperativního jazyka IFJ15
+ *            tým 21, varianta a/3/I
+ * Autori:    <xhlava42@stud.fit.vutbr.cz>, Dominik Hlaváč Ďurán
+ *            <xdurco00@stud.fit.vutbr.cz>, Marián Ďurčo
+ *            <xdomon00@stud.fit.vutbr.cz>, Dávid Domonkoš
+ *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
+ *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
+**/
+
 #include"bintree.h"
 
 //int main()
@@ -49,8 +62,8 @@ void treeNodesDestroy(Tree node)
 		treeNodesDestroy(node->left);
 	if(node->right!=NULL)
 		treeNodesDestroy(node->right);
-	free(node->data); // POZOR znamena ze mozem do data ukladat len pointer na alokovanu pamat ak by som do dat dal pointer na int napriklad tak hodi chybu lebo nema byt aka pamat uvolnena */
-	free(node);
+	memfree(node->data); // POZOR znamena ze mozem do data ukladat len pointer na alokovanu pamat ak by som do dat dal pointer na int napriklad tak hodi chybu lebo nema byt aka pamat uvolnena */
+	memfree(node);
 }
 /*funkcia inicializuje strom
  * Tre - ukazatel na strom */
@@ -98,7 +111,7 @@ ERROR_CODE treeInsert(TreePointer *Tre, char *key,void *data)
 			{
 				if(helpful_pointer->right==NULL) /* je to list */
 				{
-					helpful_pointer->right=malloc(sizeof(struct tree));
+					helpful_pointer->right=memmalloc(sizeof(struct tree));
 					if(helpful_pointer->right!=NULL)
 					{
 						helpful_pointer->right->left=NULL;
@@ -116,7 +129,7 @@ ERROR_CODE treeInsert(TreePointer *Tre, char *key,void *data)
 			{
 				if(helpful_pointer->left==NULL) /* je to list */
 				{
-					helpful_pointer->left=malloc(sizeof(struct tree));
+					helpful_pointer->left=memmalloc(sizeof(struct tree));
 					if(helpful_pointer->left!=NULL)
 					{
 						helpful_pointer->left->left=NULL;
@@ -139,7 +152,7 @@ ERROR_CODE treeInsert(TreePointer *Tre, char *key,void *data)
 	}
 	else /* strom je prazdny tj. vkladam koren */
 	{
-		Tre->root=malloc(sizeof(struct tree));	
+		Tre->root=memmalloc(sizeof(struct tree));	
 		if(Tre->root!=NULL)
 		{
 			Tre->root->left=NULL;
