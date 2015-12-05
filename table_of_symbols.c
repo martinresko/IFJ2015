@@ -80,16 +80,16 @@
 //	destroyGTS(&tabulka); 
 //	return 0;
 //}
-//
-///* inicializuje globalnu tabulku symbolov
-// * gts_table - ukazatel na strukturu GTS */
-//void globalTableOfSymbolsInit(Table_symbols *gts_table)
-//{
-//	if(gts_table!=NULL)
-//		treeInit(&(gts_table->functions));
-//		gts_table->actual_function=NULL;
-//}
-//
+
+/* inicializuje globalnu tabulku symbolov
+ * gts_table - ukazatel na strukturu GTS */
+void globalTableOfSymbolsInit(Table_symbols *gts_table)
+{
+	if(gts_table!=NULL)
+		treeInit(&(gts_table->functions));
+		gts_table->actual_function=NULL;
+}
+
 /* vlozi do GTS funkciu 
  * return - intern ak nedostanem pamat alebo dobry ukazatel inak OK
  * gts_table - ukazatal na GTS strom
