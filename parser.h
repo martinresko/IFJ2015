@@ -27,11 +27,11 @@ ERROR_CODE body();
 ERROR_CODE function();
 ERROR_CODE typ();
 ERROR_CODE prototype_of_definition();
-ERROR_CODE params();
-ERROR_CODE multi_params();
+ERROR_CODE params(Function_GTS *);
+ERROR_CODE multi_params(Function_GTS *);
 ERROR_CODE stat_list();
 ERROR_CODE command();
-ERROR_CODE funkcia_priradenie();
+ERROR_CODE funkcia_priradenie(char *);
 ERROR_CODE assign();
 ERROR_CODE arguments();
 ERROR_CODE declaration();
@@ -46,5 +46,6 @@ ERROR_CODE declaration_or();
 ERROR_CODE for_definition();
 ERROR_CODE for_deklaration();
 ERROR_CODE foo();
+ERROR_CODE bulid_in_function();
 
 #endif

@@ -18,6 +18,7 @@
 #define NOT_TAKEN_FIRST_TOKEN 0
 #define TRUE 1
 #define FALSE 0 
+#define CONTINUE 2
 
 tToken token; // aktualny token
 extern tToken token_expression;
@@ -56,6 +57,13 @@ ERROR_CODE prog()
             error = body();
             break;
     }
+
+    if (error != OK_ERR) {
+        return error;
+    }
+    // osetrenie ci main bol deklarovany a ci su vsetky funkcie definovane
+    error =  finalFunctionCheckout(&symbol_table);
+
     printf("Program vystup %d\n", error );
     if (error != OK_ERR) {
         return error;
@@ -139,8 +147,12 @@ ERROR_CODE function()
         error = SYN_ERR;
         return error;
     }
-    // vlozim do tabulky symbolov 
-    error = insertFunction(&symbol_table,token.attribute,type_of_element_to_table_of_symbols);
+    Function_GTS *function_for_searching = searchFunction(&symbol_table,token.attribute);
+
+    if (function_for_searching == NULL) {
+        // vlozim do tabulky symbolov 
+        error = insertFunction(&symbol_table,token.attribute,type_of_element_to_table_of_symbols);
+    }
 
     if (error != OK_ERR){
         return error;
@@ -159,7 +171,7 @@ ERROR_CODE function()
         return error;
     }
     printf("je to (\n");
-    error = params();
+    error = params(function_for_searching);
 
     if (error != OK_ERR){
         return error;
@@ -175,7 +187,7 @@ ERROR_CODE function()
 }
 
 /**
- * @info:<typ> -> int / string / double
+ * @info:<typ> -> int / string / double 
  */
 
 ERROR_CODE typ()
@@ -223,7 +235,7 @@ ERROR_CODE typ()
  * @info:<params> -> <typ> id <multi_params> / empty
  */
 
-ERROR_CODE params()
+ERROR_CODE params(Function_GTS * previous_function_id)
 {
     printf("som v prams\n");
     ERROR_CODE error;
@@ -263,13 +275,31 @@ ERROR_CODE params()
             error = SYN_ERR;
             return error;
         }
-        //vkladanie prametrov do tabulky symbolov
-        error = insertFunctionParam(symbol_table.actual_function,token.attribute,type_of_element_to_table_of_symbols);
 
-        if (error != OK_ERR) {
-            return error;
+        if (previous_function_id == NULL) {
+            //vkladanie prametrov do tabulky symbolov
+            error = insertFunctionParam(symbol_table.actual_function,token.attribute,type_of_element_to_table_of_symbols);
+
+            if (error != OK_ERR) {
+                return error;
+            }
         }
-        error = multi_params();
+        else {
+            // ziskam prvy parameter funkcie
+            Variable *The_First = getFunctionParam(symbol_table.actual_function,TRUE);
+            if (The_First != NULL) {
+                if ((The_First->typ != (int)(type_of_element_to_table_of_symbols)) || (strcmp(The_First->name,token.attribute))) {
+                    error = SEM_TYPE_ERR;
+                    return error;
+                }
+            }
+            else {
+                error = SEM_TYPE_ERR;
+                return error;
+            }
+        }
+
+        error = multi_params(previous_function_id);
     }
 
     if (error != OK_ERR) {
@@ -283,7 +313,7 @@ ERROR_CODE params()
  * @info:<multi_params> -> , <typ> id <multi_params> / empty
  */
 
-ERROR_CODE multi_params()
+ERROR_CODE multi_params(Function_GTS * previous_function_id)
 {
     printf("som v multi params\n");
     token = get_Token();
@@ -297,6 +327,7 @@ ERROR_CODE multi_params()
             break;
         /*pokila dostanem ")" je len jedne parameter a vraciam sa*/
         case sRParenth :
+            getFunctionParam(symbol_table.actual_function,FALSE);
             printf("je to )\n");
             error = OK_ERR;
             return error;
@@ -328,14 +359,32 @@ ERROR_CODE multi_params()
                 error = SYN_ERR;
                 return error;
             }
-            //vkladanie prametrov do tabulky symbolov
-            error = insertFunctionParam(symbol_table.actual_function,token.attribute,type_of_element_to_table_of_symbols);
-        
-            if (error != OK_ERR) {
-                return error;
+
+            if (previous_function_id == NULL) {
+                //vkladanie prametrov do tabulky symbolov
+                error = insertFunctionParam(symbol_table.actual_function,token.attribute,type_of_element_to_table_of_symbols);
+
+                if (error != OK_ERR) {
+                    return error;
+                }
             }
+            else {
+                // kontrolujem dalsi parameter funkcie
+                Variable *The_First = getFunctionParam(symbol_table.actual_function,CONTINUE);
+                if (The_First != NULL) {
+                    if ((The_First->typ != (int)(type_of_element_to_table_of_symbols)) || (strcmp(The_First->name,token.attribute))) {
+                        error = SEM_TYPE_ERR;
+                        return error;
+                    }
+                }
+                else {
+                    error = SEM_TYPE_ERR;
+                    return error;
+                }
+            }
+            
             printf("je to ID\n");
-            error = multi_params();
+            error = multi_params(previous_function_id);
 
             if (error != OK_ERR) {
                 return error;
@@ -515,10 +564,11 @@ ERROR_CODE command()
             printf("idem do funkcia_priradenie\n");
             ;
             Variable *premenna_na_odvodenie_typu = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
-            if(premenna_na_odvodenie_typu!=NULL){
+
+            if(premenna_na_odvodenie_typu != NULL){
             	type_for_expression = premenna_na_odvodenie_typu->typ;
             }
-            error = funkcia_priradenie();
+            error = funkcia_priradenie(token.attribute);
 
             if (error != OK_ERR) {
                 return error;
@@ -542,6 +592,34 @@ ERROR_CODE command()
                     return error;
                     break;
             }
+            break;
+        case sResWord :
+            error = bulid_in_function();
+
+            if (error != OK_ERR) {
+                return error;
+            }
+            token = get_Token();
+
+            switch (token.id) {
+                /*pokial lexer vrati lex error*/
+                case sError : 
+                    error = LEX_ERR;
+                    return error;
+                    break;
+                /*pokial dostaanem ";"*/
+                case sSemicolon :
+                    printf("dostal som ;\n");
+                    error = OK_ERR;
+                    return error;
+                    break;
+                default : 
+                    printf("chyba v command v ID\n");               
+                    error = SYN_ERR;
+                    return error;
+                    break;
+            }
+
             break;
         case sKeyWord : 
             /*
@@ -936,7 +1014,7 @@ ERROR_CODE command()
  *  <deklaracia>
  */
 
-ERROR_CODE funkcia_priradenie()
+ERROR_CODE funkcia_priradenie(char *previous_token_atributte)
 {
 	printf("som vo funkcia_priradenie\n");
 
@@ -952,6 +1030,10 @@ ERROR_CODE funkcia_priradenie()
             break;
         /*ak dostanem ( idem do arguments*/
         case sLParenth :
+            if (searchFunction(&symbol_table,previous_token_atributte) == NULL) {
+                error = SEM_UNDEF_ERR;
+                return error;
+            }
         	printf("je to (\n");
         	printf("idem do arguments\n");
             error = arguments();
@@ -983,6 +1065,11 @@ ERROR_CODE funkcia_priradenie()
             break;
         /*ak som dostal = tak idem do deklaracia*/
         case sAssign :
+            if (searchFunctionVariableInStack(symbol_table.actual_function,previous_token_atributte) == NULL) {
+                error = SEM_UNDEF_ERR;
+                return error;
+            }
+
         	printf("idem do declaration\n");
             error = declaration();
 
@@ -1314,7 +1401,6 @@ ERROR_CODE hodnota_priradenia()
             break;
         case sIdent :
         	;
-        	//token = get_Token();
         	Function_GTS *function_for_searching = NULL;
         	function_for_searching = searchFunction(&symbol_table,token.attribute);
 
@@ -1425,10 +1511,22 @@ ERROR_CODE fun_auto()
             error = SYN_ERR;
             return error;
         }
+
+        if (searchFunction(&symbol_table,token.attribute) != NULL) {
+            error = SEM_UNDEF_ERR;
+            return error;
+        }
+
+        Variable *premenna_auto = searchFunctionVariableInActualLevel(symbol_table.actual_function,token.attribute);
+
+        if (premenna_auto != NULL){
+            error = SEM_UNDEF_ERR;
+            return error;
+        }
+        // vlozime premennu na zasobnik
         error = insertFunctionVariableToStack(symbol_table.actual_function,token.attribute,AUTO);
         printf("stale som v aute\n");
-        /* premenna ukazuje na aktualne vlozenu polozku */
-        Variable *premenna_auto = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
+        
         if (error != OK_ERR) {
             return error;
         }
@@ -1518,6 +1616,18 @@ ERROR_CODE inicialization()
     if(token.id != sIdent) {
     	printf("dostal som ID\n");
         error = SYN_ERR;
+        return error;
+    }
+
+    if (searchFunction(&symbol_table,token.attribute) != NULL) {
+        error = SEM_UNDEF_ERR;
+        return error;
+    }
+
+    Variable *premenna_inicialization = searchFunctionVariableInActualLevel(symbol_table.actual_function,token.attribute);
+
+    if (premenna_inicialization != NULL){
+        error = SEM_UNDEF_ERR;
         return error;
     }
 
@@ -1715,4 +1825,508 @@ ERROR_CODE foo()
     }
 
     return OK_ERR; 
+}
+
+
+ERROR_CODE bulid_in_function()
+{
+    ERROR_CODE error;
+    /*
+    *Vstavana funkcia length
+    */
+    if(!(strcmp(token.attribute, "length"))){
+
+        token = get_Token();
+
+        switch (token.id) {
+            /*pokial lexer vrati lex error*/
+            case sError: 
+                error = LEX_ERR;
+                return error;
+                break;
+            case sLParenth:
+                token = get_Token();
+
+                switch (token.id) {
+                    case sError:
+                        error = LEX_ERR;
+                        return error;
+                        break;
+                    case sString :
+                        error = OK_ERR;
+                    // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
+                    case sIdent :
+                        ;
+                        Variable * identifier_of_parameter = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
+
+                        if (identifier_of_parameter == NULL) {
+                            error = SEM_UNDEF_ERR;
+                            return error;
+                        }
+                        else if (identifier_of_parameter->typ != sString) {
+                            error = SEM_TYPE_ERR;
+                            return error;
+                        }
+                        else {
+                            error = OK_ERR;
+                        }
+                        break;
+                    default :
+                        error = SYN_ERR;
+                        return error;
+                        break;
+                }
+
+                token = get_Token();
+
+                if (token.id == sError) {
+                    error = LEX_ERR;
+                    return error;
+                }
+                // dostal som )
+                if (token.id != sRParenth) {
+                    error = SYN_ERR;
+                    return error;
+                }
+            default :
+                error = SYN_ERR;
+                return error;
+                break;
+        }
+    }
+    /*
+    *Vstavana funkcia substring
+    */
+    else if(!(strcmp(token.attribute, "substr"))){
+
+        token = get_Token();
+
+        switch (token.id) {
+            /*pokial lexer vrati lex error*/
+            case sError: 
+                error = LEX_ERR;
+                return error;
+                break;
+            case sLParenth:
+                token = get_Token();
+
+                switch (token.id) {
+                    case sError:
+                        error = LEX_ERR;
+                        return error;
+                        break;
+                    case sString :
+                        error = OK_ERR;
+                    // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
+                    case sIdent :
+                        ;
+                        Variable * identifier_of_parameter = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
+
+                        if (identifier_of_parameter == NULL) {
+                            error = SEM_UNDEF_ERR;
+                            return error;
+                        }
+                        else if (identifier_of_parameter->typ != sString) {
+                            error = SEM_TYPE_ERR;
+                            return error;
+                        }
+                        else {
+                            error = OK_ERR;
+                        }
+                        break;
+                    default :
+                        error = SYN_ERR;
+                        return error;
+                        break;
+                }
+
+                token = get_Token();
+
+                if (token.id == sError) {
+                    error = LEX_ERR;
+                    return error;
+                }
+                // dostal som ,
+                if (token.id != sComma) {
+                    error = SYN_ERR;
+                    return error;
+                }
+                token = get_Token();
+
+                switch (token.id) {
+                    case sError:
+                        error = LEX_ERR;
+                        return error;
+                        break;
+                    case sInteger :
+                        error = OK_ERR;
+                    // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
+                    case sIdent :
+                        ;
+                        Variable * identifier_of_parameter = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
+
+                        if (identifier_of_parameter == NULL) {
+                            error = SEM_UNDEF_ERR;
+                            return error;
+                        }
+                        else if (identifier_of_parameter->typ != sInteger) {
+                            error = SEM_TYPE_ERR;
+                            return error;
+                        }
+                        else {
+                            error = OK_ERR;
+                        }
+                        break;
+                    default :
+                        error = SYN_ERR;
+                        return error;
+                        break;
+                }
+                token = get_Token();
+
+                if (token.id == sError) {
+                    error = LEX_ERR;
+                    return error;
+                }
+                // dostal som ,
+                if (token.id != sComma) {
+                    error = SYN_ERR;
+                    return error;
+                }
+                token = get_Token();
+
+                switch (token.id) {
+                    case sError:
+                        error = LEX_ERR;
+                        return error;
+                        break;
+                    case sInteger :
+                        error = OK_ERR;
+                    // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
+                    case sIdent :
+                        ;
+                        Variable * identifier_of_parameter = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
+
+                        if (identifier_of_parameter == NULL) {
+                            error = SEM_UNDEF_ERR;
+                            return error;
+                        }
+                        else if (identifier_of_parameter->typ != sInteger) {
+                            error = SEM_TYPE_ERR;
+                            return error;
+                        }
+                        else {
+                            error = OK_ERR;
+                        }
+                        break;
+                    default :
+                        error = SYN_ERR;
+                        return error;
+                        break;
+                }
+
+                token = get_Token();
+
+                if (token.id == sError) {
+                    error = LEX_ERR;
+                    return error;
+                }
+                // dostal som )
+                if (token.id != sRParenth) {
+                    error = SYN_ERR;
+                    return error;
+                }
+            default :
+                error = SYN_ERR;
+                return error;
+                break;
+        }
+    }
+    /*
+    *Vstavana funkcia concat
+    */
+    else if(!(strcmp(token.attribute, "concat"))){
+
+        token = get_Token();
+
+        switch (token.id) {
+            /*pokial lexer vrati lex error*/
+            case sError: 
+                error = LEX_ERR;
+                return error;
+                break;
+            case sLParenth:
+                token = get_Token();
+
+                switch (token.id) {
+                    case sError:
+                        error = LEX_ERR;
+                        return error;
+                        break;
+                    case sString :
+                        error = OK_ERR;
+                    // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
+                    case sIdent :
+                        ;
+                        Variable * identifier_of_parameter = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
+
+                        if (identifier_of_parameter == NULL) {
+                            error = SEM_UNDEF_ERR;
+                            return error;
+                        }
+                        else if (identifier_of_parameter->typ != sString) {
+                            error = SEM_TYPE_ERR;
+                            return error;
+                        }
+                        else {
+                            error = OK_ERR;
+                        }
+                        break;
+                    default :
+                        error = SYN_ERR;
+                        return error;
+                        break;
+                }
+
+                token = get_Token();
+
+                if (token.id == sError) {
+                    error = LEX_ERR;
+                    return error;
+                }
+                // dostal som ,
+                if (token.id != sComma) {
+                    error = SYN_ERR;
+                    return error;
+                }
+                token = get_Token();
+
+                switch (token.id) {
+                    case sError:
+                        error = LEX_ERR;
+                        return error;
+                        break;
+                    case sString :
+                        error = OK_ERR;
+                    // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
+                    case sIdent :
+                        ;
+                        Variable * identifier_of_parameter = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
+
+                        if (identifier_of_parameter == NULL) {
+                            error = SEM_UNDEF_ERR;
+                            return error;
+                        }
+                        else if (identifier_of_parameter->typ != sString) {
+                            error = SEM_TYPE_ERR;
+                            return error;
+                        }
+                        else {
+                            error = OK_ERR;
+                        }
+                        break;
+                    default :
+                        error = SYN_ERR;
+                        return error;
+                        break;
+                }
+                
+                token = get_Token();
+
+                if (token.id == sError) {
+                    error = LEX_ERR;
+                    return error;
+                }
+                // dostal som )
+                if (token.id != sRParenth) {
+                    error = SYN_ERR;
+                    return error;
+                }
+
+            default :
+                error = SYN_ERR;
+                return error;
+                break;
+        }
+    }
+    /*
+    *Vstavana funkcia find
+    */
+    else if(!(strcmp(token.attribute, "find"))){
+
+        token = get_Token();
+
+        switch (token.id) {
+            /*pokial lexer vrati lex error*/
+            case sError: 
+                error = LEX_ERR;
+                return error;
+                break;
+            case sLParenth:
+                token = get_Token();
+
+                switch (token.id) {
+                    case sError:
+                        error = LEX_ERR;
+                        return error;
+                        break;
+                    case sString :
+                        error = OK_ERR;
+                    // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
+                    case sIdent :
+                        ;
+                        Variable * identifier_of_parameter = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
+
+                        if (identifier_of_parameter == NULL) {
+                            error = SEM_UNDEF_ERR;
+                            return error;
+                        }
+                        else if (identifier_of_parameter->typ != sString) {
+                            error = SEM_TYPE_ERR;
+                            return error;
+                        }
+                        else {
+                            error = OK_ERR;
+                        }
+                        break;
+                    default :
+                        error = SYN_ERR;
+                        return error;
+                        break;
+                }
+
+                token = get_Token();
+
+                if (token.id == sError) {
+                    error = LEX_ERR;
+                    return error;
+                }
+                // dostal som ,
+                if (token.id != sComma) {
+                    error = SYN_ERR;
+                    return error;
+                }
+                token = get_Token();
+
+                switch (token.id) {
+                    case sError:
+                        error = LEX_ERR;
+                        return error;
+                        break;
+                    case sString :
+                        error = OK_ERR;
+                    // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
+                    case sIdent :
+                        ;
+                        Variable * identifier_of_parameter = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
+
+                        if (identifier_of_parameter == NULL) {
+                            error = SEM_UNDEF_ERR;
+                            return error;
+                        }
+                        else if (identifier_of_parameter->typ != sString) {
+                            error = SEM_TYPE_ERR;
+                            return error;
+                        }
+                        else {
+                            error = OK_ERR;
+                        }
+                        break;
+                    default :
+                        error = SYN_ERR;
+                        return error;
+                        break;
+                }
+                
+                token = get_Token();
+
+                if (token.id == sError) {
+                    error = LEX_ERR;
+                    return error;
+                }
+                // dostal som )
+                if (token.id != sRParenth) {
+                    error = SYN_ERR;
+                    return error;
+                }
+
+            default :
+                error = SYN_ERR;
+                return error;
+                break;
+        }
+    }
+    /*
+    *Vstavana funkcia length
+    */
+    else if(!(strcmp(token.attribute, "sort"))){
+
+        token = get_Token();
+
+        switch (token.id) {
+            /*pokial lexer vrati lex error*/
+            case sError: 
+                error = LEX_ERR;
+                return error;
+                break;
+            case sLParenth:
+                token = get_Token();
+
+                switch (token.id) {
+                    case sError:
+                        error = LEX_ERR;
+                        return error;
+                        break;
+                    case sString :
+                        error = OK_ERR;
+                    // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
+                    case sIdent :
+                        ;
+                        Variable * identifier_of_parameter = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
+
+                        if (identifier_of_parameter == NULL) {
+                            error = SEM_UNDEF_ERR;
+                            return error;
+                        }
+                        else if (identifier_of_parameter->typ != sString) {
+                            error = SEM_TYPE_ERR;
+                            return error;
+                        }
+                        else {
+                            error = OK_ERR;
+                        }
+                        break;
+                    default :
+                        error = SYN_ERR;
+                        return error;
+                        break;
+                }
+
+                token = get_Token();
+
+                if (token.id == sError) {
+                    error = LEX_ERR;
+                    return error;
+                }
+                // dostal som )
+                if (token.id != sRParenth) {
+                    error = SYN_ERR;
+                    return error;
+                }
+            default :
+                error = SYN_ERR;
+                return error;
+                break;
+        }
+    }
+    // toto by nemalo nikdy nastat
+    else {
+        error = SYN_ERR;
+        return error;
+    }
+
+    if (error != OK_ERR) {
+        return error;
+    }
+    return OK_ERR;
 }
