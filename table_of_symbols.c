@@ -15,21 +15,43 @@
 
 #define TRUE 1
 #define FALSE 0
+#define CONTINUE 2
 
-//int main()
-//{
-//	Table_symbols tabulka;
-//	globalTableOfSymbolsInit(&tabulka);
-//	// funkcia
-//	insertFunction(&tabulka,"funkcia1",1);
-//	Function_GTS *a=NULL;
-//	a=searchFunction(&tabulka,"funkcia1");
-//	if(a!=NULL)
-//		//printf("%d\n",a->return_type);
-//		printf("%d\n",a->return_type);
-//	else
-//		printf("nenasiel som \n");
-//	
+#define DELETE 2
+#define DEFINE 3
+
+int main()
+{
+	meminitialization();
+	Table_symbols tabulka;
+	globalTableOfSymbolsInit(&tabulka);
+	// funkcia
+	insertFunction(&tabulka,"main",1);
+	Function_GTS *a=NULL;
+	a=searchFunction(&tabulka,"main");
+	a->defined=TRUE;
+	if(a!=NULL)
+		printf("%d\n",a->return_type);
+	else
+		printf("nenasiel som \n");
+	insertFunctionInstruction(tabulka.actual_function,1,NULL,NULL,NULL);
+	insertFunctionParam(tabulka.actual_function,"param1",1);
+	insertFunctionParam(tabulka.actual_function,"param2",2);
+	getFunctionParam(tabulka.actual_function,TRUE);
+	getFunctionParam(tabulka.actual_function,CONTINUE);
+	Variable *par3=getFunctionParam(tabulka.actual_function,CONTINUE);
+	if(par3!=NULL)
+		printf("prvy parameter name: %s typ: %d \n",par3->name,par3->typ);
+	
+	insertFunction(&tabulka,"funkcia",1);
+	Function_GTS *b=NULL;
+	b=searchFunction(&tabulka,"funkcia");
+	b->defined=TRUE;
+	if(b!=NULL)
+		printf("%d\n",b->return_type);
+	else
+		printf("nenasiel som \n");
+
 //	// parameter do funkcie
 //	insertFunctionParam(tabulka.actual_function,"param1",2);
 //	Variable *b=NULL;
@@ -93,9 +115,12 @@
 //	else
 //		printf("!!!!!!!!!!nenasiel som \n");
 //
-//	destroyGTS(&tabulka); 
-//	return 0;
-//}
+	if(finalFunctionCheckout(&tabulka)!=OK_ERR)
+		printf(" final function ERROR \n");
+	destroyGTS(&tabulka); 
+	memallfree();
+	return 0;
+}
 
 /* inicializuje globalnu tabulku symbolov
  * gts_table - ukazatel na strukturu GTS */
@@ -120,7 +145,7 @@ ERROR_CODE insertFunction(Table_symbols *gts_table,char *function_name,int retur
 		{
 			InitList(&(func->params));
 			stackInit(&(func->symbol_table_of_block));
-			func->pointer_to_instructions=NULL;
+			InitList(&(func->instructions));
 			func->defined=FALSE;
 			func->return_occured=FALSE;
 			func->return_type=return_type; 
@@ -191,6 +216,18 @@ Variable *searchFunctionParam(Function_GTS *function,char *variable_name)
 		Variable *helpful_pointer=NULL;
 		helpful_pointer=findInList(&(function->params),variable_name);
 		printf("HLADAM PARAMETER\n"); 
+		return (helpful_pointer!=NULL)?(Variable *)(helpful_pointer):NULL;
+	}
+	return NULL;
+}
+
+Variable *getFunctionParam(Function_GTS *function,int state)
+{
+	if(function!=NULL)
+	{
+		Variable *helpful_pointer=NULL;
+		helpful_pointer=getFromList(&(function->params),state);
+		printf("VRACIAM PARAMETER\n"); 
 		return (helpful_pointer!=NULL)?(Variable *)(helpful_pointer):NULL;
 	}
 	return NULL;
@@ -318,7 +355,7 @@ void functionInGlobalTableDestroy(Function_GTS *function)
 		DestroyList(&(function->params));
 		SymbolTableStackDestroy(function);	
 		stackDestroy(&(function->symbol_table_of_block));
-		function->pointer_to_instructions=NULL;
+		DestroyList(&(function->instructions));
 		function->defined=0;
 		function->return_type=0;
 	}
@@ -326,25 +363,49 @@ void functionInGlobalTableDestroy(Function_GTS *function)
 
 /* prejst cez cely GTS strom a pre kazdy uzol vestko uvolnit
  * tabulka - ukazatel na GTS */
-void traversalGTS(Table_symbols *tabulka)
+ERROR_CODE traversalGTS(Table_symbols *tabulka,int what_to_do)
 {
 	if(tabulka!=NULL)
-		traversalTree(&(tabulka->functions));
+		return traversalTree(&(tabulka->functions),what_to_do);
+	return INTERN_ERR;
 }
 
-void traversalTree(TreePointer *Tre)
+ERROR_CODE traversalTree(TreePointer *Tre, int what_to_do)
 {
 	if(Tre->root!=NULL)
-		nodesTree(Tre->root);
+		return nodesTree(Tre->root,what_to_do);
+	return INTERN_ERR;
 }
 
-void nodesTree(Tree node)
+ERROR_CODE nodesTree(Tree node,int what_to_do)
 {
 	if(node->left!=NULL)
-		nodesTree(node->left);
+	{
+		if(nodesTree(node->left,what_to_do)==SEM_UNDEF_ERR)
+		{
+			return SEM_UNDEF_ERR;
+		}
+	}
 	if(node->right!=NULL)
-		nodesTree(node->right);
-	functionInGlobalTableDestroy(node->data);
+	{
+		if(nodesTree(node->right,what_to_do)==SEM_UNDEF_ERR)
+		{
+			return SEM_UNDEF_ERR;
+		}
+	}
+	if(what_to_do==DELETE)
+	{
+		functionInGlobalTableDestroy(node->data);
+		return OK_ERR;
+	}
+	else /* DEFINE */
+	{
+		if( ((Function_GTS*)(node->data))->defined==FALSE )	 
+			return SEM_UNDEF_ERR;
+		else
+			return OK_ERR; /* ak je definovana */
+	}
+	return INTERN_ERR;
 }
 
 /* funkcia prejde cely strom uvolni vseko v kazdom uzle a nasledne sa uvolni aj strom sam
@@ -353,7 +414,7 @@ void destroyGTS(Table_symbols *tabulka)
 {
 	if(tabulka!=NULL)
 	{
-		traversalGTS(tabulka);
+		traversalGTS(tabulka,DELETE);
 		treeDestroy(&(tabulka->functions));
 		tabulka->actual_function=NULL;
 	}
@@ -383,3 +444,87 @@ Variable *findInList(ListPointer *Lis,char *param_name)
 	}
 	return NULL; /* nenasiel som */
 }
+
+/* funkcia po kazdom zavolani vrati paramater 
+ * return - vrati ukazatel na paramater
+ * Lis 	  - ukazatel na zoznam parametrov  
+ * state  - 0 reset, 1 read , 2 continue */
+Variable *getFromList(ListPointer *Lis,int state)
+{
+	if(EmptyList(Lis))
+	{
+		printf("zoznam parametrov je prazdny \n");
+		return NULL; /* zoznam je prazdny nemam co vratit */
+	}
+	if(state==FALSE) /* reset */
+	{
+		Lis->last_terminal=Lis->first_list_element;
+		return NULL;	
+	}
+	else if(state==TRUE) /* start */
+	{
+		Lis->last_terminal=Lis->first_list_element;
+		return Lis->last_terminal->data;
+	}
+	else /* continue */
+	{
+		if(Lis->last_terminal!=NULL)
+		{
+			if(Lis->last_terminal->next!=NULL)
+			{
+				Lis->last_terminal=Lis->last_terminal->next;
+				return Lis->last_terminal->data;
+			}
+			else
+			{
+				printf("ziaden dalsi parameter nieje vraciam NULL \n");
+				return NULL;
+			}
+		}
+	}
+	return NULL;
+}
+
+/* funkcia prida instrukciu na instrukcnu pasku 
+ * return - INTERN_ERR, OK_ERR
+ * function - ukazatel na funkciu do ktorej sa bude instrukcia pridava
+ * type 	- typ instrukcie
+ * destination - prvy prarameter instrukcie
+ * source1 - druhy parameter instrukcie
+ * source2 - treti parameter instrukcie */
+ERROR_CODE insertFunctionInstruction(Function_GTS *function, int type, void *destination, void *source1, void *source2)
+{
+	if(function!=NULL)
+	{
+		Instruction *instruct=memmalloc(sizeof(struct instruction));
+		if(instruct!=NULL)
+		{
+			instruct->type=type;
+			instruct->destination=destination;
+			instruct->source1=source1;
+			instruct->source2=source2;
+			InsertLast(&(function->instructions),instruct);
+			printf("PRIDAVAM INSTRUKCIU\n"); 
+			return OK_ERR;
+		}
+		else
+		{
+			return INTERN_ERR;
+		}
+	}
+	return INTERN_ERR;
+}
+
+/* funkcia prejde celu GTS a bude zistovat ci su vsetky funkcie v nej definovane ak nie je to chyba SEM_UNDEF_ERR, ak su vsekty funkcie definovane tak este skontoluje GTS ci sa v nej vyskytuje funkcia main, ktora je povinna inak error SEM_UNDEF_ERR
+* return - OK_ERR, SEM_UNDEF_ERR
+* tabulka - ukazatel na tabulku symbolov */
+ERROR_CODE finalFunctionCheckout(Table_symbols * tabulka)
+{
+	if(traversalGTS(tabulka,DEFINE)==OK_ERR) /* funkcie su definovane */
+	{
+		if(searchFunction(tabulka,"main")!=NULL) /* ak najdem v GTS main */
+				return OK_ERR;
+	}
+	return SEM_UNDEF_ERR; /* funkcie definovane niesu */
+}
+

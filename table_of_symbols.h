@@ -27,7 +27,7 @@
 typedef struct function_GTS {
 	ListPointer params; /* TS parametrov funkcie */
 	StackPointer symbol_table_of_block; /* zasobnik TS blokov */
-	void *pointer_to_instructions; /* ukazatel na instrukcnu pasku !! treba doplnit upravit ukazatel na co typicky ukazatel na dvojsmerne viazany zozname alebo jeho prvu polozku ... */
+	ListPointer instructions; /* ukazatel na instrukcnu pasku */
 	int defined; /* funkcia definovana ? */
 	int return_type; /* navratova hodnota funkcie */
 	int return_occured; /* kontrola ci funkcia obsahuje return */
@@ -38,6 +38,14 @@ typedef struct variable {
 	int typ; /* int,double,string */
 	char *name;
 } Variable;
+
+/* struktura instrukcie */
+typedef struct instruction {
+	int type;
+	void *destination;
+	void *source1;
+	void *source2;
+} Instruction;
 
 typedef struct table_symbols{
 	TreePointer functions; /* strom funkcii */
@@ -50,17 +58,21 @@ ERROR_CODE insertFunction(Table_symbols *,char *,int);
 Function_GTS *searchFunction(Table_symbols *,char *);
 ERROR_CODE insertFunctionParam(Function_GTS *,char *,int);
 Variable *searchFunctionParam(Function_GTS *,char *);
+Variable *getFunctionParam(Function_GTS *,int);
 ERROR_CODE pushBlock(Function_GTS *);
 void popBlock(Function_GTS *);
 ERROR_CODE insertFunctionVariableToStack(Function_GTS *, char *,int);
 Variable *searchFunctionVariableInStack(Function_GTS *,char *);
 Variable *findInList(ListPointer *, char *);
+Variable *getFromList(ListPointer *,int);
+ERROR_CODE insertFunctionInstruction(Function_GTS *, int, void *, void *, void *);
 
 void SymbolTableStackDestoy(Function_GTS *);
 void functionInGlobalTableDestroy(Function_GTS *);
-void traversalGTS(Table_symbols *);
-void traversalTree(TreePointer *);
-void nodesTree(Tree);
+ERROR_CODE traversalGTS(Table_symbols *,int);
+ERROR_CODE traversalTree(TreePointer *,int);
+ERROR_CODE nodesTree(Tree,int);
 void destroyGTS(Table_symbols *);
 
+ERROR_CODE finalFunctionCheckout(Table_symbols *);
 #endif
