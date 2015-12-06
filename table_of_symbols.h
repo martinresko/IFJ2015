@@ -63,6 +63,7 @@ ERROR_CODE pushBlock(Function_GTS *);
 void popBlock(Function_GTS *);
 ERROR_CODE insertFunctionVariableToStack(Function_GTS *, char *,int);
 Variable *searchFunctionVariableInStack(Function_GTS *,char *);
+Variable *searchFunctionVariableInActualLevel(Function_GTS *,char *);
 Variable *findInList(ListPointer *, char *);
 Variable *getFromList(ListPointer *,int);
 ERROR_CODE insertFunctionInstruction(Function_GTS *, int, void *, void *, void *);

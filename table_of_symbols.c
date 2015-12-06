@@ -300,6 +300,34 @@ ERROR_CODE insertFunctionVariableToStack(Function_GTS *function, char *variable_
 	return INTERN_ERR;
 }
 
+/* funkcia hlada v danej urovni bloku lokalnu premennu danej funkcie plus aj nahliada aj na parametre
+ * return - NULL ak nic nenasiel alebo pointer na Parameter alebo Pointer na Variable
+ * function - ukazatel na funkciu
+ * variable_name - meno hladanej premennej */
+Variable *searchFunctionVariableInActualLevel(Function_GTS *function, char *variable_name)
+{
+	if(function!=NULL)
+	{
+		Variable *found_param = findInList(&(function->params),variable_name);
+		if(found_param!=NULL)
+			return found_param;/* ak som nasiel parameter */
+		
+		/* ak som to nenasiel ako parameter tak hladam v aktualnom bloku */
+		Tree helpful_pointer=NULL;
+		helpful_pointer = treeSearch(stackTop(&(function->symbol_table_of_block)),variable_name);
+		if(helpful_pointer!=NULL)
+		{
+			return (Variable *)(helpful_pointer->data);/* nasiel som */
+		}
+		else
+		{
+			return NULL; /* nasiel som */
+		}
+	}
+	return NULL;
+}
+
+
 /* funkcia postupne od vrcholu zasabnika hlada ziadanu premennu az po lokalne premenne danej funkcie plus aj parametre 
  * return - NULL ak nic nenasiel alebo pointer na Parameter alebo Pointer na Variable
  * function - ukazatel na funkciu
