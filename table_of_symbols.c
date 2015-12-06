@@ -20,38 +20,38 @@
 #define DELETE 2
 #define DEFINE 3
 
-int main()
-{
-	meminitialization();
-	Table_symbols tabulka;
-	globalTableOfSymbolsInit(&tabulka);
-	// funkcia
-	insertFunction(&tabulka,"main",1);
-	Function_GTS *a=NULL;
-	a=searchFunction(&tabulka,"main");
-	a->defined=TRUE;
-	if(a!=NULL)
-		printf("%d\n",a->return_type);
-	else
-		printf("nenasiel som \n");
-	insertFunctionInstruction(tabulka.actual_function,1,NULL,NULL,NULL);
-	insertFunctionParam(tabulka.actual_function,"param1",1);
-	insertFunctionParam(tabulka.actual_function,"param2",2);
-	getFunctionParam(tabulka.actual_function,TRUE);
-	getFunctionParam(tabulka.actual_function,CONTINUE);
-	Variable *par3=getFunctionParam(tabulka.actual_function,CONTINUE);
-	if(par3!=NULL)
-		printf("prvy parameter name: %s typ: %d \n",par3->name,par3->typ);
-	
-	insertFunction(&tabulka,"funkcia",1);
-	Function_GTS *b=NULL;
-	b=searchFunction(&tabulka,"funkcia");
-	b->defined=TRUE;
-	if(b!=NULL)
-		printf("%d\n",b->return_type);
-	else
-		printf("nenasiel som \n");
-
+//int main()
+//{
+//	meminitialization();
+//	Table_symbols tabulka;
+//	globalTableOfSymbolsInit(&tabulka);
+//	// funkcia
+//	insertFunction(&tabulka,"main",1);
+//	Function_GTS *a=NULL;
+//	a=searchFunction(&tabulka,"main");
+//	a->defined=TRUE;
+//	if(a!=NULL)
+//		printf("%d\n",a->return_type);
+//	else
+//		printf("nenasiel som \n");
+//	insertFunctionInstruction(tabulka.actual_function,1,NULL,NULL,NULL);
+//	insertFunctionParam(tabulka.actual_function,"param1",1);
+//	insertFunctionParam(tabulka.actual_function,"param2",2);
+//	getFunctionParam(tabulka.actual_function,TRUE);
+//	getFunctionParam(tabulka.actual_function,CONTINUE);
+//	Variable *par3=getFunctionParam(tabulka.actual_function,CONTINUE);
+//	if(par3!=NULL)
+//		printf("prvy parameter name: %s typ: %d \n",par3->name,par3->typ);
+//	
+//	insertFunction(&tabulka,"funkcia",1);
+//	Function_GTS *b=NULL;
+//	b=searchFunction(&tabulka,"funkcia");
+//	b->defined=TRUE;
+//	if(b!=NULL)
+//		printf("%d\n",b->return_type);
+//	else
+//		printf("nenasiel som \n");
+//
 //	// parameter do funkcie
 //	insertFunctionParam(tabulka.actual_function,"param1",2);
 //	Variable *b=NULL;
@@ -115,12 +115,12 @@ int main()
 //	else
 //		printf("!!!!!!!!!!nenasiel som \n");
 //
-	if(finalFunctionCheckout(&tabulka)!=OK_ERR)
-		printf(" final function ERROR \n");
-	destroyGTS(&tabulka); 
-	memallfree();
-	return 0;
-}
+//	if(finalFunctionCheckout(&tabulka)!=OK_ERR)
+//		printf(" final function ERROR \n");
+//	destroyGTS(&tabulka); 
+//	memallfree();
+//	return 0;
+//}
 
 /* inicializuje globalnu tabulku symbolov
  * gts_table - ukazatel na strukturu GTS */
