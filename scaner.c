@@ -160,7 +160,6 @@ int j;
  		switch(state){
  			case sStart:{
  				if((isalpha(c)) || (c == '_'))				state = sIdent;
- 				else if(c == '0')							state = sNull;
  				else if((c > '0') && (c <= '9'))			state = sInteger;
  				else if(c == '=')							state = sAssign;
  				else if(c == '/')							state = sDivide;
@@ -182,6 +181,11 @@ int j;
  					state = sString;
  					break;
  				} 	
+
+ 				else if(c == '0'){
+ 					state = sNull;
+ 					break;
+ 				}
 
  				//Ak sa jedna o biely znak
  				else if(isspace(c)){
@@ -206,8 +210,9 @@ int j;
  				} else if((c > '0') && (c <= '9')){
  					state = sInteger;
  					expand_token(c, &i);	//rozsirime token o jeden znak
- 				} else{
+ 				} else if(c == ){
 					state = sInteger;
+					expand_token('0', &i);
  					fill_token(state);		//prepiseme id tokenu
  					state = sEnd;
  					undo_c(c);		//posledny nacitany znak vratime spat
@@ -362,7 +367,7 @@ int j;
  				} else{
  					state = sString;
  					expand_token(92, &i);
- 					expand_token(c, &i);
+ 					undo_c(c);
  				}
  				break;
  			}
@@ -380,7 +385,7 @@ int j;
  					state = sString;
  					expand_token(92, &i);
  					expand_token(escap, &i);
- 					expand_token(c, &i);
+ 					undo_c(c);
  				}
  				break;
  			}
@@ -400,7 +405,7 @@ int j;
  					expand_token(92, &i);
  					expand_token(escap, &i);
  					expand_token(escap2, &i);
- 					expand_token(c, &i);
+ 					undo_c(c);
  				}
  				break;
  			}
