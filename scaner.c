@@ -210,7 +210,7 @@ int j;
  				} else if((c > '0') && (c <= '9')){
  					state = sInteger;
  					expand_token(c, &i);	//rozsirime token o jeden znak
- 				} else if(c == ){
+ 				} else{
 					state = sInteger;
 					expand_token('0', &i);
  					fill_token(state);		//prepiseme id tokenu
