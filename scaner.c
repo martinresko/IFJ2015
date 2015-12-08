@@ -33,7 +33,7 @@ FILE *file;
 * Mena vstavanych funkcii jazyka IFJ15
 */
  const char *reswords[NUM_OF_RESWORDS] = {
- 	"lenght\0", "substr\0", "concat\0",
+ 	"length\0", "substr\0", "concat\0",
  	"find\0", "sort\0"
  };
 

@@ -65,6 +65,7 @@ ERROR_CODE prog()
     error =  finalFunctionCheckout(&symbol_table);
 
     printf("Program vystup %d\n", error );
+
     if (error != OK_ERR) {
         return error;
     }
@@ -464,8 +465,6 @@ ERROR_CODE stat_list()
     token = get_Token();
     ERROR_CODE error;
 
-   
-
     switch (token.id) {
         /*pokila lexer vrati lex error*/
         case sError : 
@@ -527,8 +526,7 @@ ERROR_CODE command()
 {
     printf("som v command\n");
     ERROR_CODE error;
-    
-
+    printf("hodnota tokenu v command  %d\n", token.id);
     switch (token.id) {
         /*pokila lexer vrati lex error*/
         case sError: 
@@ -594,7 +592,9 @@ ERROR_CODE command()
             }
             break;
         case sResWord :
-            error = bulid_in_function();
+            printf("idem do res word\n");
+            // nekontrolujem typ 
+            error = build_in_function(FALSE);
 
             if (error != OK_ERR) {
                 return error;
@@ -785,6 +785,10 @@ ERROR_CODE command()
                                 return error;
                                 break;
                             case sIdent :
+                                if(searchFunctionVariableInStack(symbol_table.actual_function,token.attribute) == NULL) {
+                                    error = SEM_UNDEF_ERR;
+                                    return error;
+                                }
                             	printf("dostal som ID\n");
                                 error = OK_ERR;
                                 break;
@@ -1036,32 +1040,14 @@ ERROR_CODE funkcia_priradenie(char *previous_token_atributte)
             }
         	printf("je to (\n");
         	printf("idem do arguments\n");
-            error = arguments();
+            error = arguments(previous_token_atributte);
 
             if (error != OK_ERR) {
                 return error;
             }
-            //majo
-            // asi nebude token = get_Token();
 
-            switch (token.id) {
-                /*pokial lexer vrati lex error*/
-                case sError: 
-                    error = LEX_ERR;
-                    return error;
-                    break;
-                // dostal som ) 
-                case sRParenth :
-                	printf("dostal som )\n");
-                    error = OK_ERR;
-                    return error;
-                    break;
-                default :
-                	printf("chyba v hodnota_priradenia\n");
-                    error = SYN_ERR;
-                    return error;
-                    break;
-            }
+            token = get_Token();
+            printf("%s\n",token.attribute );
             break;
         /*ak som dostal = tak idem do deklaracia*/
         case sAssign :
@@ -1098,12 +1084,12 @@ ERROR_CODE funkcia_priradenie(char *previous_token_atributte)
  * id <multi_arguments>
  */
 
-ERROR_CODE arguments()
+ERROR_CODE arguments(char *previous_token_atributte)
 {
-	printf("som v arguments\n");
+    printf("som v arguments\n");
     ERROR_CODE error;
     token = get_Token();
-
+    printf("%s\n",token.attribute );
     switch (token.id) {
         /*pokial lexer vrati lex error*/
         case sError: 
@@ -1111,19 +1097,66 @@ ERROR_CODE arguments()
             return error;
             break;
         case sIdent :
-        	printf("dostal som ID\n");
-        	printf("idem do multi_arguments\n");
-            error = multi_arguments();
+            ;
+            // vyhladame prvy parameter funkcie
+            Variable *The_First = getFunctionParam(searchFunction(&symbol_table,previous_token_atributte),TRUE);
+            //ak nejaky ma
+            if (The_First != NULL) {
+                //zistim ci je ID platne
+                Variable* argument_ID = searchFunctionVariableInStack(symbol_table.actual_function, token.attribute);
+                if (argument_ID == NULL) {
+                   error = SEM_UNDEF_ERR;
+                   return error;
+                }
+                if (The_First->typ != argument_ID->typ) {
+                    error = SEM_TYPE_ERR;
+                    return error;
+                }
+            }
+            else {
+                error = SEM_TYPE_ERR;
+                return error;
+            }
+            printf("dostal som ID\n");
+            printf("idem do multi_arguments\n");
+            error = multi_arguments(previous_token_atributte);
 
             if (error != OK_ERR) {
                 return error;
             }
             break;
         default :
-        	printf("chyba v arguments\n");
-            error = SYN_ERR;
-            return error;
-            break;
+            if((token.id == sInteger) || (token.id == sDouble) || (token.id == sString) ) {
+                printf("dostal som  cislo alebo string\n");
+                // vyhladame prvy parameter funkcie
+                Variable *The_First = getFunctionParam(searchFunction(&symbol_table,previous_token_atributte),TRUE);
+                //ak nejaky ma
+                if (The_First != NULL) {
+                    if (The_First->typ != token.id) {
+                        error = SEM_TYPE_ERR;
+                        return error;
+                    }
+                }
+                else{
+                    printf("FIrst == NULL\n");
+                    error = SEM_TYPE_ERR;
+                    return error;
+                }
+                error = OK_ERR;
+            }
+            else {
+                printf("chyba v arguments\n");
+                error = SYN_ERR;
+                return error;
+            }
+            error = multi_arguments(previous_token_atributte);
+
+            if (error != OK_ERR) {
+                return error;
+            }
+            
+
+        break;
     }
 
     if (error != OK_ERR) {
@@ -1139,12 +1172,12 @@ ERROR_CODE arguments()
  * empty
 **/
 
-ERROR_CODE multi_arguments()
+ERROR_CODE multi_arguments(char *previous_token_atributte)
 {
-	printf("som v multi_arguments\n");
+    printf("som v multi_arguments\n");
     ERROR_CODE error;
     token = get_Token();
-
+    printf("%s\n",token.attribute );
     switch (token.id) {
         /*pokial lexer vrati lex error*/
         case sError: 
@@ -1153,40 +1186,83 @@ ERROR_CODE multi_arguments()
             break;
         // ak som dostal ciarku
         case sComma :
-        	printf("dostal som ,\n");
+            printf("dostal som ,\n");
             token = get_Token();
-
+            printf("%s\n",token.attribute );
             switch (token.id) {
                 /*pokial lexer vrati lex error*/
                 case sError: 
                     error = LEX_ERR;
                     return error;
-                    break;
+                break;
                 case sIdent :
-                	printf("dostal som ID\n");
+                    printf("dostal som ID\n");
+                    // vyhladame prvy parameter funkcie
+                    Variable *The_First = getFunctionParam(searchFunction(&symbol_table,previous_token_atributte),CONTINUE);
+                    //ak nejaky ma
+                    if (The_First != NULL) {
+                        //zistim ci je ID platne
+                        Variable* argument_ID = searchFunctionVariableInStack(symbol_table.actual_function, token.attribute);
+                        if (argument_ID == NULL) {
+                           error = SEM_UNDEF_ERR;
+                           return error;
+                        }
+                        if (The_First->typ != argument_ID->typ) {
+                            error = SEM_TYPE_ERR;
+                            return error;
+                        }
+                    }
+                    else {
+                        error = SEM_TYPE_ERR;
+                        return error;
+                    }
                     error = OK_ERR;
-                    break;
-                 default :
-                 	printf("dostal som chybu\n");
-                    error = SYN_ERR;
-                    return error;
-                    break;
+                break;
+                default :
+                    if((token.id == sInteger) || (token.id == sDouble) || (token.id == sString) ) {
+                        printf("dostal som cislo alebo string\n");
+                        // vyhladame prvy parameter funkcie
+                        Variable *The_First = getFunctionParam(searchFunction(&symbol_table,previous_token_atributte),CONTINUE);
+                        //ak nejaky ma
+                        if (The_First != NULL) {
+                            if (The_First->typ != token.id) {
+                                error = SEM_TYPE_ERR;
+                                return error;
+                            }
+                        }
+                        else {
+                            error = SEM_TYPE_ERR;
+                            return error;
+                        }
+                        error = OK_ERR;
+                    } 
+                    else {
+                        printf("dostal som chybu\n");
+                        error = SYN_ERR;
+                        return error;
+                    }
+                break;
             }
 
-            break;
+            if (error != OK_ERR) {
+                return error;
+            }
+        break;
         // ak som dostal )
         case sRParenth :
-        	printf("dostal som )\n");
+            getFunctionParam(searchFunction(&symbol_table,previous_token_atributte),FALSE);
+            printf("dostal som )\n");
             error = OK_ERR;
             return error;
-            break;
+        break;
         default :
             error = SYN_ERR;
             return error;
-            break;
+        break;
     }
+
     printf("idem do multi multi_arguments\n");
-    error = multi_arguments();
+    error = multi_arguments(previous_token_atributte);
 
     if (error != OK_ERR) {
         return error;
@@ -1228,6 +1304,10 @@ ERROR_CODE multi_cin()
                     return error;
                     break;
                 case sIdent :
+                    if(searchFunctionVariableInStack(symbol_table.actual_function,token.attribute) == NULL) {
+                        error = SEM_UNDEF_ERR;
+                        return error;
+                    }
                 	printf("dostal som ID\n");
                     error = OK_ERR;
                     break;
@@ -1401,12 +1481,11 @@ ERROR_CODE hodnota_priradenia()
             break;
         case sIdent :
         	;
-        	Function_GTS *function_for_searching = NULL;
-        	function_for_searching = searchFunction(&symbol_table,token.attribute);
-
-			if (function_for_searching == NULL) {
+            // premenna pre arguments
+            char * token_attribute_for_arguments = token.attribute;
+			if (searchFunction(&symbol_table,token.attribute) == NULL) {
         		printf("volam expression\n");
-        		error = expression(TAKEN_FIRST_TOKEN,type_for_expression); // expression opravit este
+        		error = expression(TAKEN_FIRST_TOKEN,type_for_expression); 
                 token = token_expression;
 
                 if (error != OK_ERR) {
@@ -1426,17 +1505,31 @@ ERROR_CODE hodnota_priradenia()
 			        return error;
 			    }
 
-			    error = arguments();
+			    error = arguments(token_attribute_for_arguments);
 
 			    if (error != OK_ERR) {
 			        return error;
 			    }
 			    token = get_Token();
+
+                if (token.id == sError) {
+                    error = LEX_ERR;
+                    return error;
+                }
 			    printf("hodnota priradenia token atribute %s\n",token.attribute );
-			break;
         	}
+        break;
+        case sResWord :
+            printf("idem do res word v hodnote priradenia\n");
+            printf("typ  for expression     %d\n",type_for_expression );
+            error = build_in_function(TRUE);
+            if (error != OK_ERR) {
+                    return error;
+                }
+            token = get_Token();
+        break;
         default :
-        	error = expression(TAKEN_FIRST_TOKEN,type_for_expression); // expression opravit este
+        	error = expression(TAKEN_FIRST_TOKEN,type_for_expression); 
             token = token_expression;
             if (error != OK_ERR) {
                 return error;
@@ -1447,7 +1540,8 @@ ERROR_CODE hodnota_priradenia()
     if (error != OK_ERR) {
         return error;
     }
-return OK_ERR;
+
+    return OK_ERR;
 }
 
 /*
@@ -1465,9 +1559,15 @@ ERROR_CODE term()
         error = LEX_ERR;
         return error;
     // ak dostanem ocakavany vstup OK_ERR
-    } else if((token.id == sIdent) || (token.id == sInteger) || 
-        (token.id == sDouble) || (token.id == sString) ) 
-    {
+    } 
+    else if(token.id == sIdent) {
+        if(searchFunctionVariableInStack(symbol_table.actual_function,token.attribute) == NULL) {
+            error = SEM_UNDEF_ERR;
+            return error;
+        }
+        error = OK_ERR;
+    } 
+    else if ((token.id == sInteger) || (token.id == sDouble) || (token.id == sString)) {
     	printf("dostal som ID alebo cislo alebo string\n");
         error = OK_ERR;
         return error;
@@ -1614,11 +1714,11 @@ ERROR_CODE inicialization()
     }
 
     if(token.id != sIdent) {
-    	printf("dostal som ID\n");
+    	printf(" nedostal som ID\n");
         error = SYN_ERR;
         return error;
     }
-
+    printf("dostal som ID\n");
     if (searchFunction(&symbol_table,token.attribute) != NULL) {
         error = SEM_UNDEF_ERR;
         return error;
@@ -1827,8 +1927,17 @@ ERROR_CODE foo()
     return OK_ERR; 
 }
 
+/*
+ * @info: <build_in_function>
+ *  length
+ *  substr
+ *  find
+ *  sort
+ * type_control znaci ci sa bude kontrolovat typ TRUE/FALSE
+ * type_for_build_in_function
+*/
 
-ERROR_CODE bulid_in_function()
+ERROR_CODE build_in_function(int type_control)
 {
     ERROR_CODE error;
     /*
@@ -1836,6 +1945,13 @@ ERROR_CODE bulid_in_function()
     */
     if(!(strcmp(token.attribute, "length"))){
 
+        if(type_control == TRUE) {
+
+            if(type_for_expression != sInteger) {
+                error = SEM_TYPE_ERR;
+                return error;
+            }
+        }
         token = get_Token();
 
         switch (token.id) {
@@ -1843,7 +1959,7 @@ ERROR_CODE bulid_in_function()
             case sError: 
                 error = LEX_ERR;
                 return error;
-                break;
+            break;
             case sLParenth:
                 token = get_Token();
 
@@ -1851,9 +1967,10 @@ ERROR_CODE bulid_in_function()
                     case sError:
                         error = LEX_ERR;
                         return error;
-                        break;
+                    break;
                     case sString :
                         error = OK_ERR;
+                    break;
                     // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
                     case sIdent :
                         ;
@@ -1870,11 +1987,11 @@ ERROR_CODE bulid_in_function()
                         else {
                             error = OK_ERR;
                         }
-                        break;
+                    break;
                     default :
                         error = SYN_ERR;
                         return error;
-                        break;
+                    break;
                 }
 
                 token = get_Token();
@@ -1888,10 +2005,11 @@ ERROR_CODE bulid_in_function()
                     error = SYN_ERR;
                     return error;
                 }
+            break;
             default :
                 error = SYN_ERR;
                 return error;
-                break;
+            break;
         }
     }
     /*
@@ -1899,6 +2017,14 @@ ERROR_CODE bulid_in_function()
     */
     else if(!(strcmp(token.attribute, "substr"))){
 
+        if(type_control == TRUE) {
+
+            if(type_for_expression != sString) {
+                error = SEM_TYPE_ERR;
+                return error;
+            }
+        }
+
         token = get_Token();
 
         switch (token.id) {
@@ -1906,7 +2032,7 @@ ERROR_CODE bulid_in_function()
             case sError: 
                 error = LEX_ERR;
                 return error;
-                break;
+            break;
             case sLParenth:
                 token = get_Token();
 
@@ -1914,9 +2040,10 @@ ERROR_CODE bulid_in_function()
                     case sError:
                         error = LEX_ERR;
                         return error;
-                        break;
+                    break;
                     case sString :
                         error = OK_ERR;
+                    break;
                     // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
                     case sIdent :
                         ;
@@ -1933,11 +2060,11 @@ ERROR_CODE bulid_in_function()
                         else {
                             error = OK_ERR;
                         }
-                        break;
+                    break;
                     default :
                         error = SYN_ERR;
                         return error;
-                        break;
+                    break;
                 }
 
                 token = get_Token();
@@ -1957,9 +2084,10 @@ ERROR_CODE bulid_in_function()
                     case sError:
                         error = LEX_ERR;
                         return error;
-                        break;
+                    break;
                     case sInteger :
                         error = OK_ERR;
+                    break;
                     // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
                     case sIdent :
                         ;
@@ -1976,11 +2104,11 @@ ERROR_CODE bulid_in_function()
                         else {
                             error = OK_ERR;
                         }
-                        break;
+                    break;
                     default :
                         error = SYN_ERR;
                         return error;
-                        break;
+                    break;
                 }
                 token = get_Token();
 
@@ -1999,9 +2127,10 @@ ERROR_CODE bulid_in_function()
                     case sError:
                         error = LEX_ERR;
                         return error;
-                        break;
+                    break;
                     case sInteger :
                         error = OK_ERR;
+                    break;
                     // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
                     case sIdent :
                         ;
@@ -2018,11 +2147,11 @@ ERROR_CODE bulid_in_function()
                         else {
                             error = OK_ERR;
                         }
-                        break;
+                    break;
                     default :
                         error = SYN_ERR;
                         return error;
-                        break;
+                    break;
                 }
 
                 token = get_Token();
@@ -2036,16 +2165,24 @@ ERROR_CODE bulid_in_function()
                     error = SYN_ERR;
                     return error;
                 }
+            break;
             default :
                 error = SYN_ERR;
                 return error;
-                break;
+            break;
         }
     }
     /*
     *Vstavana funkcia concat
     */
     else if(!(strcmp(token.attribute, "concat"))){
+        if(type_control == TRUE) {
+
+            if(type_for_expression != sString) {
+                error = SEM_TYPE_ERR;
+                return error;
+            }
+        }
 
         token = get_Token();
 
@@ -2054,7 +2191,7 @@ ERROR_CODE bulid_in_function()
             case sError: 
                 error = LEX_ERR;
                 return error;
-                break;
+            break;
             case sLParenth:
                 token = get_Token();
 
@@ -2062,9 +2199,10 @@ ERROR_CODE bulid_in_function()
                     case sError:
                         error = LEX_ERR;
                         return error;
-                        break;
+                    break;
                     case sString :
                         error = OK_ERR;
+                    break;
                     // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
                     case sIdent :
                         ;
@@ -2081,11 +2219,11 @@ ERROR_CODE bulid_in_function()
                         else {
                             error = OK_ERR;
                         }
-                        break;
+                    break;
                     default :
                         error = SYN_ERR;
                         return error;
-                        break;
+                    break;
                 }
 
                 token = get_Token();
@@ -2105,9 +2243,10 @@ ERROR_CODE bulid_in_function()
                     case sError:
                         error = LEX_ERR;
                         return error;
-                        break;
+                    break;
                     case sString :
                         error = OK_ERR;
+                    break;
                     // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
                     case sIdent :
                         ;
@@ -2124,11 +2263,11 @@ ERROR_CODE bulid_in_function()
                         else {
                             error = OK_ERR;
                         }
-                        break;
+                    break;
                     default :
                         error = SYN_ERR;
                         return error;
-                        break;
+                    break;
                 }
                 
                 token = get_Token();
@@ -2142,7 +2281,7 @@ ERROR_CODE bulid_in_function()
                     error = SYN_ERR;
                     return error;
                 }
-
+            break;
             default :
                 error = SYN_ERR;
                 return error;
@@ -2154,6 +2293,14 @@ ERROR_CODE bulid_in_function()
     */
     else if(!(strcmp(token.attribute, "find"))){
 
+        if(type_control == TRUE) {
+
+            if(type_for_expression != sInteger) {
+                error = SEM_TYPE_ERR;
+                return error;
+            }
+        }
+
         token = get_Token();
 
         switch (token.id) {
@@ -2161,7 +2308,7 @@ ERROR_CODE bulid_in_function()
             case sError: 
                 error = LEX_ERR;
                 return error;
-                break;
+            break;
             case sLParenth:
                 token = get_Token();
 
@@ -2169,9 +2316,10 @@ ERROR_CODE bulid_in_function()
                     case sError:
                         error = LEX_ERR;
                         return error;
-                        break;
+                    break;
                     case sString :
                         error = OK_ERR;
+                    break;
                     // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
                     case sIdent :
                         ;
@@ -2188,11 +2336,11 @@ ERROR_CODE bulid_in_function()
                         else {
                             error = OK_ERR;
                         }
-                        break;
+                    break;
                     default :
                         error = SYN_ERR;
                         return error;
-                        break;
+                    break;
                 }
 
                 token = get_Token();
@@ -2212,9 +2360,10 @@ ERROR_CODE bulid_in_function()
                     case sError:
                         error = LEX_ERR;
                         return error;
-                        break;
+                    break;
                     case sString :
                         error = OK_ERR;
+                    break;
                     // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
                     case sIdent :
                         ;
@@ -2231,11 +2380,11 @@ ERROR_CODE bulid_in_function()
                         else {
                             error = OK_ERR;
                         }
-                        break;
+                    break;
                     default :
                         error = SYN_ERR;
                         return error;
-                        break;
+                    break;
                 }
                 
                 token = get_Token();
@@ -2249,7 +2398,7 @@ ERROR_CODE bulid_in_function()
                     error = SYN_ERR;
                     return error;
                 }
-
+            break;
             default :
                 error = SYN_ERR;
                 return error;
@@ -2261,6 +2410,14 @@ ERROR_CODE bulid_in_function()
     */
     else if(!(strcmp(token.attribute, "sort"))){
 
+        if(type_control == TRUE) {
+
+            if(type_for_expression != sString) {
+                error = SEM_TYPE_ERR;
+                return error;
+            }
+        }
+
         token = get_Token();
 
         switch (token.id) {
@@ -2268,7 +2425,7 @@ ERROR_CODE bulid_in_function()
             case sError: 
                 error = LEX_ERR;
                 return error;
-                break;
+            break;
             case sLParenth:
                 token = get_Token();
 
@@ -2276,9 +2433,10 @@ ERROR_CODE bulid_in_function()
                     case sError:
                         error = LEX_ERR;
                         return error;
-                        break;
+                    break;
                     case sString :
                         error = OK_ERR;
+                    break;
                     // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
                     case sIdent :
                         ;
@@ -2295,11 +2453,11 @@ ERROR_CODE bulid_in_function()
                         else {
                             error = OK_ERR;
                         }
-                        break;
+                    break;
                     default :
                         error = SYN_ERR;
                         return error;
-                        break;
+                    break;
                 }
 
                 token = get_Token();
@@ -2313,6 +2471,7 @@ ERROR_CODE bulid_in_function()
                     error = SYN_ERR;
                     return error;
                 }
+            break;
             default :
                 error = SYN_ERR;
                 return error;

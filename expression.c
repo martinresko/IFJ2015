@@ -86,6 +86,8 @@ ERROR_CODE Analysis(ListPointer *Lis,int first_token,int type_control)
 	else /* ak mi rekurzivny zostup zobral prvy token */
 	{
 		token_expression=token;
+		if(token_expression.id==sError)
+			return LEX_ERR;
 		printf("id tokenu:%d token:%s\n",token_expression.id,token_expression.attribute);
 	}
 

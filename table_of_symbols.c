@@ -492,7 +492,7 @@ Variable *getFromList(ListPointer *Lis,int state)
 	else if(state==TRUE) /* start */
 	{
 		Lis->last_terminal=Lis->first_list_element;
-		return Lis->last_terminal->data;
+		return Lis->last_terminal->data;		
 	}
 	else /* continue */
 	{

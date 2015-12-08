@@ -33,9 +33,9 @@ ERROR_CODE stat_list();
 ERROR_CODE command();
 ERROR_CODE funkcia_priradenie(char *);
 ERROR_CODE assign();
-ERROR_CODE arguments();
+ERROR_CODE arguments(char *);
 ERROR_CODE declaration();
-ERROR_CODE multi_arguments();
+ERROR_CODE multi_arguments(char *);
 ERROR_CODE multi_cin();
 ERROR_CODE hodnota_priradenia();
 ERROR_CODE multi_cout();
@@ -46,6 +46,6 @@ ERROR_CODE declaration_or();
 ERROR_CODE for_definition();
 ERROR_CODE for_deklaration();
 ERROR_CODE foo();
-ERROR_CODE bulid_in_function();
+ERROR_CODE build_in_function(int);
 
 #endif
