@@ -282,6 +282,7 @@ void popBlock(Function_GTS *function)
  * variable_typ - typ vkladanej premennej */
 ERROR_CODE insertFunctionVariableToStack(Function_GTS *function, char *variable_name,int variable_typ)
 {
+	
 	if(function!=NULL)
 	{
 		Variable *var=memmalloc(sizeof(struct variable));
@@ -291,7 +292,7 @@ ERROR_CODE insertFunctionVariableToStack(Function_GTS *function, char *variable_
 			var->name=variable_name;
 			if((treeInsert(stackTop(&(function->symbol_table_of_block)),variable_name,var)==INTERN_ERR))
 					return INTERN_ERR;
-			printf("VKLADAM PREMENNU\n"); 
+			printf("VKLADAM PREMENNU MENOM %s \n",variable_name); 
 			return OK_ERR;
 		}
 		else
@@ -306,6 +307,7 @@ ERROR_CODE insertFunctionVariableToStack(Function_GTS *function, char *variable_
  * variable_name - meno hladanej premennej */
 Variable *searchFunctionVariableInActualLevel(Function_GTS *function, char *variable_name)
 {
+	printf("CHECEM NAJT PREMENNU V AKTUALNOM BLOKU MENOM %s\n",variable_name );
 	if(function!=NULL)
 	{
 		Variable *found_param = findInList(&(function->params),variable_name);
@@ -334,6 +336,7 @@ Variable *searchFunctionVariableInActualLevel(Function_GTS *function, char *vari
  * variable_name - meno hladanej premennej */
 Variable *searchFunctionVariableInStack(Function_GTS *function, char *variable_name)
 {
+	printf("CHECEM NAJT PREMENNU V STACK MENOM %s\n",variable_name );
 	if(function!=NULL)
 	{
 		Variable *found_param = findInList(&(function->params),variable_name);

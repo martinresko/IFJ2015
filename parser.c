@@ -421,6 +421,7 @@ ERROR_CODE prototype_of_definition()
     ERROR_CODE error;
 
     token = get_Token();
+    printf("%s\n",token.attribute);
 
     switch (token.id) {
         /*pokila lexer vrati lex error*/
@@ -1215,7 +1216,7 @@ ERROR_CODE multi_arguments(char *previous_token_atributte)
                         //zistim ci je ID platne
                         Variable* argument_ID = searchFunctionVariableInStack(symbol_table.actual_function, token.attribute);
                         if (argument_ID == NULL) {
-                           error = SEM_UNDEF_ERR;
+                           error = SEM_TYPE_ERR;
                            return error;
                         }
                         if (The_First->typ != argument_ID->typ) {
@@ -1261,6 +1262,12 @@ ERROR_CODE multi_arguments(char *previous_token_atributte)
         break;
         // ak som dostal )
         case sRParenth :
+
+            if(getFunctionParam(searchFunction(&symbol_table,previous_token_atributte),CONTINUE) != NULL ) {
+                error = SEM_TYPE_ERR;
+                return error;
+            }
+
             getFunctionParam(searchFunction(&symbol_table,previous_token_atributte),FALSE);
             printf("dostal som )\n");
             error = OK_ERR;
@@ -1641,9 +1648,12 @@ ERROR_CODE fun_auto()
             error = SEM_UNDEF_ERR;
             return error;
         }
+
         // vlozime premennu na zasobnik
         error = insertFunctionVariableToStack(symbol_table.actual_function,token.attribute,AUTO);
         printf("stale som v aute\n");
+        
+        premenna_auto = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
         
         if (error != OK_ERR) {
             return error;
