@@ -548,10 +548,16 @@ ERROR_CODE insertFunctionInstruction(Function_GTS *function, int type, void *des
 * tabulka - ukazatel na tabulku symbolov */
 ERROR_CODE finalFunctionCheckout(Table_symbols * tabulka)
 {
-	if(traversalGTS(tabulka,DEFINE)==OK_ERR) /* funkcie su definovane */
+	if(traversalGTS(tabulka,DEFINE)==OK_ERR) /* ak su vsetky funkcie definovane */
 	{
-		if(searchFunction(tabulka,"main")!=NULL) /* ak najdem v GTS main */
-				return OK_ERR;
+		Function_GTS *main_funkcia = searchFunction(tabulka,"main");
+		if(main_funkcia!=NULL)
+		{
+			if((EmptyList(&main_funkcia->params)) && (main_funkcia->return_type==2)) /* skontrolujem ci main nema ziadne parametre a navtratovatova hodnota je int */
+                 return OK_ERR;
+             else
+                 return SEM_UNDEF_ERR;
+		}
 	}
 	return SEM_UNDEF_ERR; /* funkcie definovane niesu */
 }
