@@ -41,18 +41,27 @@ Tree treeNodesSearch(Tree node,char *key)
 	if(node!=NULL)	
 	{
 		int compare = strcmp(node->key,key);	/* porovnam hladany kluc s klucom v prvku */
-		if(compare)
+		if(compare!=0)
 		{
 			if(compare>0)	
+			{
 				return treeNodesSearch(node->right,key);
+			}
 			else /* compare je mensie ako nula */
+			{
 				return treeNodesSearch(node->left,key);
+			}
 		}
 		else /* compare == 0, cize su kluce rovnake */
+		{
 			return node; 
+		}
 	}
 	else /* nic som nenasiel */
+	{
 		return NULL;
+	}
+	return NULL;
 }
 /* vymaze vsetky podstromy daneho uzlu 
  * node - ukazatel na polozku v strome */
@@ -141,7 +150,7 @@ ERROR_CODE treeInsert(TreePointer *Tre, char *key,void *data)
 						return INTERN_ERR;
 				}
 				else /* list to nieje tak musim sa posunut dalej */
-					helpful_pointer=helpful_pointer->right;
+					helpful_pointer=helpful_pointer->left;
 			}
 			else /*compare == 0 */
 			{
