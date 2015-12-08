@@ -14,24 +14,27 @@
 //Hlavickovy subor pre interpret
 #include "interpret.h"
 
-/*
-* Nacitame si instrukcnu pasku funkcie main, Pristupime
-* k prvej instrukcii. Inicializujeme zasobnik ramcov.
-* Zavolame hlavnu funkciu interpretu.
-*/
-ERROR_CODE init_interpret(Table_Symbols *table){
-	ListPointer Instr_tape;
-	List NextIP;
-	Instr_tape = table.actual_function->instructions;
-	NextIP = Instr_tape->first_list_element;
-	StackPointer *Stack;
-	stackInit(Stack);
-	run_error = interpret()
+Instruction * get_next_instr(List NextIP){
+	Instruction *Act_Instr = (Instruction *) NextIP->data;
+	return Act_Instr;
 }
 
-ERROR_CODE interpret(){
+ERROR_CODE interpret(Table_symbols *table){
 run_error = OK_ERR;
-Act_Instr = NextIP->data;
+tFrame *frame;
+//Inicializujeme zasobnik na ramce
+StackPointer *Fr_Stack = NULL;
+stackInit(Fr_Stack);
+//Inicializujeme zasobnik na postfixove vycislenie
+StackPointer *Postfix_stack = NULL;
+stackInit(Postfix_stack);
+Function_GTS *current_function = searchFunction(table, "main"); //Vyhladame funckiu main v TS
+ListPointer Instr_tape = current_function->instructions; //Nacitana instrukcna paska
+//Prvy prvok na instrukcnej paske
+List NextIP = Instr_tape.first_list_element;
+//Dostaneme prvu instrukciu z instrukcnej pasky
+Instruction *Act_Instr = get_next_instr(NextIP);
+tPostFixNum *op1, *op2, *res = NULL;
 
 	while((run_error == OK_ERR) && (NextIP->next != NULL)){
 		switch(Act_Instr->type){
@@ -39,44 +42,110 @@ Act_Instr = NextIP->data;
 				
 			break;
 
-			case iADD:
+			case iGETNUM:
+				run_error = stackPush(Postfix_stack, Act_Instr->source1);
+				if(!(run_error)){
+					return run_error;
+				}
+			break;
 
+			case iADD:
+				op2 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
+				op1 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
+
+				res->data->iData = op1->data->iData + op2->data->iData;
+				run_error = stackPush(Postfix_stack, res);
 			break;
 
 			case iSUB:
+				op2 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
+				op1 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
 
+				res->data->iData = op1->data->iData - op2->data->iData;
+				run_error = stackPush(Postfix_stack, res);
 			break;
 
 			case iMUL:
+				op2 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
+				op1 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
 
+				res->data->iData = op1->data->iData * op2->data->iData;
+				run_error = stackPush(Postfix_stack, res);
 			break;
 
 			case iDIV:
+				op2 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
+				op1 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
 
+				res->data->iData = op1->data->iData / op2->data->iData;
+				run_error = stackPush(Postfix_stack, res);
 			break;
 
 			case iGREATER:
+				op2 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
+				op1 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
 
+				res->data->iData = op1->data->iData > op2->data->iData;
+				run_error = stackPush(Postfix_stack, res);
 			break;
 
 			case iLESS:
+				op2 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
+				op1 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
 
+				res->data->iData = op1->data->iData < op2->data->iData;
+				run_error = stackPush(Postfix_stack, res);
 			break;
 
-			case iEGREATER;
-
+			case iEGREATER:
+				op2 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
+				op1 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
+				res->data->iData = op1->data->iData >= op2->data->iData;
+				run_error = stackPush(Postfix_stack, res);
 			break;
 
 			case iELESS:
+				op2 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
+				op1 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
 
+				res->data->iData = op1->data->iData <= op2->data->iData;
+				run_error = stackPush(Postfix_stack, res);
 			break;
 
 			case iEQUAL:
+				op2 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
+				op1 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
 
+				res->data->iData = op1->data->iData == op2->data->iData;
+				run_error = stackPush(Postfix_stack, res);
 			break;
 
 			case iNEQUAL:
+				op2 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
+				op1 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
 
+				res->data->iData = op1->data->iData != op2->data->iData;
+				run_error = stackPush(Postfix_stack, res);
 			break;
 
 			case iJMP:
@@ -124,27 +193,24 @@ Act_Instr = NextIP->data;
 			break;
 
 			case iPUSH:
-
+				frame = Act_Instr->source1;
+				run_error = stackPush(Fr_Stack, frame);
+				if(!(run_error)){
+					return run_error;
+				}
 			break;
 
 			case iPOP:
-
+				stackPop(Fr_Stack);
 			break;
 
 			case iTOP:
-
+				frame = stackTop(Fr_Stack);
 			break;
 
 			case iTOPPOP:
-
-			break;
-
-			case iEMPTY:
-
-			break;
-
-			case iINIT:
-
+				frame = stackTop(Fr_Stack);
+				stackPop(Fr_Stack);
 			break;
 
 			case iRET:
@@ -171,6 +237,10 @@ Act_Instr = NextIP->data;
 
 			break;
 		}
-		Act_Instr = Act_Instr->next;
+		//Posunieme sa na instrukcnej paske
+		NextIP = NextIP->next;
+		//Poziadame o nasledujucu instrukciu
+		Act_Instr = get_next_instr(NextIP);
 	}
+	return run_error;
 }
