@@ -1,4 +1,0 @@
-int main(){
-string s = "\x2gasd";
-return 0;
-}
