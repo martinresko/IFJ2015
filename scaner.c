@@ -84,7 +84,6 @@ int HextoDec(char *hexa){
  			value += ((int)hexa[i] - 55) * base;
  		}
  	}
-
  	return value;
 }
 
@@ -365,8 +364,7 @@ int j;
  					escap = 'x';
  					state = sEscHex;
  				} else{
- 					state = sString;
- 					expand_token(92, &i);
+ 					state = sError;
  					undo_c(c);
  				}
  				break;
@@ -382,9 +380,7 @@ int j;
  					escap2 = c;
  					hexa[0] = (char)c;
  				} else{
- 					state = sString;
- 					expand_token(92, &i);
- 					expand_token(escap, &i);
+ 					state = sError;
  					undo_c(c);
  				}
  				break;
@@ -399,12 +395,13 @@ int j;
  					hexa[1] = (char)c;
  					hexa[2] = '\0';
  					escap2 = HextoDec(hexa);
- 					expand_token(escap2, &i);
+ 					if(escap2 == 0){
+ 						state = sError;
+ 					} else{
+ 						expand_token(escap2, &i);
+ 					}
  				} else{
- 					state = sString;
- 					expand_token(92, &i);
- 					expand_token(escap, &i);
- 					expand_token(escap2, &i);
+ 					state = sError;
  					undo_c(c);
  				}
  				break;

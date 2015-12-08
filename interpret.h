@@ -25,6 +25,7 @@ ERROR_CODE run_error;
 typedef enum{
 //Presun
 	iMOV,
+	iGETNUM,
 //Aritmeticke operacie
 	iADD,
 	iSUB,
@@ -53,12 +54,10 @@ typedef enum{
 	iWRITE,
 	iREAD,
 //Zasobnikove operacie
-	iPUSP,
+	iPUSH,
 	iPOP,
 	iTOP,
 	iTOPPOP,
-	iEMPTY,
-	iINIT,
 //Navratova hodnota
 	iRET,
 //Navestia
@@ -69,3 +68,31 @@ typedef enum{
 	iWRITEFR,
 	iREADFR
 } tInstrT;
+
+/* union na predavanie dat urciteho typu */
+typedef union{
+	int iData;
+	double dData;
+	char *sData;
+} tDataType;
+
+/* Vycet jednotlivych typov IFJ15 */
+typedef enum{
+	tINT,
+	tDOUBLE,
+	tSTRING
+} tType;
+
+/* Struktura na ramec */
+typedef struct{
+	int base_frame;
+	TreePointer Frame_tree;
+} tFrame;
+
+/* Struktura na premennu*/
+typedef struct{
+	tDataType *data;
+	tType *type;
+} tPostFixNum; 
+
+ERROR_CODE interpret(Table_symbols *table);
