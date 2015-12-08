@@ -1,4 +1,4 @@
-/**
+/*
  * Predmet: IFJ / IAL
  * Subor:     parser.h
  *            Hlavickovy subor parsru (rekurzivny zostup)
@@ -22,30 +22,30 @@
  #include "table_of_symbols.h"
  #include "scaner.h"
 
-ERROR_CODE prog();
-ERROR_CODE body();
-ERROR_CODE function();
-ERROR_CODE typ();
-ERROR_CODE prototype_of_definition();
-ERROR_CODE params(Function_GTS *);
-ERROR_CODE multi_params(Function_GTS *);
-ERROR_CODE stat_list();
-ERROR_CODE command();
-ERROR_CODE funkcia_priradenie(char *);
-ERROR_CODE assign();
-ERROR_CODE arguments(char *);
-ERROR_CODE declaration();
-ERROR_CODE multi_arguments(char *);
-ERROR_CODE multi_cin();
-ERROR_CODE hodnota_priradenia();
-ERROR_CODE multi_cout();
-ERROR_CODE term();
-ERROR_CODE fun_auto();
-ERROR_CODE inicialization();
-ERROR_CODE declaration_or();
-ERROR_CODE for_definition();
-ERROR_CODE for_deklaration();
-ERROR_CODE foo();
-ERROR_CODE build_in_function(int);
+ ERROR_CODE prog();
+ ERROR_CODE body();
+ ERROR_CODE function();
+ ERROR_CODE typ();
+ ERROR_CODE prototype_of_definition();
+ ERROR_CODE params(Function_GTS *);
+ ERROR_CODE multi_params(Function_GTS *);
+ ERROR_CODE stat_list();
+ ERROR_CODE command();
+ ERROR_CODE funkcia_priradenie(char *);
+ ERROR_CODE assign();
+ ERROR_CODE arguments(char *);
+ ERROR_CODE declaration();
+ ERROR_CODE multi_arguments(char *);
+ ERROR_CODE multi_cin();
+ ERROR_CODE hodnota_priradenia();
+ ERROR_CODE multi_cout();
+ ERROR_CODE term();
+ ERROR_CODE fun_auto();
+ ERROR_CODE inicialization();
+ ERROR_CODE declaration_or();
+ ERROR_CODE for_definition();
+ ERROR_CODE for_deklaration();
+ ERROR_CODE foo();
+ ERROR_CODE build_in_function(int);
 
 #endif

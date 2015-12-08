@@ -1,4 +1,4 @@
-/**
+/*
  * Predmet: IFJ / IAL
  * Subor:     parser.c
  *            Implementacia parsru (rekurzivny zostup)
@@ -9,7 +9,7 @@
  *            <xdomon00@stud.fit.vutbr.cz>, Dávid Domonkoš
  *            <xcerna06@stud.fit.vutbr.cz>, Peter Čerňanský
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
-**/
+ */
  
 #include "parser.h"
 
@@ -29,8 +29,9 @@ int type_for_expression;
 
 
 
-/**
+/* hlavna funkcia na spustenie parseru
  * @info:<prog> ->  <body> ; $
+ * navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE prog()
@@ -69,13 +70,13 @@ ERROR_CODE prog()
     if (error != OK_ERR) {
         return error;
     }
-    
 
     return OK_ERR;
 }
 
-/**
+/*
  * @info:<body> -> <function><body> /empty
+ * navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE body()
@@ -114,8 +115,9 @@ ERROR_CODE body()
     return OK_ERR;
 }
 
-/**
+/*
  * @info:function> -> <typ> id (<params>) <protype_or_definition>
+ * navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE function()
@@ -187,8 +189,9 @@ ERROR_CODE function()
     return OK_ERR;
 }
 
-/**
+/*
  * @info:<typ> -> int / string / double 
+ * navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE typ()
@@ -232,8 +235,9 @@ ERROR_CODE typ()
     return error;
 }
 
-/**
+/*
  * @info:<params> -> <typ> id <multi_params> / empty
+ * navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE params(Function_GTS * previous_function_id)
@@ -310,8 +314,9 @@ ERROR_CODE params(Function_GTS * previous_function_id)
     return OK_ERR;
 }
 
-/**
+/*
  * @info:<multi_params> -> , <typ> id <multi_params> / empty
+ * navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE multi_params(Function_GTS * previous_function_id)
@@ -405,8 +410,9 @@ ERROR_CODE multi_params(Function_GTS * previous_function_id)
     return OK_ERR;
 }
 
-/**
+/*
  * @info:<prototype_or_definition> -> { <stat_list> } / ;
+ * navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE prototype_of_definition()
@@ -455,8 +461,9 @@ ERROR_CODE prototype_of_definition()
     return OK_ERR;
 }
 
-/**
+/*
  * @info:<stat_list> -> <command> <stat_list> /empty
+ * navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE stat_list()
@@ -509,7 +516,7 @@ ERROR_CODE stat_list()
     return OK_ERR;
 }
 
-/**
+/*
  * @info: command
  * <assign>
  * <funkcia_ priradenie>
@@ -520,6 +527,7 @@ ERROR_CODE stat_list()
  *  for (<for_definice> ; expresion ; <premenna>) { <stat_list>}
  *  cin >> id <multi_cin>;
  *  cout << <term> <multi_cout>;
+ * navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE command()
@@ -1012,10 +1020,11 @@ ERROR_CODE command()
     return OK_ERR;
 }
 
-/**
+/*
  * @info:  <funkcia_ priradenie>
  *  (<arguments>)
  *  <deklaracia>
+ * navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE funkcia_priradenie(char *previous_token_atributte)
@@ -1079,9 +1088,10 @@ ERROR_CODE funkcia_priradenie(char *previous_token_atributte)
 
 }
 
-/**
+/*
  * @info:  <arguments> 
  * id <multi_arguments>
+ * navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE arguments(char *previous_token_atributte)
@@ -1166,11 +1176,12 @@ ERROR_CODE arguments(char *previous_token_atributte)
     return OK_ERR;
 }
 
-/**
+/*
  * @info: <multi_arguments>
  *  , id <multi_arguments>
  * empty
-**/
+ * navratova hodnota return: ERROR CODE
+ */
 
 ERROR_CODE multi_arguments(char *previous_token_atributte)
 {
@@ -1271,11 +1282,12 @@ ERROR_CODE multi_arguments(char *previous_token_atributte)
     return OK_ERR;
 }
 
-/**
+/*
  * @info: <multi_cin>  
  *  >> id <multi_cin>
  *  empty
-**/
+ * navratova hodnota return: ERROR CODE
+ */
 
 ERROR_CODE multi_cin()
 {
@@ -1342,11 +1354,12 @@ ERROR_CODE multi_cin()
 }
 
 
-/**
+/*
  * @info: <multi_cout> 
  *  << <term> <multi_count>
  *  empty
-**/
+ * navratova hodnota return: ERROR CODE
+ */
 
 ERROR_CODE multi_cout()
 {
@@ -1392,11 +1405,12 @@ ERROR_CODE multi_cout()
     return OK_ERR;
 }
 
-/**
+/*
  * @info: <assign> 
  *  <auto>;
  *  <inicializacia>;
-**/
+ * navratova hodnota return: ERROR CODE
+ */
 
 ERROR_CODE assign()
 {
@@ -1436,7 +1450,8 @@ ERROR_CODE assign()
 /*
  * @info: <deklaracia>
  *  = <hodnota_priradenia>
-*/
+ * navratova hodnota return: ERROR CODE
+ */
 
 ERROR_CODE declaration()
 {
@@ -1464,7 +1479,8 @@ ERROR_CODE declaration()
  * @info: <hodnota_priradenia> 
  *  expression
  *  id( < arguments > ) 
-*/
+ * navratova hodnota return: ERROR CODE
+ */
 
 ERROR_CODE hodnota_priradenia()
 {	
@@ -1546,8 +1562,9 @@ ERROR_CODE hodnota_priradenia()
 
 /*
  * @info: <term> 
- *id / cislo / retazec 
-*/
+ * id / cislo / retazec 
+ * navratova hodnota return: ERROR CODE
+ */
 
 ERROR_CODE term()
 {
@@ -1589,7 +1606,8 @@ ERROR_CODE term()
 /*
  * @info: <auto> 
  *  auto id = expression 
-*/
+ * navratova hodnota return: ERROR CODE
+ */
 
 ERROR_CODE fun_auto()
 {
@@ -1691,7 +1709,8 @@ ERROR_CODE fun_auto()
 /*
  * @info: <inicialization> 
  *  <typ> id <deklaracia alebo ;>
-*/
+ * navratova hodnota return: ERROR CODE
+ */
 
 ERROR_CODE inicialization()
 {
@@ -1751,7 +1770,8 @@ ERROR_CODE inicialization()
  * @info: <declaration_or> 
  *  <deklaracia>
  *  empty
-*/
+ * navratova hodnota return: ERROR CODE
+ */
 
 ERROR_CODE declaration_or()
 {
@@ -1788,7 +1808,8 @@ ERROR_CODE declaration_or()
 /*
  * @info: <for_definition>
  *  = <hodnota_priradenia>
-*/
+ * navratova hodnota return: ERROR CODE
+ */
 
 ERROR_CODE for_definition()
 {
@@ -1823,7 +1844,8 @@ ERROR_CODE for_definition()
  * @info: <for_deklaration>
  *  id <deklaracia>
  *  <typ> id <deklaracia>
-*/
+ * navratova hodnota return: ERROR CODE
+ */
 
 ERROR_CODE for_deklaration() 
 {
@@ -1882,7 +1904,8 @@ ERROR_CODE for_deklaration()
  * @info: <foo>
  *  empty
  *  = expresion
-*/
+ * navratova hodnota return: ERROR CODE
+ */
 
 ERROR_CODE foo() 
 {
@@ -1935,7 +1958,8 @@ ERROR_CODE foo()
  *  sort
  * type_control znaci ci sa bude kontrolovat typ TRUE/FALSE
  * type_for_build_in_function
-*/
+ * navratova hodnota return: ERROR CODE
+ */
 
 ERROR_CODE build_in_function(int type_control)
 {
