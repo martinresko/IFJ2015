@@ -19,17 +19,23 @@
 //{
 //	meminitialization();
 //
+//	char *menoInstrukcie = "GOTO";
+//	List dalsiaInstrukcia = memmalloc(sizeof(struct list));
+//	dalsiaInstrukcia->data = menoInstrukcie;
+//	dalsiaInstrukcia->next = NULL;
+//	dalsiaInstrukcia->prev = NULL;
+//
 //	StackPointer zasobnik;
 //	stackInit(&zasobnik);
 //	pushFrame(&zasobnik);
-//	fromPreparationDoBase(&zasobnik,sString);
+//	fromPreparationDoBase(&zasobnik,sString,dalsiaInstrukcia);
 //	Frame_variable *F_var = insertVariableToFrame(&zasobnik,"premenna",sInteger);
 //	insertVariableToFrame(&zasobnik,"return_test",sString);
 //	setValueVariable(&zasobnik,"premenna","4");
 //	F_var=F_var;
 //
 //	pushFrame(&zasobnik);
-//	fromPreparationDoBase(&zasobnik,sString);
+//	fromPreparationDoBase(&zasobnik,sString,NULL);
 //	insertVariableToFrame(&zasobnik,"premenna2",sString);
 //	setValueVariable(&zasobnik,"$return","navratova hodnota STRING");
 //	Frame_variable *ret  = searchVariableInFrames(&zasobnik,"$return");
@@ -41,6 +47,12 @@
 //		printf("hodnota premennej: %s\n",S_var->frame_var_value.S);
 //	else
 //		printf("Nenasiel som \n");
+//
+//	Frame_variable *instrukc = searchVariableInFrames(&zasobnik,"$next_instruction");
+//	if(instrukc!=NULL)
+//		printf("nasledujuca instrukcia je %s",(char *)(instrukc->next_instruction->data));
+//	else
+//		printf("nenasiel som instrukciu\n");
 //
 //	//setValueVariable(&zasobnik,"premenna2","AHOJ");
 //	//copyValue(&zasobnik,"premenna2","$return");
@@ -107,6 +119,7 @@ Frame_variable *insertVariableToFrame(StackPointer *Stac, char *name,int type)
 					break;
 			}
 			new_variable->inicialized=FALSE;
+			new_variable->next_instruction = NULL;
 			if(treeInsert( &(((Frame *)(stackTop(Stac)))->frame_tree),name,new_variable)==INTERN_ERR)
 			{
 				memfree(new_variable);
@@ -213,7 +226,7 @@ Stack findLastBaseFrame(StackPointer *Stac)
 
 /* zmeni typ ramca z pripravovaneho ktory je na vrchole na zakladny 
  * Stac - ukazatel na zasobnik */
-void fromPreparationDoBase(StackPointer *Stac,int return_type)
+void fromPreparationDoBase(StackPointer *Stac,int return_type,List next_instruction)
 {
 	if(Stac!=NULL)
 	{
@@ -230,6 +243,11 @@ void fromPreparationDoBase(StackPointer *Stac,int return_type)
 			case sString:
 				insertVariableToFrame(Stac,"$return",return_type);
 				break;
+		}
+		if(next_instruction!=NULL)
+		{
+			Frame_variable *Inst_next = insertVariableToFrame(Stac,"$next_instruction",return_type); /* specialne premennja ktora ako jedina bude mat nastavenu polozku next_instruction co je vlastne ukazatel na dalsiu instrukciu v volajucej funkcii */
+			Inst_next->next_instruction=next_instruction;/* samotne priradenie ukazatela */
 		}
 	}
 }
@@ -349,9 +367,12 @@ ERROR_CODE copyValue(StackPointer *Stac,Frame_variable *from_variable, Frame_var
 				return OK_ERR;
 				break;
 			case sString:
-				to_variable->frame_var_value.S = malloc(sizeof(char) * strlen(from_variable->frame_var_value.S));
-				strcpy(to_variable->frame_var_value.S,from_variable->frame_var_value.S);
-				return OK_ERR;
+				to_variable->frame_var_value.S = memmalloc(sizeof(char) * strlen(from_variable->frame_var_value.S)+1);
+				if(to_variable->frame_var_value.S !=NULL)
+				{
+					strcpy(to_variable->frame_var_value.S,from_variable->frame_var_value.S);
+					return OK_ERR;
+				}
 				break;
 			case sDouble:
 				to_variable->frame_var_value.D = from_variable->frame_var_value.D;

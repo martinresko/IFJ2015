@@ -24,6 +24,7 @@
 #include"bintree.h"
 #include"stack.h"
 #include"scaner.h"
+#include"list.h"
 
 /* typy ramcov */
 typedef enum {
@@ -51,22 +52,27 @@ typedef struct frame_variable {
 	int frame_var_type;	
 	Var_value frame_var_value;
 	int inicialized;
+	List next_instruction; /* je nastavene len v jednej specialnej premennej */
 } Frame_variable;
 
 /* prototypy pre ramce */
+// praca z ramcami
 ERROR_CODE pushFrame(StackPointer *);
 void popFrame(StackPointer *);
-Frame_variable *insertVariableToFrame(StackPointer*,char*,int);
+void destroyFramesToEnded(StackPointer *);
+Stack findLastBaseFrame(StackPointer *);
+void fromPreparationDoBase(StackPointer *,int,List);
+void fromBaseDoEnded(StackPointer *);
+//hladanie v ramcoch
 Frame_variable *searchVariableInFrames(StackPointer *,char *);
 Frame_variable *searchVariableInFramesAfterEnded(StackPointer *,char *);
-Stack findLastBaseFrame(StackPointer *);
-void fromPreparationDoBase(StackPointer *,int);
+//praca z hodnotou v ramcoch
+Frame_variable *insertVariableToFrame(StackPointer*,char*,int);
+ERROR_CODE setValueVariable(StackPointer *,char *,char*);
+ERROR_CODE copyValue(StackPointer *,Frame_variable *,Frame_variable *);
+ERROR_CODE setVariableAsInitialized(StackPointer *,char *);
+// uvvolnovanie 
 void destroyFrameWithBase(StackPointer *);
 void destroyAllFrames(StackPointer *);
-ERROR_CODE setVariableAsInitialized(StackPointer *,char *);
-ERROR_CODE setValueVariable(StackPointer *,char *,char*);
-void fromBaseDoEnded(StackPointer *);
-void destroyFramesToEnded(StackPointer *);
-ERROR_CODE copyValue(StackPointer *,Frame_variable *,Frame_variable *);
 
 #endif
