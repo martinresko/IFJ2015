@@ -219,6 +219,7 @@ ERROR_CODE Reduce(ListPointer *Lis)
 	{
 		List left_operand = Lis->last_terminal->prev;
 		List right_operand = Lis->last_terminal->next;
+		printf("pravy je %d \n",((Precedence_table_element *)(right_operand->data))->expresion_id);
 		if( ( (left_operand!=NULL) && (((Precedence_table_element *)(left_operand->data))->expresion_id==OPERAND) ) && ( (right_operand!=NULL) && (((Precedence_table_element *)(right_operand->data))->expresion_id==OPERAND) ) )/* ci okolo operatoru nieco je a ci su to operandy */
 		{
 			int left_id=((Precedence_table_element *)(left_operand->data))->id;
@@ -308,7 +309,10 @@ ERROR_CODE Reduce(ListPointer *Lis)
 		}
 	}
 	else
+	{
+		printf("koniec else \n");
 		return SYN_ERR;
+	}
 }
 
 /* funkcia pre pravidlo (D) -> D
@@ -316,9 +320,11 @@ ERROR_CODE Reduce(ListPointer *Lis)
 void ReduceT(ListPointer *Lis)
 {
 	printf("(D) -> D\n");
-	Lis->last_terminal->data=Lis->last_terminal->next->data; /* skopirujem data z operandu do ( */
+	int typ = ((Precedence_table_element *)(Lis->last_terminal->next->data))->id;
 	DeleteLast(Lis); /* odstranim operand */
-	((Precedence_table_element *)(Lis->last_terminal->data))->terminal=false; /* z ( odnastavim terminal lebo teraz je to Operand */
+	((Precedence_table_element *)(Lis->last_terminal->data))->id=typ;
+	((Precedence_table_element *)(Lis->last_terminal->data))->expresion_id=OPERAND;
+	((Precedence_table_element *)(Lis->last_terminal->data))->terminal=false; 
 	FindLastTerminal(Lis); /* nastavim novy terminal */
 }
 
