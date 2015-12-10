@@ -156,6 +156,10 @@ ERROR_CODE function()
         // vlozim do tabulky symbolov 
         error = insertFunction(&symbol_table,token.attribute,type_of_element_to_table_of_symbols);
     }
+    else {
+        error = SEM_UNDEF_ERR;
+        return error;
+    }
 
     if (error != OK_ERR){
         return error;
@@ -1135,7 +1139,10 @@ ERROR_CODE arguments(char *previous_token_atributte)
             if (error != OK_ERR) {
                 return error;
             }
-            break;
+        break;
+        case sRParenth :
+            error = OK_ERR;
+        break;
         default :
             if((token.id == sInteger) || (token.id == sDouble) || (token.id == sString) ) {
                 printf("dostal som  cislo alebo string\n");
@@ -1165,8 +1172,6 @@ ERROR_CODE arguments(char *previous_token_atributte)
             if (error != OK_ERR) {
                 return error;
             }
-            
-
         break;
     }
 
@@ -1668,11 +1673,11 @@ ERROR_CODE fun_auto()
 
         if(token.id != sAssign) {
         	printf("nedostal som =\n");
-            error = SYN_ERR;
+            error = DATA_TYPE_ERR;
             return error;
         }
         printf("dostal som =\n");
-        error = expression(NOT_TAKEN_FIRST_TOKEN,AUTO); // expression opravit este
+        error = expression(NOT_TAKEN_FIRST_TOKEN,AUTO);
         
         if (error != OK_ERR) {
            	return error;
