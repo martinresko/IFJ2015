@@ -490,7 +490,7 @@ ERROR_CODE stat_list()
             popBlock(symbol_table.actual_function);
 
             if( (stackEmpty(&(symbol_table.actual_function->symbol_table_of_block))) && (symbol_table.actual_function->return_occured == FALSE) ) {
-            	error = SYN_ERR;
+            	error = UNINITI_ERR;
             	return error;
             }
 
@@ -650,7 +650,7 @@ ERROR_CODE command()
                     return error;
                 } 
 
-                // zo prediktivnej som uz dostal token
+                // z prediktivnej som uz dostal token
                 /*kontrola ci je Lex_ERR*/
                 if (token.id == sError) {
                     error = LEX_ERR;
