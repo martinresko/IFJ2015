@@ -14,156 +14,354 @@
 //Hlavickovy subor pre interpret
 #include "interpret.h"
 
+/* Nacitanie nasledujucej instrukcie */
 Instruction * get_next_instr(List NextIP){
 	Instruction *Act_Instr = (Instruction *) NextIP->data;
 	return Act_Instr;
 }
 
+/* Spusta interpretaciu programu v IFJ15 */
 ERROR_CODE interpret(Table_symbols *table){
 run_error = OK_ERR;
-tFrame *frame;
+
 //Inicializujeme zasobnik na ramce
 StackPointer *Fr_Stack = NULL;
 stackInit(Fr_Stack);
+
 //Inicializujeme zasobnik na postfixove vycislenie
 StackPointer *Postfix_stack = NULL;
 stackInit(Postfix_stack);
-Function_GTS *current_function = searchFunction(table, "main"); //Vyhladame funckiu main v TS
-ListPointer Instr_tape = current_function->instructions; //Nacitana instrukcna paska
-//Prvy prvok na instrukcnej paske
+
+//Vyhladame si instrukcnu pasku funkcie main
+Function_GTS *current_function = searchFunction(table, "main");
+ListPointer Instr_tape = current_function->instructions;
 List NextIP = Instr_tape.first_list_element;
-//Dostaneme prvu instrukciu z instrukcnej pasky
+
+//Ziskame nasledujucu instrukciu
 Instruction *Act_Instr = get_next_instr(NextIP);
-tPostFixNum *op1, *op2, *res = NULL;
+
+//aktualny ramec...
+
+//Frame FR_element;
+
+//Premenna ramca...
+Frame_variable *Act_Var1 = NULL;
+Frame_variable *Act_Var2 = NULL;
+Frame_variable *Act_Res = NULL;
+
 
 	while((run_error == OK_ERR) && (NextIP->next != NULL)){
 		switch(Act_Instr->type){
+			/* Operacie PRIRADENIA a ZISKANIA HODNOT */
 			case iMOV:
 				
 			break;
 
-			case iGETNUM:
-				run_error = stackPush(Postfix_stack, Act_Instr->source1);
-				if(!(run_error)){
+			case iGETVALUE:
+				
+			break;
+			///////////////////////////////////////////
+
+			/* ARITMETICKE operatory --> celociselne, desatinne, retazcove */
+			case iADD:
+			case iSUB:
+			case iMUL:
+			case iDIV:
+
+				Act_Var2 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
+				Act_Var1 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
+
+				if((Act_Var1->inicialized == 0) || (Act_Var2->inicialized == 0)){
+					run_error = UNINITI_ERR;
 					return run_error;
 				}
+
+				if((Act_Var1->frame_var_type == sInteger) && (Act_Var2->frame_var_type == sInteger)){
+					Act_Res->frame_var_type = sInteger;
+					switch(Act_Instr->type){
+						case iADD:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.I + Act_Var2->frame_var_value.I;
+						break;
+
+						case iSUB:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.I - Act_Var2->frame_var_value.I;
+						break;
+
+						case iMUL:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.I * Act_Var2->frame_var_value.I;
+						break;
+
+						case iDIV:
+							if(Act_Var2->frame_var_value.I == 0){
+								run_error = ZERO_DIV_ERR;
+								return run_error;
+							}
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.I / Act_Var2->frame_var_value.I;
+						break;
+					}
+				}
+				else if((Act_Var1->frame_var_type == sInteger) && (Act_Var2->frame_var_type == sDouble)){
+					Act_Res->frame_var_type = sDouble;
+					switch(Act_Instr->type){
+						case iADD:
+							Act_Res->frame_var_value.D = (double)Act_Var1->frame_var_value.I + Act_Var2->frame_var_value.D;
+						break;
+
+						case iSUB:
+							Act_Res->frame_var_value.D = (double)Act_Var1->frame_var_value.I - Act_Var2->frame_var_value.D;
+						break;
+
+						case iMUL:
+							Act_Res->frame_var_value.D = (double)Act_Var1->frame_var_value.I * Act_Var2->frame_var_value.D;
+						break;
+
+						case iDIV:
+							if(Act_Var2->frame_var_value.D == 0.0){
+								run_error = ZERO_DIV_ERR;
+								return run_error;
+							}
+							Act_Res->frame_var_value.D = (double)Act_Var1->frame_var_value.I / Act_Var2->frame_var_value.D;
+						break;
+					}
+				}
+				else if((Act_Var1->frame_var_type == sDouble) && (Act_Var2->frame_var_type == sInteger)){
+					Act_Res->frame_var_type = sDouble;
+					switch(Act_Instr->type){
+						case iADD:
+							Act_Res->frame_var_value.D = Act_Var1->frame_var_value.D + (double)Act_Var2->frame_var_value.I;
+						break;
+
+						case iSUB:
+							Act_Res->frame_var_value.D = Act_Var1->frame_var_value.D - (double)Act_Var2->frame_var_value.I;
+						break;
+
+						case iMUL:
+							Act_Res->frame_var_value.D = Act_Var1->frame_var_value.D * (double)Act_Var2->frame_var_value.I;
+						break;
+
+						case iDIV:
+							if(Act_Var2->frame_var_value.I == 0){
+								run_error = ZERO_DIV_ERR;
+								return run_error;
+							}
+							Act_Res->frame_var_value.D = Act_Var1->frame_var_value.D / (double)Act_Var2->frame_var_value.I;
+						break;
+					}
+				}
+				else if((Act_Var1->frame_var_type == sDouble) && (Act_Var2->frame_var_type == sDouble)){
+					Act_Res->frame_var_type = sDouble;
+					switch(Act_Instr->type){
+						case iADD:
+							Act_Res->frame_var_value.D = Act_Var1->frame_var_value.D + Act_Var2->frame_var_value.D;
+						break;
+
+						case iSUB:
+							Act_Res->frame_var_value.D = Act_Var1->frame_var_value.D - Act_Var2->frame_var_value.D;
+						break;
+
+						case iMUL:
+							Act_Res->frame_var_value.D = Act_Var1->frame_var_value.D * Act_Var2->frame_var_value.D;
+						break;
+
+						case iDIV:
+							if(Act_Var2->frame_var_value.D == 0.0){
+								run_error = ZERO_DIV_ERR;
+								return run_error;
+							}
+							Act_Res->frame_var_value.D = Act_Var1->frame_var_value.D / Act_Var2->frame_var_value.D;
+						break;
+					}
+				}
+
+				run_error = stackPush(Postfix_stack, Act_Res);
 			break;
 
-			case iADD:
-				op2 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-				op1 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
+			//////////////////////////////////////////
 
-				res->data->iData = op1->data->iData + op2->data->iData;
-				run_error = stackPush(Postfix_stack, res);
-			break;
-
-			case iSUB:
-				op2 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-				op1 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-
-				res->data->iData = op1->data->iData - op2->data->iData;
-				run_error = stackPush(Postfix_stack, res);
-			break;
-
-			case iMUL:
-				op2 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-				op1 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-
-				res->data->iData = op1->data->iData * op2->data->iData;
-				run_error = stackPush(Postfix_stack, res);
-			break;
-
-			case iDIV:
-				op2 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-				op1 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-
-				res->data->iData = op1->data->iData / op2->data->iData;
-				run_error = stackPush(Postfix_stack, res);
-			break;
-
+			/* RELACNE operatory (logicke) --> vysledok TRUE || FALSE reprezentovane int */
 			case iGREATER:
-				op2 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-				op1 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-
-				res->data->iData = op1->data->iData > op2->data->iData;
-				run_error = stackPush(Postfix_stack, res);
-			break;
-
 			case iLESS:
-				op2 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-				op1 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-
-				res->data->iData = op1->data->iData < op2->data->iData;
-				run_error = stackPush(Postfix_stack, res);
-			break;
-
 			case iEGREATER:
-				op2 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-				op1 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-				res->data->iData = op1->data->iData >= op2->data->iData;
-				run_error = stackPush(Postfix_stack, res);
-			break;
-
 			case iELESS:
-				op2 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-				op1 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-
-				res->data->iData = op1->data->iData <= op2->data->iData;
-				run_error = stackPush(Postfix_stack, res);
-			break;
-
 			case iEQUAL:
-				op2 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-				op1 = stackTop(Postfix_stack);
-				stackPop(Postfix_stack);
-
-				res->data->iData = op1->data->iData == op2->data->iData;
-				run_error = stackPush(Postfix_stack, res);
-			break;
-
 			case iNEQUAL:
-				op2 = stackTop(Postfix_stack);
+
+				Act_Var2 = stackTop(Postfix_stack);
 				stackPop(Postfix_stack);
-				op1 = stackTop(Postfix_stack);
+				Act_Var1 = stackTop(Postfix_stack);
 				stackPop(Postfix_stack);
 
-				res->data->iData = op1->data->iData != op2->data->iData;
-				run_error = stackPush(Postfix_stack, res);
+				if((Act_Var1->inicialized == 0) || (Act_Var2->inicialized == 0)){
+					run_error = UNINITI_ERR;
+					return run_error;
+				}
+
+				if((Act_Var1->frame_var_type == sInteger) && (Act_Var2->frame_var_type == sInteger)){
+					Act_Res->frame_var_type = sInteger;
+					switch(Act_Instr->type){
+						case iGREATER:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.I > Act_Var2->frame_var_value.I;
+						break;
+
+						case iLESS:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.I < Act_Var2->frame_var_value.I;
+						break;
+
+						case iEGREATER:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.I >= Act_Var2->frame_var_value.I;
+						break;
+
+						case iELESS:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.I <= Act_Var2->frame_var_value.I;
+						break;
+
+						case iEQUAL:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.I == Act_Var2->frame_var_value.I;
+						break;
+
+						case iNEQUAL:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.I != Act_Var2->frame_var_value.I;
+						break;
+					}
+				}
+				else if((Act_Var1->frame_var_type == sDouble) && (Act_Var2->frame_var_type == sDouble)){
+					Act_Res->frame_var_type = sInteger;
+					switch(Act_Instr->type){
+						case iGREATER:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.D > Act_Var2->frame_var_value.D;
+						break;
+
+						case iLESS:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.D < Act_Var2->frame_var_value.D;
+						break;
+
+						case iEGREATER:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.D >= Act_Var2->frame_var_value.D;
+						break;
+
+						case iELESS:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.D <= Act_Var2->frame_var_value.D;
+						break;
+
+						case iEQUAL:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.D == Act_Var2->frame_var_value.D;
+						break;
+
+						case iNEQUAL:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.D != Act_Var2->frame_var_value.D;
+						break;
+					}
+				}
+				else if((Act_Var1->frame_var_type == sString) && (Act_Var2->frame_var_type == sString)){
+					Act_Res->frame_var_type = sInteger;
+					switch(Act_Instr->type){
+						case iGREATER:
+							Act_Res->frame_var_value.I = strcmp(Act_Var1->frame_var_value.S, Act_Var2->frame_var_value.S) > 0;
+						break;
+
+						case iLESS:
+							Act_Res->frame_var_value.I = strcmp(Act_Var1->frame_var_value.S, Act_Var2->frame_var_value.S) < 0;
+						break;
+
+						case iEGREATER:
+							Act_Res->frame_var_value.I = strcmp(Act_Var1->frame_var_value.S, Act_Var2->frame_var_value.S) >= 0;
+						break;
+
+						case iELESS:
+							Act_Res->frame_var_value.I = strcmp(Act_Var1->frame_var_value.S, Act_Var2->frame_var_value.S) <= 0;
+						break;
+
+						case iEQUAL:
+							Act_Res->frame_var_value.I = strcmp(Act_Var1->frame_var_value.S, Act_Var2->frame_var_value.S) == 0;
+						break;
+
+						case iNEQUAL:
+							Act_Res->frame_var_value.I = strcmp(Act_Var1->frame_var_value.S, Act_Var2->frame_var_value.S) != 0;
+						break;
+					}
+				}
+				else if((Act_Var1->frame_var_type == sInteger) && (Act_Var2->frame_var_type == sDouble)){
+					Act_Res->frame_var_type = sInteger;
+					switch(Act_Instr->type){
+						case iGREATER:
+							Act_Res->frame_var_value.I = (double)Act_Var1->frame_var_value.I > Act_Var2->frame_var_value.D;
+						break;
+
+						case iLESS:
+							Act_Res->frame_var_value.I = (double)Act_Var1->frame_var_value.I < Act_Var2->frame_var_value.D;
+						break;
+
+						case iEGREATER:
+							Act_Res->frame_var_value.I = (double)Act_Var1->frame_var_value.I >= Act_Var2->frame_var_value.D;
+						break;
+
+						case iELESS:
+							Act_Res->frame_var_value.I = (double)Act_Var1->frame_var_value.I <= Act_Var2->frame_var_value.D;
+						break;
+
+						case iEQUAL:
+							Act_Res->frame_var_value.I = (double)Act_Var1->frame_var_value.I == Act_Var2->frame_var_value.D;
+						break;
+
+						case iNEQUAL:
+							Act_Res->frame_var_value.I = (double)Act_Var1->frame_var_value.I != Act_Var2->frame_var_value.D;
+						break;
+					}
+				}
+				else if((Act_Var1->frame_var_type == sDouble) && (Act_Var2->frame_var_type == sInteger)){
+					Act_Res->frame_var_type = sInteger;
+					switch(Act_Instr->type){
+						case iGREATER:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.D > (double)Act_Var2->frame_var_value.I;
+						break;
+
+						case iLESS:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.D < (double)Act_Var2->frame_var_value.I;
+						break;
+
+						case iEGREATER:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.D >= (double)Act_Var2->frame_var_value.I;
+						break;
+
+						case iELESS:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.D <= (double)Act_Var2->frame_var_value.I;
+						break;
+
+						case iEQUAL:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.D == (double)Act_Var2->frame_var_value.I;
+						break;
+
+						case iNEQUAL:
+							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.D != (double)Act_Var2->frame_var_value.I;
+						break;
+					}
+				}
+
+				run_error = stackPush(Postfix_stack, Act_Res);
 			break;
+			/////////////////////////////////////////
 
+			/* Nepodmienene, podmienene SKOKY a volanie funkcii */
 			case iJMP:
-
+				//goto
 			break;
 
 			case iJZ:
-
+				//goto
 			break;
 
 			case iJNZ:
-
+				//goto
 			break;
 
 			case iCALL:
 
 			break;
+			/////////////////////////////////////////
 
+			/* Praca so VSTAVANYMI funkciami */
 			case iSORT:
 
 			break;
@@ -183,59 +381,109 @@ tPostFixNum *op1, *op2, *res = NULL;
 			case iCONCAT:
 
 			break;
+			/////////////////////////////////////////
 
+			/* Instrukcie I/O Vstupu a Vystupu */
 			case iWRITE:
+				/* Potrebujeme zistit co ideme vypisovat */
+				if(!(Act_Var1->inicialized)){
+					run_error = UNINITI_ERR;
+					return run_error;
+				}
 
+				switch(Act_Var1->frame_var_type){
+					case sInteger:
+						printf("%d", Act_Var1->frame_var_value.I);
+					break;
+
+					case sDouble:
+						printf("%g", Act_Var1->frame_var_value.D);
+					break;
+
+					case sString:
+						printf("%s", Act_Var1->frame_var_value.S);
+					break;
+				}
 			break;
 
 			case iREAD:
 
 			break;
+			////////////////////////////////////////
+			
+			/* Operacie nad zasobnikom POSTFIX */
+
+			case iDISPSTPOST:
+				stackDestroy(Postfix_stack);
+			break;
 
 			case iPUSH:
-				frame = Act_Instr->source1;
-				run_error = stackPush(Fr_Stack, frame);
-				if(!(run_error)){
-					return run_error;
-				}
+				//Act_Var1 = searchVariableInFrames(Fr_Stack, /* char * */)
+				run_error = stackPush(Postfix_stack, Act_Var1);
 			break;
 
 			case iPOP:
-				stackPop(Fr_Stack);
+				stackPop(Postfix_stack);
 			break;
 
 			case iTOP:
-				frame = stackTop(Fr_Stack);
+				Act_Var1 = stackTop(Postfix_stack);
 			break;
 
 			case iTOPPOP:
-				frame = stackTop(Fr_Stack);
-				stackPop(Fr_Stack);
+				Act_Var1 = stackTop(Postfix_stack);
+				stackPop(Postfix_stack);
 			break;
+			//////////////////////////////////////
 
+			/* Praca s navestiami instrukcnej pasky */
 			case iRET:
 
 			break;
 
 			case iLABEL:
+				;
+			break;
+			//////////////////////////////////////
 
+			/* Praca s FRAME ramcami a zasobnikom ramcov */
+			case iPUSHFR:
+				run_error = pushFrame(Fr_Stack);
 			break;
 
-			case iINITFR:
-
+			case iPOPFR:
+				popFrame(Fr_Stack);
 			break;
 
 			case iDISPFR:
-
+				destroyFrameWithBase(Fr_Stack);
+				destroyFramesToEnded(Fr_Stack);
 			break;
 
-			case iWRITEFR:
-
+			case iINSERT_TO_FR:
+				//Act_Var1 = insertVariableToFrame(Fr_Stack, /* char * , int */);
 			break;
 
 			case iREADFR:
-
+				//Act_Var1 = searchVariableInFrames(Fr_Stack, /* char * */);
 			break;
+
+			case iSETBASEFR:
+				//fromPreparationDoBase(Fr_Stack,/* int */, NextIP);
+			break;
+
+			case iDISPOSEALL:
+				destroyAllFrames(Fr_Stack);
+			break;
+
+			case iBASE_TO_END:
+				fromBaseDoEnded(Fr_Stack);
+			break;
+
+			case iCOPY_VALUE:
+				run_error = copyValue(Fr_Stack,Act_Var1, Act_Var2);
+			break;
+			//////////////////////////////////////
 		}
 		//Posunieme sa na instrukcnej paske
 		NextIP = NextIP->next;

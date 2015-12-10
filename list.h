@@ -14,11 +14,11 @@
 #ifndef LIST_INCLUDED
 #define LIST_INCLUDED
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<stdarg.h>
-#include<stdbool.h>
-#include"garbage.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include "garbage.h"
 
 #define TRUE 1
 #define FALSE 0

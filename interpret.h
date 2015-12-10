@@ -11,6 +11,9 @@
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */
 
+#ifndef INTERPRET_INCLUDED
+#define INTERPRET_INCLUDED
+
 /* Hlavickove subory */
 #include "error.h"
 #include "table_of_symbols.h"
@@ -18,6 +21,12 @@
 #include "stack.h"
 #include "list.h"
 #include "bintree.h"
+#include "frames.h"
+#include "scaner.h"
+#include "ial.h"
+
+#include <string.h>
+#include <stdio.h>
 
 /* definujeme si premennu na uchovanie chyby */
 ERROR_CODE run_error;
@@ -25,7 +34,7 @@ ERROR_CODE run_error;
 typedef enum{
 //Presun
 	iMOV,
-	iGETNUM,
+	iGETVALUE,
 //Aritmeticke operacie
 	iADD,
 	iSUB,
@@ -54,6 +63,7 @@ typedef enum{
 	iWRITE,
 	iREAD,
 //Zasobnikove operacie
+	iDISPSTPOST,
 	iPUSH,
 	iPOP,
 	iTOP,
@@ -63,36 +73,17 @@ typedef enum{
 //Navestia
 	iLABEL,
 //Operacie s ramcami
-	iINITFR,
+	iPUSHFR,
+	iPOPFR,
 	iDISPFR,
-	iWRITEFR,
-	iREADFR
+	iINSERT_TO_FR,
+	iREADFR,
+	iSETBASEFR,
+	iDISPOSEALL,
+	iBASE_TO_END,
+	iCOPY_VALUE
 } tInstrT;
 
-/* union na predavanie dat urciteho typu */
-typedef union{
-	int iData;
-	double dData;
-	char *sData;
-} tDataType;
-
-/* Vycet jednotlivych typov IFJ15 */
-typedef enum{
-	tINT,
-	tDOUBLE,
-	tSTRING
-} tType;
-
-/* Struktura na ramec */
-typedef struct{
-	int base_frame;
-	TreePointer Frame_tree;
-} tFrame;
-
-/* Struktura na premennu*/
-typedef struct{
-	tDataType *data;
-	tType *type;
-} tPostFixNum; 
-
 ERROR_CODE interpret(Table_symbols *table);
+
+#endif

@@ -11,18 +11,7 @@
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
  */ 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "error.c"
-#include "garbage.h"
-
-/**Prototypy funkcii**/
-int KMP_Find(char *string, char *pattern);
-int *KMP_FAIL_INDEX(char *pattern, int pattern_length);
-int length_of_string(char * string);
-char* concatenation(char *string1, char *string2);
-
+#include "ial.h"
 
 //////////////////////////**Vektor chyby**//////////////////////////////////////
 
