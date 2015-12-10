@@ -150,15 +150,16 @@ ERROR_CODE function()
         error = SYN_ERR;
         return error;
     }
+    // kontrola na redefiniciu funkcie
     Function_GTS *function_for_searching = searchFunction(&symbol_table,token.attribute);
 
     if (function_for_searching == NULL) {
         // vlozim do tabulky symbolov 
         error = insertFunction(&symbol_table,token.attribute,type_of_element_to_table_of_symbols);
     }
-    else {
-        error = SEM_UNDEF_ERR;
-        return error;
+    else
+    {
+    	symbol_table.actual_function=function_for_searching; // nastavim este aktualnu funkciu na najdenu
     }
 
     if (error != OK_ERR){
@@ -284,8 +285,12 @@ ERROR_CODE params(Function_GTS * previous_function_id)
             error = SYN_ERR;
             return error;
         }
-
+        // 
         if (previous_function_id == NULL) {
+            if (searchFunction(&symbol_table,token.attribute) != NULL) {
+                error = SEM_UNDEF_ERR;
+                return error;
+            }
             //vkladanie prametrov do tabulky symbolov
             error = insertFunctionParam(symbol_table.actual_function,token.attribute,type_of_element_to_table_of_symbols);
 
@@ -294,15 +299,18 @@ ERROR_CODE params(Function_GTS * previous_function_id)
             }
         }
         else {
-            // ziskam prvy parameter funkcie
+            // ziskam prvy parameter funkcie a kontrooluje mena a typy parametrov
             Variable *The_First = getFunctionParam(symbol_table.actual_function,TRUE);
             if (The_First != NULL) {
+                printf("tu som 1\n");
                 if ((The_First->typ != (int)(type_of_element_to_table_of_symbols)) || (strcmp(The_First->name,token.attribute))) {
+                    printf("tu som 3\n");
                     error = SEM_TYPE_ERR;
                     return error;
                 }
             }
             else {
+                printf("tu som 2\n");
                 error = SEM_TYPE_ERR;
                 return error;
             }
@@ -369,14 +377,26 @@ ERROR_CODE multi_params(Function_GTS * previous_function_id)
                 error = SYN_ERR;
                 return error;
             }
-
+            // ziskam prvy parameter funkcie a kontrooluje mena a typy parametrov
             if (previous_function_id == NULL) {
-                //vkladanie prametrov do tabulky symbolov
-                error = insertFunctionParam(symbol_table.actual_function,token.attribute,type_of_element_to_table_of_symbols);
-
-                if (error != OK_ERR) {
+                 // kontrola ci na redefiniciu
+                if (searchFunction(&symbol_table,token.attribute) != NULL) {
+                    error = SEM_UNDEF_ERR;
                     return error;
                 }
+
+                if(findInList(&symbol_table.actual_function->params,token.attribute) == NULL){
+                    //vkladanie prametrov do tabulky symbolov
+                    error = insertFunctionParam(symbol_table.actual_function,token.attribute,type_of_element_to_table_of_symbols);
+                    
+                    if (error != OK_ERR) {
+                        return error;
+                    }
+                }
+                else {
+                    error = SEM_UNDEF_ERR;
+                    return error;
+                }                
             }
             else {
                 // kontrolujem dalsi parameter funkcie
@@ -441,6 +461,10 @@ ERROR_CODE prototype_of_definition()
             return error;
             break;
         case sLSetPar :
+            if (symbol_table.actual_function->defined == TRUE) {
+                error = SEM_UNDEF_ERR;
+                return error;
+            }
             // ak dostanem { tak je uz funkcia definovana
             symbol_table.actual_function->defined = TRUE;
             // pushnem blok
@@ -626,7 +650,7 @@ ERROR_CODE command()
                     error = OK_ERR;
                     return error;
                     break;
-                default : 
+                default :
                     printf("chyba v command v ID\n");               
                     error = SYN_ERR;
                     return error;
@@ -1141,7 +1165,13 @@ ERROR_CODE arguments(char *previous_token_atributte)
             }
         break;
         case sRParenth :
+            if (getFunctionParam(searchFunction(&symbol_table,previous_token_atributte),TRUE) != NULL) {
+                error = SEM_TYPE_ERR;
+                return error;
+            }
+
             error = OK_ERR;
+            getFunctionParam(searchFunction(&symbol_table,previous_token_atributte),FALSE);
         break;
         default :
             if((token.id == sInteger) || (token.id == sDouble) || (token.id == sString) ) {

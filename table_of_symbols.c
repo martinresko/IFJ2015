@@ -307,7 +307,6 @@ ERROR_CODE insertFunctionVariableToStack(Function_GTS *function, char *variable_
  * variable_name - meno hladanej premennej */
 Variable *searchFunctionVariableInActualLevel(Function_GTS *function, char *variable_name)
 {
-	printf("CHECEM NAJT PREMENNU V AKTUALNOM BLOKU MENOM %s\n",variable_name );
 	if(function!=NULL)
 	{
 		Variable *found_param = findInList(&(function->params),variable_name);
