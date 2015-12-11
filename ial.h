@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "error.c"
 #include "garbage.h"
+#include "error.h"
 
 
 /**Prototypy funkcii**/

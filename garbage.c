@@ -41,7 +41,7 @@ void* memmalloc(size_t size) {
 
 	if (tmpptr == NULL) {
 	memallfree();
-	call_error(INTERN_ERR, FAILED_MALLOC);
+	exit(99);
 	}
 
     gmemtableitem* item = memfindout(memtable.table, (intptr_t)tmpptr);
@@ -63,7 +63,7 @@ void* memrealloc(void* ptr, size_t size){
 
     if (tmpptr == NULL) {
         memallfree();
-	call_error(INTERN_ERR, FAILED_MALLOC);
+	exit(99);
     }
 
     gmemtableitem* item = NULL;
@@ -92,7 +92,7 @@ void* memcalloc(size_t num, size_t size){
 
     if (tmpptr == NULL) {
       memallfree();
-      call_error(INTERN_ERR, FAILED_MALLOC);
+      exit(99);
     }
 
     gmemtableitem* item = memfindout(memtable.table, (intptr_t)tmpptr);

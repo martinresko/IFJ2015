@@ -38,13 +38,4 @@ typedef enum error_code{
 
 } ERROR_CODE;
 
-typedef enum error_message{
-	WRONG_SCALE,
-	FAILED_MALLOC
-
-} ERROR_MESSAGE;
-
-void call_error(ERROR_CODE tmp, ERROR_MESSAGE pom);
-void call_error_message(ERROR_MESSAGE pom);
-
 #endif

@@ -19,7 +19,6 @@
 #include <stdint.h>
 #include <assert.h>
 
-#include "strings.h"
 #include "error.h"
  
 #define MMU_SIZE 32

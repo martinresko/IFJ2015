@@ -15,6 +15,9 @@
 #define INTERPRET_INCLUDED
 
 /* Hlavickove subory */
+#include <stdio.h>
+#include <string.h>
+
 #include "error.h"
 #include "table_of_symbols.h"
 #include "parser.h"
@@ -24,9 +27,8 @@
 #include "frames.h"
 #include "scaner.h"
 #include "ial.h"
+#include "garbage.h"
 
-#include <string.h>
-#include <stdio.h>
 
 /* definujeme si premennu na uchovanie chyby */
 ERROR_CODE run_error;

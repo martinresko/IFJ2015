@@ -100,7 +100,6 @@ char* substring(char *string, int i, int n)
 
 	if ((i >= string_len) || ((i + n) >= string_len) || (n >= string_len) || (i < 0)){
 		memfree(result); 
-		call_error(SEM_TYPE_ERR,WRONG_SCALE);
 		return "";
 		}
 
@@ -182,13 +181,12 @@ char* shell(char *items)
   strcpy(pom,items);
 
      int count = strlen(items);
-    register int i, j, gap, k;  
-    char x, a[5];  
+    register int i, j, gap;  
+    char x;
+
   
-    a[0]=9; a[1]=5; a[2]=3; a[3]=2; a[4]=1;  
-  
-    for(k=0; k < 5; k++) {  
-      gap = a[k];  
+    for (gap = count/2; gap > 0; gap = gap/2) {
+     
       for(i=gap; i < count; ++i) {  
         x = pom[i];  
         for(j=i-gap; (x < pom[j]) && (j >= 0); j=j-gap) 
@@ -229,7 +227,7 @@ return pom;
       }
 printf("%s\n",array);
 }*/
-
+/*
 int main() 
 {
 	meminitialization();
@@ -239,7 +237,7 @@ int main()
 	if (tt != "")
 		memfree(tt);
 
-	char* s = "987654321";
+	char* s = "98761";
 	printf("string je %s\n",s);	
 	char* vysl;
 	vysl = shell(s);
@@ -261,3 +259,4 @@ int main()
 	memallfree();
 	return 0;
 }
+*/

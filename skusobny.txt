@@ -1,4 +1,3 @@
-
 int main() {
 string x = find("as","asd");
 return 0;
