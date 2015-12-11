@@ -80,7 +80,7 @@ char *src1 = Act_Instr->source1;
 char *src2 = Act_Instr->source2;  
 
 //Pomocne premenne
-char *res_str;
+char *res_str = NULL;
 int res_int;
 
 	while((run_error == OK_ERR) && (NextIP->next != NULL)){
@@ -404,10 +404,10 @@ int res_int;
 					return run_error;
 				}
 
-				res_str = shell(Act_Var1->frame_var_value->S);
+				res_str = shell(Act_Var1->frame_var_value.S);
 				Act_Res = searchVariableInFrames(Fr_Stack, dest);
 
-				run_error = setValueVariable(Fr_Stack, Act_Res->frame_var_value, res_str);
+				run_error = setValueVariable(Fr_Stack, Act_Res->frame_var_name, res_str);
 			break;
 
 			case iLEN:
@@ -418,10 +418,12 @@ int res_int;
 					return run_error;
 				}
 
-				res_int = length_of_string(Act_Var1->frame_var_value->S);
+				res_int = length_of_string(Act_Var1->frame_var_value.S);
 				Act_Res = searchVariableInFrames(Fr_Stack, dest);
 
-				run_error = setValueVariable(Fr_Stack, Act_Res->frame_var_value, res_int)
+				sprintf(res_str, "%d", res_int);
+
+				run_error = setValueVariable(Fr_Stack, Act_Res->frame_var_name, res_str);
 			break;
 
 			case iSUBSTR:
@@ -429,12 +431,36 @@ int res_int;
 			break;
 
 			case iFIND:
+				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
+				Act_Var2 = searchVariableInFrames(Fr_Stack, src2);
 
+				if((Act_Var1->inicialized == 0) || (Act_Var2->inicialized == 0)){
+					run_error = UNINITI_ERR;
+					return run_error;
+				}
+
+				res_int = KMP_Find(Act_Var1->frame_var_value.S, Act_Var2->frame_var_value.S);
+				Act_Res = searchVariableInFrames(Fr_Stack, dest);
+
+				sprintf(res_str, "%d", res_int);
+
+				run_error = setValueVariable(Fr_Stack, Act_Res->frame_var_name, res_str);
 			break;
 
 			case iCONCAT:
+				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
+				Act_Var2 = searchVariableInFrames(Fr_Stack, src2);
 
-			break;
+				if((Act_Var1->inicialized == 0) || (Act_Var2->inicialized == 0)){
+					run_error = UNINITI_ERR;
+					return run_error;
+				}
+
+				res_str = concatenation(Act_Var1->frame_var_value.S, Act_Var2->frame_var_value.S);
+				Act_Res = searchVariableInFrames(Fr_Stack, dest);
+
+				run_error = setValueVariable(Fr_Stack, Act_Res->frame_var_name, res_str);
+			break;	
 			/////////////////////////////////////////
 
 			/* Instrukcie I/O Vstupu a Vystupu */
