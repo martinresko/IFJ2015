@@ -52,6 +52,8 @@ static void init_string(int *i){
 /* Spusta interpretaciu programu v IFJ15 */
 ERROR_CODE interpret(Table_symbols *table){
 run_error = OK_ERR;
+int ret_value_func = 0;
+int var_type = 0;
 
 //Inicializujeme zasobnik na ramce
 StackPointer *Fr_Stack = NULL;
@@ -87,11 +89,18 @@ int res_int;
 		switch(Act_Instr->type){
 			/* Operacie PRIRADENIA a ZISKANIA HODNOT */
 			case iMOV:
-				
+				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
+				if(Act_Var1->inicialized == 0){
+					run_error = UNINITI_ERR;
+					return run_error;
+				}
+
+				Act_Var2 = searchVariableInFrames(Fr_Stack, dest);
+				run_error = copyValue(Fr_Stack, Act_Var1, Act_Var2);
 			break;
 
 			case iGETVALUE:
-				
+					
 			break;
 			///////////////////////////////////////////
 
@@ -378,28 +387,29 @@ int res_int;
 
 			/* Nepodmienene, podmienene SKOKY a volanie funkcii */
 			case iJMP:
-				//goto
+				//goto src1;
 			break;
 
 			case iJZ:
-				//goto
+				//goto src1;
 			break;
 
 			case iJNZ:
-				//goto
+				//goto src1;
 			break;
 
 			case iCALL:
-
+				current_function = searchFunction(table, src1);
+				Instr_tape = current_function->instructions;
+				NextIP = Instr_tape.first_list_element;
 			break;
 			/////////////////////////////////////////
 
 			/* Praca so VSTAVANYMI funkciami */
 			case iSORT:
 				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
-				Act_Var2 = searchVariableInFrames(Fr_Stack, src2);
 
-				if((Act_Var1->inicialized == 0) || (Act_Var2->inicialized == 0)){
+				if(Act_Var1->inicialized == 0){
 					run_error = UNINITI_ERR;
 					return run_error;
 				}
@@ -650,7 +660,7 @@ int res_int;
 			break;
 
 			case iPUSH:
-				//Act_Var1 = searchVariableInFrames(Fr_Stack, /* char * */)
+				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
 				run_error = stackPush(Postfix_stack, Act_Var1);
 			break;
 
@@ -670,7 +680,7 @@ int res_int;
 
 			/* Praca s navestiami instrukcnej pasky */
 			case iRET:
-
+				NextIP = Act_Var1->next_instruction;
 			break;
 
 			case iLABEL:
@@ -692,15 +702,15 @@ int res_int;
 			break;
 
 			case iINSERT_TO_FR:
-				//Act_Var1 = insertVariableToFrame(Fr_Stack, /* char * , int */);
+				Act_Var1 = insertVariableToFrame(Fr_Stack, src1 , var_type);
 			break;
 
 			case iREADFR:
-				//Act_Var1 = searchVariableInFrames(Fr_Stack, /* char * */);
+				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
 			break;
 
 			case iSETBASEFR:
-				//fromPreparationDoBase(Fr_Stack,/* int */, NextIP);
+				fromPreparationDoBase(Fr_Stack, ret_value_func, NextIP);
 			break;
 
 			case iDISPOSEALL:
