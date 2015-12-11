@@ -100,7 +100,7 @@ char* substring(char *string, int i, int n)
 
 	if ((i >= string_len) || ((i + n) >= string_len) || (n >= string_len) || (i < 0)){
 		memfree(result); 
-		return "";
+		return NULL;
 		}
 
 	strncpy(result,string+i,n);
