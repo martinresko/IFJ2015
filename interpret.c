@@ -462,7 +462,7 @@ int res_int;
 				run_error = setValueVariable(Fr_Stack, Act_Res->frame_var_name, res_str);
 			break;
 
-			case iCONCA
+			case iCONCAT:
 				//source1 = meno premennej - 1. parameter vstavanej funkcie
 				//source2 = meno premennej - 2. parameter vst. funkcie
 				//destination = meno premennej do ktorej ukladame navratovu hodnotu vstavanej funkcieT:
@@ -734,7 +734,7 @@ int res_int;
 			case iINSERT_TO_FR:
 				//source1 = meno premennej ktoru ideme predavat do ramca
 				//source2 = integer - akeho typu je premenna ktoru ideme pridavat {sInteger, sDouble, sString}
-				var_type = Act_Instr->source2;
+				var_type = *((int *)(Act_Instr->source2));
 				Act_Var1 = insertVariableToFrame(Fr_Stack, Act_Instr->source1 , var_type);
 			break;
 
