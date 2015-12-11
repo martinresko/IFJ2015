@@ -116,6 +116,8 @@ ERROR_CODE Analysis(ListPointer *Lis,int first_token,int type_control)
 			}
 			else if(return_shift==SEM_UNDEF_ERR)
 				return SEM_UNDEF_ERR;
+			else if(return_shift==SYN_ERR)
+				return SYN_ERR;
 			else
 				return INTERN_ERR;
 		}
@@ -368,6 +370,13 @@ ERROR_CODE Shift(ListPointer *Lis,int id,char *attribute)
 				((Precedence_table_element *)(Lis->last_terminal->data))->id=sDouble;
 			break;
 		}
+	}
+
+	if(Lis->last_terminal->prev->data!=NULL)
+	{
+		/* nemozem shiftovat ak na vrchole je OPERAND a na vstupre je OPERAND */
+		if( (((Precedence_table_element *)(Lis->last_terminal->data))->expresion_id == OPERAND) && ((((Precedence_table_element *)(Lis->last_terminal->prev->data))->expresion_id == OPERAND)) )
+			return SYN_ERR;
 	}
 	return (Lis->last_terminal==NULL)?INTERN_ERR:OK_ERR;
 }
