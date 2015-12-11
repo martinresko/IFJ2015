@@ -456,6 +456,8 @@ int j;
  				if(c == '*'){
  					state = sBlockEnd;
  				} else if(c == EOF){
+ 					state = sError;
+ 					fill_token(state);
  					state = sEndofFile;
  				} else{
  					state = sBComment;
@@ -469,6 +471,8 @@ int j;
  					state = sStart;
  					i = 0;
  				} else if(c == EOF){
+ 					state = sError;
+ 					fill_token(state);
  					state = sEndofFile;
  				} else{
  					state = sBComment;
