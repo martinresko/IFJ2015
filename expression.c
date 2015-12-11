@@ -122,7 +122,8 @@ ERROR_CODE Analysis(ListPointer *Lis,int first_token,int type_control)
 		else if(next_step=='T')
 		{
 			printf("pravidlo T:\n");
-			ReduceT(Lis);
+			if(ReduceT(Lis)!=OK_ERR)
+				return SYN_ERR;
 			token_expression = get_Token(); /* aktualizujem token za ')' */
 			if(token_expression.id==sError)
 				return LEX_ERR;
@@ -323,15 +324,23 @@ ERROR_CODE Reduce(ListPointer *Lis)
 
 /* funkcia pre pravidlo (D) -> D
  * Lis - ukazatel na zoznam */
-void ReduceT(ListPointer *Lis)
+ERROR_CODE ReduceT(ListPointer *Lis)
 {
 	printf("(D) -> D\n");
-	int typ = ((Precedence_table_element *)(Lis->last_terminal->next->data))->id;
-	DeleteLast(Lis); /* odstranim operand */
-	((Precedence_table_element *)(Lis->last_terminal->data))->id=typ;
-	((Precedence_table_element *)(Lis->last_terminal->data))->expresion_id=OPERAND;
-	((Precedence_table_element *)(Lis->last_terminal->data))->terminal=false; 
-	FindLastTerminal(Lis); /* nastavim novy terminal */
+	if(Lis->last_terminal->next != NULL)
+	{
+		int typ = ((Precedence_table_element *)(Lis->last_terminal->next->data))->id;
+		DeleteLast(Lis); /* odstranim operand */
+		((Precedence_table_element *)(Lis->last_terminal->data))->id=typ;
+		((Precedence_table_element *)(Lis->last_terminal->data))->expresion_id=OPERAND;
+		((Precedence_table_element *)(Lis->last_terminal->data))->terminal=false; 
+		FindLastTerminal(Lis); /* nastavim novy terminal */
+		return OK_ERR;
+	}
+	else
+	{
+		return SYN_ERR;
+	}
 }
 
 /* shift vlastne iba pushne znak z input na list */
