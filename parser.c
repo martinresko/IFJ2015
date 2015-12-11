@@ -581,13 +581,13 @@ ERROR_CODE command()
         case sError: 
             error = LEX_ERR;
             return error;
-            break;
+        break;
         /*pokial dostaanem ";"*/
         case sSemicolon :
             printf("dostal som ;\n");
             error = SYN_ERR;
             return error;
-            break;
+        break;
         /*
          *  { <stat_list> }
         */
@@ -603,7 +603,7 @@ ERROR_CODE command()
         	if (error != OK_ERR) {
                 return error;
             }
-        	break;
+        break;
         /*
          * id<funkcia_priradenie>;
         */
@@ -626,20 +626,20 @@ ERROR_CODE command()
                 case sError : 
                     error = LEX_ERR;
                     return error;
-                    break;
+                break;
                 /*pokial dostaanem ";"*/
                 case sSemicolon :
                     printf("dostal som ;\n");
                     error = OK_ERR;
                     return error;
-                    break;
+                break;
                 default : 
                     printf("chyba v command v ID\n");               
                     error = SYN_ERR;
                     return error;
-                    break;
+                break;
             }
-            break;
+        break;
         case sResWord :
             printf("idem do res word\n");
             // nekontrolujem typ 
@@ -655,21 +655,20 @@ ERROR_CODE command()
                 case sError : 
                     error = LEX_ERR;
                     return error;
-                    break;
+                break;
                 /*pokial dostaanem ";"*/
                 case sSemicolon :
                     printf("dostal som ;\n");
                     error = OK_ERR;
                     return error;
-                    break;
+                break;
                 default :
                     printf("chyba v command v ID\n");               
                     error = SYN_ERR;
                     return error;
-                    break;
+                break;
             }
-
-            break;
+        break;
         case sKeyWord : 
             /*
              *return expresion ;
@@ -801,7 +800,7 @@ ERROR_CODE command()
 		            if (error != OK_ERR) {
 		                return error;
 		            }
-                  
+
                 error = stat_list();
 
                 if (error != OK_ERR) {
@@ -822,7 +821,7 @@ ERROR_CODE command()
                     case sError: 
                         error = LEX_ERR;
                         return error;
-                        break;
+                    break;
                     case sCin :
                     	printf("dostal som >>\n");
                         token = get_Token ();
@@ -832,7 +831,7 @@ ERROR_CODE command()
                             case sError: 
                                 error = LEX_ERR;
                                 return error;
-                                break;
+                            break;
                             case sIdent :
                                 if(searchFunctionVariableInStack(symbol_table.actual_function,token.attribute) == NULL) {
                                     error = SEM_UNDEF_ERR;
@@ -840,23 +839,22 @@ ERROR_CODE command()
                                 }
                             	printf("dostal som ID\n");
                                 error = OK_ERR;
-                                break;
+                            break;
                             default :
                                 error = SYN_ERR;
                                 return error;
-                                break;
+                            break;
                         }
 
                         if (error != OK_ERR) {
                             return error;
                         }
-
-                        break;
+                    break;
                     default :
                     	printf("chyba v cin\n");
                         error = SYN_ERR;
                         return error;
-                        break;
+                    break;
                 }
 
                 if (error != OK_ERR) {
@@ -1000,7 +998,6 @@ ERROR_CODE command()
                 }
 
                 return OK_ERR;
-
             }
             /*
              * cout << <term> <multi_cout>;
@@ -1014,7 +1011,7 @@ ERROR_CODE command()
                     case sError: 
                         error = LEX_ERR;
                         return error;
-                        break;
+                    break;
                     case sCout :
                     	printf("dostal som <<\n");
                     	printf("idem do term\n");
@@ -1023,12 +1020,12 @@ ERROR_CODE command()
                         if (error != OK_ERR) {
                             return error;
                         }
-                        break;
+                    break;
                     default :
                     	printf("chyba v cout\n");
                         error = SYN_ERR;
                         return error;
-                        break;
+                    break;
                 }
 
                 if (error != OK_ERR) {
@@ -1050,8 +1047,12 @@ ERROR_CODE command()
                     return error;
                 }
             }
-            break;
-
+        break;
+        default :
+            printf("chyba v cout\n");
+            error = SYN_ERR;
+            return error;
+        break;
     }
 
     if (error != OK_ERR) {
