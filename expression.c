@@ -217,8 +217,14 @@ ERROR_CODE Reduce(ListPointer *Lis)
 	}
 	else if(( rule >= MUL ) && (rule <= NE ) ) /* terminal je operand */
 	{
+		if( (Lis->last_terminal->prev==NULL) || (Lis->last_terminal->next==NULL) )
+		{
+			return SYN_ERR;
+		}
+
 		List left_operand = Lis->last_terminal->prev;
 		List right_operand = Lis->last_terminal->next;
+
 		printf("pravy je %d \n",((Precedence_table_element *)(right_operand->data))->expresion_id);
 		if( ( (left_operand!=NULL) && (((Precedence_table_element *)(left_operand->data))->expresion_id==OPERAND) ) && ( (right_operand!=NULL) && (((Precedence_table_element *)(right_operand->data))->expresion_id==OPERAND) ) )/* ci okolo operatoru nieco je a ci su to operandy */
 		{

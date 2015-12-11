@@ -28,7 +28,6 @@ tState type_of_element_to_table_of_symbols;
 int type_for_expression;
 
 
-
 /* hlavna funkcia na spustenie parseru
  * @info:<prog> ->  <body> ; $
  * navratova hodnota return: ERROR CODE
@@ -105,6 +104,12 @@ ERROR_CODE body()
     }
 
     token = get_Token();
+    
+    if (token.id == sError) {
+        error = LEX_ERR;
+        return error;
+    }
+
     error = body();
 
     if (error != OK_ERR) {
@@ -159,7 +164,7 @@ ERROR_CODE function()
     }
     else
     {
-    	symbol_table.actual_function=function_for_searching; // nastavim este aktualnu funkciu na najdenu
+    	symbol_table.actual_function = function_for_searching; // nastavim este aktualnu funkciu na najdenu
     }
 
     if (error != OK_ERR){
@@ -268,12 +273,18 @@ ERROR_CODE params(Function_GTS * previous_function_id)
         }
         /*ak nema funkcia ziadny parameter*/
         else {
+            if (getFunctionParam(symbol_table.actual_function,TRUE) != NULL) {
+                error = SEM_TYPE_ERR;
+                return error;
+            }
+
+            getFunctionParam(symbol_table.actual_function,FALSE);
             printf("je )\n");
             error = OK_ERR;
         }
     }  /*ak ma funkcia parameter*/
     else {
-        printf("ma viac parametrov\n");
+        printf("ma nejake parametre\n");
         token = get_Token();
         /*kontrola ci je Lex_ERR*/
         if (token.id == sError) {
@@ -452,14 +463,13 @@ ERROR_CODE prototype_of_definition()
         case sError : 
             error = LEX_ERR;
             return error;
-            break;    
+        break;    
         case sSemicolon :
         	printf("dostal som ; je to prototyp\n");
             // ak dostanem ; tak nieje funkcia definovana
-            symbol_table.actual_function->defined = FALSE;
             error = OK_ERR;
             return error;
-            break;
+        break;
         case sLSetPar :
             if (symbol_table.actual_function->defined == TRUE) {
                 error = SEM_UNDEF_ERR;
@@ -476,11 +486,11 @@ ERROR_CODE prototype_of_definition()
 
             printf("idem do stat list\n");
             error = stat_list();
-            break;
+        break;
         default :
             error = SYN_ERR;
             return error;
-            break;
+        break;
     }
 
     if (error != OK_ERR) {
@@ -1541,7 +1551,10 @@ ERROR_CODE hodnota_priradenia()
         	;
             // premenna pre arguments
             char * token_attribute_for_arguments = token.attribute;
-			if (searchFunction(&symbol_table,token.attribute) == NULL) {
+            // konrola typu pri volani funkcie
+            Function_GTS *function_control_type = searchFunction(&symbol_table,token.attribute);
+
+			if (function_control_type == NULL) {
         		printf("volam expression\n");
         		error = expression(TAKEN_FIRST_TOKEN,type_for_expression); 
                 token = token_expression;
@@ -1551,6 +1564,12 @@ ERROR_CODE hodnota_priradenia()
                 }
         	}
         	else {
+
+                if (function_control_type->return_type != type_for_expression ) {
+                    error = SEM_TYPE_ERR;
+                    return error;
+                }
+
         		token = get_Token();
 
         		if (token.id == sError) {
