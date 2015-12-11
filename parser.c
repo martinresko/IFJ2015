@@ -45,19 +45,19 @@ ERROR_CODE prog()
     switch (token.id) {
         // chyba v lexikalnom analyzatore
         case sError: 
-             error = LEX_ERR;
-             return error;
-             break;
+            error = LEX_ERR;
+            return error;
+        break;
         // koniec suboru
         case sEndofFile: 
-             printf("koniec1\n"); 
+            printf("koniec1\n"); 
             error = SYN_ERR;
-            break;
+        break;
         // ak dostanem hocico ine
         default :
             printf("Body\n");
             error = body();
-            break;
+        break;
     }
 
     if (error != OK_ERR) {
@@ -88,21 +88,21 @@ ERROR_CODE body()
     switch (token.id) {
         /* chyba v lexikalnom analyzatore*/
         case sError :
-             error = LEX_ERR; 
-             break;
+            error = LEX_ERR; 
+        break;
         /*koniec suboru po uz jedej funkcii min */     
         case sEndofFile :
             printf("koniec2\n");
             error = OK_ERR;
             return error;
-            break;
+        break;
         default :
-             printf("idem do funkcion\n");
+            printf("idem do funkcion\n");
             error = function();
             if (error != OK_ERR) {
                 return error;
             }
-            break;
+        break;
     }
 
     token = get_Token();
@@ -164,8 +164,7 @@ ERROR_CODE function()
         // vlozim do tabulky symbolov 
         error = insertFunction(&symbol_table,token.attribute,type_of_element_to_table_of_symbols);
     }
-    else
-    {
+    else {
     	symbol_table.actual_function = function_for_searching; // nastavim este aktualnu funkciu na najdenu
     }
 
@@ -194,7 +193,7 @@ ERROR_CODE function()
    	printf("idem do prototype_of_definition\n");
     error = prototype_of_definition();
 
-    if (error != OK_ERR){
+    if (error != OK_ERR) {
         return error;
     }
 
@@ -355,14 +354,14 @@ ERROR_CODE multi_params(Function_GTS * previous_function_id)
         case sError : 
             error = LEX_ERR;
             return error;
-            break;
+        break;
         /*pokila dostanem ")" je len jedne parameter a vraciam sa*/
         case sRParenth :
             getFunctionParam(symbol_table.actual_function,FALSE);
             printf("je to )\n");
             error = OK_ERR;
             return error;
-            break;
+        break;
         /*pokila dostanem ciarku tak moze byt viac parametrov a pokracujem*/
         case sComma :
             printf("je to ciarka\n");
@@ -432,12 +431,12 @@ ERROR_CODE multi_params(Function_GTS * previous_function_id)
             if (error != OK_ERR) {
                 return error;
             }
-            break;
+        break;
         default :
         	printf("je to zle\n");
             error = SYN_ERR;
             return error;
-            break;
+        break;
     }
 
     if (error != OK_ERR) {
@@ -518,7 +517,7 @@ ERROR_CODE stat_list()
         case sError : 
             error = LEX_ERR;
             return error;
-            break;
+        break;
         /*ak som dostal "}"*/
         case sRSetPar :
             printf("dostal som }\n");
@@ -532,12 +531,12 @@ ERROR_CODE stat_list()
 
             error = OK_ERR;
             return error;
-            break;
+        break;
         case sEndofFile :
             printf("som na konci suboru\n");
             error = SYN_ERR;
             return error;
-            break;
+        break;
         default :
             printf("idem do command\n");
 			
@@ -545,7 +544,7 @@ ERROR_CODE stat_list()
             if (error != OK_ERR) {
                 return error;
             }
-            break;
+        break;
     }
 
     error = stat_list();
@@ -1082,7 +1081,7 @@ ERROR_CODE funkcia_priradenie(char *previous_token_atributte)
         case sError: 
             error = LEX_ERR;
             return error;
-            break;
+        break;
         /*ak dostanem ( idem do arguments*/
         case sLParenth :
             if (searchFunction(&symbol_table,previous_token_atributte) == NULL) {
@@ -1099,7 +1098,7 @@ ERROR_CODE funkcia_priradenie(char *previous_token_atributte)
 
             token = get_Token();
             printf("%s\n",token.attribute );
-            break;
+        break;
         /*ak som dostal = tak idem do deklaracia*/
         case sAssign :
             if (searchFunctionVariableInStack(symbol_table.actual_function,previous_token_atributte) == NULL) {
@@ -1114,12 +1113,12 @@ ERROR_CODE funkcia_priradenie(char *previous_token_atributte)
                 return error;
             }
 
-            break;
+        break;
         default :
         	printf("chyba v hodnota_priradenia\n");
             error = SYN_ERR;
             return error;
-            break;
+        break;
     }
 
     if (error != OK_ERR) {
@@ -1147,7 +1146,7 @@ ERROR_CODE arguments(char *previous_token_atributte)
         case sError: 
             error = LEX_ERR;
             return error;
-            break;
+        break;
         case sIdent :
             ;
             // vyhladame prvy parameter funkcie
@@ -1243,7 +1242,7 @@ ERROR_CODE multi_arguments(char *previous_token_atributte)
         case sError: 
             error = LEX_ERR;
             return error;
-            break;
+        break;
         // ak som dostal ciarku
         case sComma :
             printf("dostal som ,\n");
@@ -1355,11 +1354,12 @@ ERROR_CODE multi_cin()
         case sError: 
             error = LEX_ERR;
             return error;
-            break;
+        break;
         case sSemicolon :
         	printf("dostal som ;\n");
             error = OK_ERR;
             return error;
+        break;
         case sCin :
         	printf("dostal som >>\n");
             token = get_Token ();
@@ -1369,7 +1369,7 @@ ERROR_CODE multi_cin()
                 case sError: 
                     error = LEX_ERR;
                     return error;
-                    break;
+                break;
                 case sIdent :
                     if(searchFunctionVariableInStack(symbol_table.actual_function,token.attribute) == NULL) {
                         error = SEM_UNDEF_ERR;
@@ -1377,22 +1377,22 @@ ERROR_CODE multi_cin()
                     }
                 	printf("dostal som ID\n");
                     error = OK_ERR;
-                    break;
+                break;
                 default :
                     error = SYN_ERR;
                     return error;
-                    break;
+                break;
             }
 
             if (error != OK_ERR) {
                 return error;
             }
 
-            break;
+        break;
         default :
             error = SYN_ERR;
             return error;
-            break;
+        break;
     }
 
     if (error != OK_ERR) {
@@ -1427,11 +1427,12 @@ ERROR_CODE multi_cout()
         case sError: 
             error = LEX_ERR;
             return error;
-            break;
+        break;
         case sSemicolon :
         	printf("dostal som ;\n");
             error = OK_ERR;
             return error;
+        break;
         case sCout :
         	printf("dostal som <<\n");
             error = term();
@@ -1439,12 +1440,12 @@ ERROR_CODE multi_cout()
             if (error != OK_ERR) {
                 return error;
             }
-            break;
+        break;
         default :
         	printf("dostal som chybu\n");
             error = SYN_ERR;
             return error;
-            break;
+        break;
     }
 
     if (error != OK_ERR) {
@@ -1549,7 +1550,7 @@ ERROR_CODE hodnota_priradenia()
         case sError : 
             error = LEX_ERR;
             return error;
-            break;
+        break;
         case sIdent :
         	;
             // premenna pre arguments
@@ -1750,16 +1751,16 @@ ERROR_CODE fun_auto()
         case sError: 
             error = LEX_ERR;
             return error;
-            break;
+        break;
         case sSemicolon :
         	printf("dostal som ;\n");
             error = OK_ERR;
             return error;
-            break;
+        break;
         default :
             error = SYN_ERR;
             return error;
-            break;
+        break;
         }
 
         if (error != OK_ERR) {
@@ -1984,12 +1985,12 @@ ERROR_CODE foo()
         case sError: 
             error = LEX_ERR;
             return error;
-            break;
+        break;
         case sSemicolon :
         	printf("dostal som ;\n");
             error = OK_ERR;
             return error;
-            break;
+        break;
         case sAssign :
         	// volam expression s parametrom typu ID volanej naposledy
             error = expression(NOT_TAKEN_FIRST_TOKEN,type_of_element_to_table_of_symbols);
@@ -1999,11 +2000,11 @@ ERROR_CODE foo()
                 }
         	
         	token = token_expression;
-           	break;
+        break;
         default :
             error = SYN_ERR;
             return error;
-            break;
+        break;
         }
 
         if (error != OK_ERR) {
@@ -2376,7 +2377,7 @@ ERROR_CODE build_in_function(int type_control)
             default :
                 error = SYN_ERR;
                 return error;
-                break;
+            break;
         }
     }
     /*
@@ -2493,7 +2494,7 @@ ERROR_CODE build_in_function(int type_control)
             default :
                 error = SYN_ERR;
                 return error;
-                break;
+            break;
         }
     }
     /*
@@ -2566,7 +2567,7 @@ ERROR_CODE build_in_function(int type_control)
             default :
                 error = SYN_ERR;
                 return error;
-                break;
+            break;
         }
     }
     // toto by nemalo nikdy nastat
