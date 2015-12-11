@@ -456,7 +456,7 @@ Frame_variable *Act_Res = NULL;
 			break;
 
 			case iDISPFR:
-				destroyFrameWithBase(Fr_Stack);
+				destroyFramesWithBase(Fr_Stack);
 				destroyFramesToEnded(Fr_Stack);
 			break;
 

@@ -72,7 +72,7 @@ ERROR_CODE setValueVariable(StackPointer *,char *,char*);
 ERROR_CODE copyValue(StackPointer *,Frame_variable *,Frame_variable *);
 ERROR_CODE setVariableAsInitialized(StackPointer *,char *);
 // uvvolnovanie 
-void destroyFrameWithBase(StackPointer *);
+void destroyFramesWithBase(StackPointer *);
 void destroyAllFrames(StackPointer *);
 
 #endif

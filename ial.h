@@ -1,3 +1,6 @@
+#ifndef IAL_INCLUDED
+#define IAL_INCLUDED
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,3 +15,4 @@ char* concatenation(char *string1, char *string2);
 void shell(char *items, int count);
 char* substring(char *string, int i, int n);
 
+#endif
