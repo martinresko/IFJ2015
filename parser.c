@@ -20,12 +20,14 @@
 #define FALSE 0 
 #define CONTINUE 2
 
-tToken token; // aktualny token
-extern tToken token_expression;
-extern Table_symbols symbol_table;
-extern int typ_pre_auto;
-tState type_of_element_to_table_of_symbols;
-int type_for_expression;
+tToken token; // aktualny token z lexikalneho analyzatora
+extern tToken token_expression; // token vracany z expression
+extern Table_symbols symbol_table; // globalna tabulka symbolov
+extern int typ_pre_auto; // navratovy typ z expression pri odvodzovani auto
+
+tState type_of_element_to_table_of_symbols; // typ pre tabulku symbolov
+int type_for_expression; // typ id pre expression kvoli kontrolovaniu semantickej analyzy
+char * identificator_for_generating_instruction_in_assign;
 
 
 /* hlavna funkcia na spustenie parseru
@@ -104,7 +106,7 @@ ERROR_CODE body()
     }
 
     token = get_Token();
-    
+
     if (token.id == sError) {
         error = LEX_ERR;
         return error;
@@ -232,7 +234,7 @@ ERROR_CODE typ()
         }
         if(!(strcmp(token.attribute, "auto"))) {
             printf("je to auto\n");
-            error = 20;
+            error = SYN_ERR;
             return error;
         }
     }
