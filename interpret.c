@@ -20,6 +20,35 @@ Instruction * get_next_instr(List NextIP){
 	return Act_Instr;
 }
 
+static void expand_str(int c, int *i){
+ 	if((*i) > 0){
+ 		if((str_value = (char *) memrealloc(str_value, (*i) + 2))){
+ 			str_value[(*i) + 1] = '\0';
+ 			str_value[(*i)] = c;
+ 			(*i)++;
+ 		} else{
+ 			//memfree(token.attribute);
+ 			run_error = INTERN_ERR;
+ 		}
+ 	} else{
+ 			str_value[(*i) + 1] = '\0';
+ 			str_value[(*i)] = c;
+ 			(*i)++;
+ 	}
+}
+
+static void init_string(int *i){
+ 	//memfree(PomUk);
+ 	 str_value = (char *) memmalloc((*i)+2);
+ 	if(str_value == NULL){
+ 		run_error = INTERN_ERR;
+ 	} else{
+ 		str_value[(*i)] = '\0';
+ 	}
+ }
+
+
+
 /* Spusta interpretaciu programu v IFJ15 */
 ERROR_CODE interpret(Table_symbols *table){
 run_error = OK_ERR;
@@ -40,15 +69,19 @@ List NextIP = Instr_tape.first_list_element;
 //Ziskame nasledujucu instrukciu
 Instruction *Act_Instr = get_next_instr(NextIP);
 
-//aktualny ramec...
-
-//Frame FR_element;
-
 //Premenna ramca...
 Frame_variable *Act_Var1 = NULL;
 Frame_variable *Act_Var2 = NULL;
 Frame_variable *Act_Res = NULL;
 
+//Operandy 3AC
+char *dest = Act_Instr->destination;
+char *src1 = Act_Instr->source1;
+char *src2 = Act_Instr->source2;  
+
+//Pomocne premenne
+char *res_str;
+int res_int;
 
 	while((run_error == OK_ERR) && (NextIP->next != NULL)){
 		switch(Act_Instr->type){
@@ -363,11 +396,32 @@ Frame_variable *Act_Res = NULL;
 
 			/* Praca so VSTAVANYMI funkciami */
 			case iSORT:
+				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
+				Act_Var2 = searchVariableInFrames(Fr_Stack, src2);
 
+				if((Act_Var1->inicialized == 0) || (Act_Var2->inicialized == 0)){
+					run_error = UNINITI_ERR;
+					return run_error;
+				}
+
+				res_str = shell(Act_Var1->frame_var_value->S);
+				Act_Res = searchVariableInFrames(Fr_Stack, dest);
+
+				run_error = setValueVariable(Fr_Stack, Act_Res->frame_var_value, res_str);
 			break;
 
 			case iLEN:
+				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
 
+				if(Act_Var1->inicialized == 0){
+					run_error = UNINITI_ERR;
+					return run_error;
+				}
+
+				res_int = length_of_string(Act_Var1->frame_var_value->S);
+				Act_Res = searchVariableInFrames(Fr_Stack, dest);
+
+				run_error = setValueVariable(Fr_Stack, Act_Res->frame_var_value, res_int)
 			break;
 
 			case iSUBSTR:
@@ -407,6 +461,158 @@ Frame_variable *Act_Res = NULL;
 			break;
 
 			case iREAD:
+				/*+++++++++++++++++++++*/
+				str_value = NULL;
+				int state_of_str = sStart;
+				/*+++++++++++++++++++++*/
+				bool cont = true;
+				int state = sStart;
+				int c;
+				int pom = 0;
+				init_string(&pom);
+
+				while((cont) && (c = getc(stdin))){
+					switch(state){
+						case sStart:
+							if(isalpha(c)) 			state = sInteger;
+							else if(c == '.')		state = sIsDouble;
+							else if(isspace(c)){
+								state = sStart;
+								break;
+							}
+							else					state = sString;
+
+						expand_str(c, &pom);
+						break;
+
+						case sInteger:
+							if(isdigit(c)){
+ 								state = sInteger;
+ 								expand_str(c, &pom);
+ 							} else if(c == '.'){		//desatinne cislo
+ 								state = sIsDouble;
+ 								expand_str(c, &pom);
+ 							} else if((c == 'e') || (c == 'E')){	//cele cislo s exp.
+ 								state = sIsExpo;
+ 								expand_str(c, &pom);
+ 							} else{
+ 								//Nacitali sme ine ako cislo, posielame str int.
+ 								state_of_str = sInteger;
+ 								state = sEnd;
+ 								ungetc(c, stdin);
+ 							}
+						break;
+
+						case sIsDouble:
+							if(isdigit(c)){
+ 								state = sDouble;
+ 								expand_str(c, &pom);
+ 							} else {
+ 								state_of_str = sDouble;
+ 								state = sEnd;
+ 								ungetc(c, stdin);
+ 							}
+						break;
+
+						case sDouble:
+							if(isdigit(c)){
+ 								state = sDouble;
+ 								expand_str(c, &pom);
+ 							} else if((c == 'e') || (c == 'E')){
+ 								//desatinne cislo s exponentom
+ 								state = sIsExpo;
+ 								expand_str(c, &pom);
+ 							} else{
+ 								state_of_str = sDouble;
+ 								state = sEnd;
+ 								ungetc(c, stdin);
+ 							}
+						break;		
+
+						case sIsExpo:
+							if((c == '+') || (c == '-')){
+ 								state = sIsExpo2;
+ 								expand_str(c, &pom);
+ 							} else if(isdigit(c)){
+ 								state = sExpo;
+ 								expand_str(c, &pom);
+ 							} else{
+ 								state_of_str = sDouble;
+ 								state = sEnd;
+ 								ungetc(c, stdin);
+ 							}
+						break;
+
+						case sIsExpo2:
+							if(isdigit(c)){
+ 								state = sExpo;
+ 								expand_str(c, &pom);
+ 							} else{
+ 								//Chyba, po znamienku nasleduje iny znak ako cislo.
+ 								state_of_str = sDouble;
+ 								state = sEnd;
+ 								ungetc(c, stdin);
+ 							}
+						break;
+
+						case sExpo:
+							if(isdigit(c)){
+ 								state = sExpo;
+ 								expand_str(c, &pom);
+ 							} else{
+ 								state_of_str = sDouble;
+ 								state = sEnd;
+ 								ungetc(c, stdin);
+ 							}
+						break;
+
+						case sString:
+							if(!(isspace(c))){
+								state = sString;
+								expand_str(c, &pom);
+							} else{
+								state_of_str = sString;
+								state = sEnd;
+							}
+						break;
+
+						case sEnd:
+							ungetc(c, stdin);
+							cont = false;
+						break;
+					}
+				}
+
+				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
+
+				switch(state_of_str){
+					case sInteger:
+						if(Act_Var1->frame_var_type == sInteger){
+							run_error = setValueVariable(Fr_Stack, Act_Var1->frame_var_name, str_value);
+						} else{
+							run_error = NUMERIC_ERR;
+							return run_error;
+						}
+					break;
+
+					case sDouble:
+						if(Act_Var1->frame_var_type == sDouble){
+							run_error = setValueVariable(Fr_Stack, Act_Var1->frame_var_name, str_value);
+						} else{
+							run_error = NUMERIC_ERR;
+							return run_error;
+						}
+					break;
+
+					case sString:
+						if(Act_Var1->frame_var_type == sString){
+							run_error = setValueVariable(Fr_Stack, Act_Var1->frame_var_name, str_value);
+						} else{
+							run_error = NUMERIC_ERR;
+							return run_error;
+						}
+					break;
+				}
 
 			break;
 			////////////////////////////////////////
@@ -456,7 +662,6 @@ Frame_variable *Act_Res = NULL;
 			break;
 
 			case iDISPFR:
-				destroyFramesWithBase(Fr_Stack);
 				destroyFramesToEnded(Fr_Stack);
 			break;
 

@@ -68,7 +68,7 @@ Frame_variable *searchVariableInFrames(StackPointer *,char *);
 Frame_variable *searchVariableInFramesAfterEnded(StackPointer *,char *);
 //praca z hodnotou v ramcoch
 Frame_variable *insertVariableToFrame(StackPointer*,char*,int);
-ERROR_CODE setValueVariable(StackPointer *,char *,char*);
+ERROR_CODE setValueVariable(StackPointer *,char*,char*);
 ERROR_CODE copyValue(StackPointer *,Frame_variable *,Frame_variable *);
 ERROR_CODE setVariableAsInitialized(StackPointer *,char *);
 // uvvolnovanie 

@@ -209,6 +209,10 @@ int j;
  				} else if((c > '0') && (c <= '9')){
  					state = sInteger;
  					expand_token(c, &i);	//rozsirime token o jeden znak
+ 				} else if(c == '.'){ 
+ 					state = sIsDouble;
+ 					expand_token('0', &i);
+ 					expand_token(c, &i);
  				} else{
 					state = sInteger;
 					expand_token('0', &i);

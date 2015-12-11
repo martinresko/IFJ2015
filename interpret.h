@@ -31,6 +31,8 @@
 /* definujeme si premennu na uchovanie chyby */
 ERROR_CODE run_error;
 
+char *str_value;
+
 typedef enum{
 //Presun
 	iMOV,

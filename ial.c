@@ -20,11 +20,7 @@ int *KMP_FAIL_INDEX(char *pattern, int pattern_length)
 	int k,r;
 	int *fail = memmalloc(sizeof(int) * pattern_length);
 
-	if (fail == NULL) {
-		call_error(INTERN_ERR, FAILED_MALLOC);
-		return NULL;
-	}
-
+	
 	fail[0] = 0;
 
 	for (k = 1; k < pattern_length; k++) {
@@ -86,10 +82,6 @@ char* concatenation(char *string1, char *string2)
 {
 	char *result = memmalloc(strlen(string1) + strlen(string2) + 1);
 
-	if (result == NULL) {
-		call_error(INTERN_ERR, FAILED_MALLOC);
-		return NULL;
-	}
 
 	strcpy(result, string1);
     strcat(result, string2);
@@ -105,10 +97,6 @@ char* substring(char *string, int i, int n)
 	int string_len = strlen(string); // dlzka retazca
 
 	char *result = memmalloc(strlen(string));
-	if (result == NULL) {
-		call_error(INTERN_ERR, FAILED_MALLOC);
-		return "";
-	}
 
 	if ((i >= string_len) || ((i + n) >= string_len) || (n >= string_len) || (i < 0)){
 		memfree(result); 
@@ -187,9 +175,13 @@ while ( gap > 0 ) {
 //return string;
 }*/
 
-void shell(char *items, int count)  
+char* shell(char *items)  
   {  
   
+  char* pom = memmalloc(sizeof(strlen(items)+1));
+  strcpy(pom,items);
+
+     int count = strlen(items);
     register int i, j, gap, k;  
     char x, a[5];  
   
@@ -198,13 +190,15 @@ void shell(char *items, int count)
     for(k=0; k < 5; k++) {  
       gap = a[k];  
       for(i=gap; i < count; ++i) {  
-        x = items[i];  
-        for(j=i-gap; (x < items[j]) && (j >= 0); j=j-gap)  
-          items[j+gap] = items[j];  
-        items[j+gap] = x;  
+        x = pom[i];  
+        for(j=i-gap; (x < pom[j]) && (j >= 0); j=j-gap) 
+          pom[j+gap] = pom[j];  
+        pom[j+gap] = x;  
       }  
     }  
-  }  
+printf("string je %s\n",items);
+return pom;
+}  
 
 
 /*void strsort (char *array)
@@ -235,20 +229,23 @@ void shell(char *items, int count)
       }
 printf("%s\n",array);
 }*/
-/*
+
 int main() 
 {
-	
+	meminitialization();
 	char* a;
 	char* tt = substring("hatatitla",2,5); //neriesi free...
 	printf("%s\n",tt );
 	if (tt != "")
 		memfree(tt);
 
-	char s[] = "987654321";
-	shell(s,strlen(s));
+	char* s = "987654321";
+	printf("string je %s\n",s);	
+	char* vysl;
+	vysl = shell(s);
 	//shellsort(s);
-	printf("string je %s\n",s);
+	printf("string je %s\n",vysl);
+
 	
 	//printf("%s\n",shellsort("987654321"));
 	char * str = concatenation("ahoj", "jano");
@@ -261,5 +258,6 @@ int main()
 	printf("%d\n", KMP_Find("cccabcdefab", "c"));
 	printf("%d\n", KMP_Find("cccabcdefab", "aasdasdasda"));
 	printf("%d\n", KMP_Find("cccabcdefab", "fab")); 
+	memallfree();
 	return 0;
-}*/
+}
