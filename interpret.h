@@ -38,7 +38,6 @@ char *str_value;
 typedef enum{
 //Presun
 	iMOV,
-	iGETVALUE,
 //Aritmeticke operacie
 	iADD,
 	iSUB,

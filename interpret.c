@@ -74,12 +74,7 @@ Instruction *Act_Instr = get_next_instr(NextIP);
 //Premenna ramca...
 Frame_variable *Act_Var1 = NULL;
 Frame_variable *Act_Var2 = NULL;
-Frame_variable *Act_Res = NULL;
-
-//Operandy 3AC
-char *dest = Act_Instr->destination;
-char *src1 = Act_Instr->source1;
-char *src2 = Act_Instr->source2;  
+Frame_variable *Act_Res = NULL; 
 
 //Pomocne premenne
 char *res_str = NULL;
@@ -89,19 +84,18 @@ int res_int;
 		switch(Act_Instr->type){
 			/* Operacie PRIRADENIA a ZISKANIA HODNOT */
 			case iMOV:
-				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
+			// source1 = meno termu pravej strany
+			// source2 = meno termu do ktorej chceme priradit
+				Act_Var1 = searchVariableInFrames(Fr_Stack, Act_Instr->source1);
 				if(Act_Var1->inicialized == 0){
 					run_error = UNINITI_ERR;
 					return run_error;
 				}
 
-				Act_Var2 = searchVariableInFrames(Fr_Stack, dest);
+				Act_Var2 = searchVariableInFrames(Fr_Stack, Act_Instr->destination);
 				run_error = copyValue(Fr_Stack, Act_Var1, Act_Var2);
 			break;
 
-			case iGETVALUE:
-					
-			break;
 			///////////////////////////////////////////
 
 			/* ARITMETICKE operatory --> celociselne, desatinne, retazcove */
@@ -109,6 +103,7 @@ int res_int;
 			case iSUB:
 			case iMUL:
 			case iDIV:
+				//Ocakava len samotnu instrukciu, vie co treba robit ak tak
 
 				Act_Var2 = stackTop(Postfix_stack);
 				stackPop(Postfix_stack);
@@ -229,6 +224,8 @@ int res_int;
 			case iELESS:
 			case iEQUAL:
 			case iNEQUAL:
+
+				//Ocakava len samotnu instrukciu {iGREATER, iLESS atd} nic ineho !!!!!!!!!
 
 				Act_Var2 = stackTop(Postfix_stack);
 				stackPop(Postfix_stack);
@@ -387,19 +384,20 @@ int res_int;
 
 			/* Nepodmienene, podmienene SKOKY a volanie funkcii */
 			case iJMP:
-				//goto src1;
+				//ocakava navestie typu List kam treba skocit
 			break;
 
 			case iJZ:
-				//goto src1;
+				//Ocakava navestie typu List kam treba skocit, ked sa bude pracovat s IF, FOR
 			break;
 
 			case iJNZ:
-				//goto src1;
+				//Ocakava navestie typu List kam treba skocit, ked sa bude pracovat s IF, FOR
 			break;
 
 			case iCALL:
-				current_function = searchFunction(table, src1);
+				//source1 = meno funkcie ktora sa ide vykonavat.
+				current_function = searchFunction(table, Act_Instr->source1);
 				Instr_tape = current_function->instructions;
 				NextIP = Instr_tape.first_list_element;
 			break;
@@ -407,7 +405,9 @@ int res_int;
 
 			/* Praca so VSTAVANYMI funkciami */
 			case iSORT:
-				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
+				//source1 = meno premennej - 1. parameter vstavanej funkcie
+				//destination = meno premennej do ktorej ukladame navratovu hodnotu vstavanej funkcie
+				Act_Var1 = searchVariableInFrames(Fr_Stack, Act_Instr->source1);
 
 				if(Act_Var1->inicialized == 0){
 					run_error = UNINITI_ERR;
@@ -415,13 +415,15 @@ int res_int;
 				}
 
 				res_str = shell(Act_Var1->frame_var_value.S);
-				Act_Res = searchVariableInFrames(Fr_Stack, dest);
+				Act_Res = searchVariableInFrames(Fr_Stack, Act_Instr->destination);
 
 				run_error = setValueVariable(Fr_Stack, Act_Res->frame_var_name, res_str);
 			break;
 
 			case iLEN:
-				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
+				//source1 = meno premennej - 1. parameter vstavanej funkcie
+				//destination = meno premennej do ktorej ukladame navratovu hodnotu vstavanej funkcie
+				Act_Var1 = searchVariableInFrames(Fr_Stack, Act_Instr->source1);
 
 				if(Act_Var1->inicialized == 0){
 					run_error = UNINITI_ERR;
@@ -429,7 +431,7 @@ int res_int;
 				}
 
 				res_int = length_of_string(Act_Var1->frame_var_value.S);
-				Act_Res = searchVariableInFrames(Fr_Stack, dest);
+				Act_Res = searchVariableInFrames(Fr_Stack, Act_Instr->destination);
 
 				sprintf(res_str, "%d", res_int);
 
@@ -437,12 +439,15 @@ int res_int;
 			break;
 
 			case iSUBSTR:
-
+				//ked vratu substr NULL, tak je to chyba 10
 			break;
 
 			case iFIND:
-				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
-				Act_Var2 = searchVariableInFrames(Fr_Stack, src2);
+				//source1 = meno premennej - 1. parameter vstavanej funkcie
+				//source2 = meno premennej - 2. parameter vst. funkcie
+				//destination = meno premennej do ktorej ukladame navratovu hodnotu vstavanej funkcie
+				Act_Var1 = searchVariableInFrames(Fr_Stack, Act_Instr->source1);
+				Act_Var2 = searchVariableInFrames(Fr_Stack, Act_Instr->source2);
 
 				if((Act_Var1->inicialized == 0) || (Act_Var2->inicialized == 0)){
 					run_error = UNINITI_ERR;
@@ -450,7 +455,7 @@ int res_int;
 				}
 
 				res_int = KMP_Find(Act_Var1->frame_var_value.S, Act_Var2->frame_var_value.S);
-				Act_Res = searchVariableInFrames(Fr_Stack, dest);
+				Act_Res = searchVariableInFrames(Fr_Stack, Act_Instr->destination);
 
 				sprintf(res_str, "%d", res_int);
 
@@ -458,8 +463,12 @@ int res_int;
 			break;
 
 			case iCONCAT:
-				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
-				Act_Var2 = searchVariableInFrames(Fr_Stack, src2);
+				//source1 = meno premennej - 1. parameter vstavanej funkcie
+				//source2 = meno premennej - 2. parameter vst. funkcie
+				//destination = meno premennej do ktorej ukladame navratovu hodnotu vstavanej funkcieT:
+
+				Act_Var1 = searchVariableInFrames(Fr_Stack, Act_Instr->source1);
+				Act_Var2 = searchVariableInFrames(Fr_Stack, Act_Instr->source2);
 
 				if((Act_Var1->inicialized == 0) || (Act_Var2->inicialized == 0)){
 					run_error = UNINITI_ERR;
@@ -467,7 +476,7 @@ int res_int;
 				}
 
 				res_str = concatenation(Act_Var1->frame_var_value.S, Act_Var2->frame_var_value.S);
-				Act_Res = searchVariableInFrames(Fr_Stack, dest);
+				Act_Res = searchVariableInFrames(Fr_Stack, Act_Instr->destination);
 
 				run_error = setValueVariable(Fr_Stack, Act_Res->frame_var_name, res_str);
 			break;	
@@ -475,6 +484,9 @@ int res_int;
 
 			/* Instrukcie I/O Vstupu a Vystupu */
 			case iWRITE:
+				//source1 = meno toho co ideme vypisovat.
+				Act_Var1 = searchVariableInFrames(Fr_Stack, Act_Instr->source1);
+
 				/* Potrebujeme zistit co ideme vypisovat */
 				if(!(Act_Var1->inicialized)){
 					run_error = UNINITI_ERR;
@@ -497,6 +509,8 @@ int res_int;
 			break;
 
 			case iREAD:
+				//source1 = Meno toho do coho ideme zapisovat z cin
+
 				/*+++++++++++++++++++++*/
 				str_value = NULL;
 				int state_of_str = sStart;
@@ -619,7 +633,7 @@ int res_int;
 					}
 				}
 
-				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
+				Act_Var1 = searchVariableInFrames(Fr_Stack, Act_Instr->source1);
 
 				switch(state_of_str){
 					case sInteger:
@@ -656,23 +670,32 @@ int res_int;
 			/* Operacie nad zasobnikom POSTFIX */
 
 			case iDISPSTPOST:
+				//Len instrukcia
 				stackDestroy(Postfix_stack);
 			break;
 
 			case iPUSH:
-				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
-				run_error = stackPush(Postfix_stack, Act_Var1);
+				/*
+				* source1 = meno premennej
+				* source2 = ??
+				* destination = ?? 
+				*/
+					Act_Var1 = searchVariableInFrames(Fr_Stack, Act_Instr->source1);
+					run_error = stackPush(Postfix_stack, Act_Var1);
 			break;
 
 			case iPOP:
+				//Len instrukcia - POSTFIX zasobnik
 				stackPop(Postfix_stack);
 			break;
 
 			case iTOP:
+				//Len instrukcia
 				Act_Var1 = stackTop(Postfix_stack);
 			break;
 
 			case iTOPPOP:
+				//Len instrukcia
 				Act_Var1 = stackTop(Postfix_stack);
 				stackPop(Postfix_stack);
 			break;
@@ -680,49 +703,68 @@ int res_int;
 
 			/* Praca s navestiami instrukcnej pasky */
 			case iRET:
+				//len instrukcia
+
+				//next_instruction je asi len v base Frame
 				NextIP = Act_Var1->next_instruction;
 			break;
 
 			case iLABEL:
+				//Este neviem lebo lable :(
 				;
 			break;
 			//////////////////////////////////////
 
 			/* Praca s FRAME ramcami a zasobnikom ramcov */
 			case iPUSHFR:
+				//len instrukcia
 				run_error = pushFrame(Fr_Stack);
 			break;
 
 			case iPOPFR:
+				//Len instrukcia
 				popFrame(Fr_Stack);
 			break;
 
 			case iDISPFR:
+				//Len instrukcia
 				destroyFramesToEnded(Fr_Stack);
 			break;
 
 			case iINSERT_TO_FR:
-				Act_Var1 = insertVariableToFrame(Fr_Stack, src1 , var_type);
+				//source1 = meno premennej ktoru ideme predavat do ramca
+				//source2 = integer - akeho typu je premenna ktoru ideme pridavat {sInteger, sDouble, sString}
+				var_type = *((int *)(Act_Instr->source2));
+				Act_Var1 = insertVariableToFrame(Fr_Stack, Act_Instr->source1 , var_type);
 			break;
 
 			case iREADFR:
-				Act_Var1 = searchVariableInFrames(Fr_Stack, src1);
+				//source1 = meno toho co ideme vyhladavat
+				Act_Var1 = searchVariableInFrames(Fr_Stack, Act_Instr->source1);
 			break;
 
 			case iSETBASEFR:
+				//NextIP - premenna typu List
+				//ret_value_func - navratovy typ - integer
 				fromPreparationDoBase(Fr_Stack, ret_value_func, NextIP);
 			break;
 
 			case iDISPOSEALL:
+				//len instrukcia
 				destroyAllFrames(Fr_Stack);
 			break;
 
 			case iBASE_TO_END:
+				//len instrukcia
 				fromBaseDoEnded(Fr_Stack);
 			break;
 
 			case iCOPY_VALUE:
-				run_error = copyValue(Fr_Stack,Act_Var1, Act_Var2);
+				//source1 = z coho ideme kopirovat
+				//source2 = do coho ideme kopirovat
+				Act_Var1 = searchVariableInFrames(Fr_Stack, Act_Instr->source1);
+				Act_Var2 = searchVariableInFrames(Fr_Stack, Act_Instr->source2);
+				run_error = copyValue(Fr_Stack, Act_Var1, Act_Var2);
 			break;
 			//////////////////////////////////////
 		}

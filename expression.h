@@ -56,8 +56,8 @@ typedef struct precedence_table_element {
 /* funkcie precedencnej syntaktickej analyzi */
 ERROR_CODE expression(int,int);
 ERROR_CODE InitExpressionList(ListPointer *);
-ERROR_CODE  Reduce(ListPointer *);
-void ReduceT(ListPointer *);
+ERROR_CODE Reduce(ListPointer *);
+ERROR_CODE ReduceT(ListPointer *);
 ERROR_CODE Shift(ListPointer *,int,char *);
 int ConvertCharToAccessPrecedenceTable(char *);
 char DecideShiftOrReduce(ListPointer *,int);

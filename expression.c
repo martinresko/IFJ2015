@@ -116,13 +116,16 @@ ERROR_CODE Analysis(ListPointer *Lis,int first_token,int type_control)
 			}
 			else if(return_shift==SEM_UNDEF_ERR)
 				return SEM_UNDEF_ERR;
+			else if(return_shift==SYN_ERR)
+				return SYN_ERR;
 			else
 				return INTERN_ERR;
 		}
 		else if(next_step=='T')
 		{
 			printf("pravidlo T:\n");
-			ReduceT(Lis);
+			if(ReduceT(Lis)!=OK_ERR)
+				return SYN_ERR;
 			token_expression = get_Token(); /* aktualizujem token za ')' */
 			if(token_expression.id==sError)
 				return LEX_ERR;
@@ -323,15 +326,23 @@ ERROR_CODE Reduce(ListPointer *Lis)
 
 /* funkcia pre pravidlo (D) -> D
  * Lis - ukazatel na zoznam */
-void ReduceT(ListPointer *Lis)
+ERROR_CODE ReduceT(ListPointer *Lis)
 {
 	printf("(D) -> D\n");
-	int typ = ((Precedence_table_element *)(Lis->last_terminal->next->data))->id;
-	DeleteLast(Lis); /* odstranim operand */
-	((Precedence_table_element *)(Lis->last_terminal->data))->id=typ;
-	((Precedence_table_element *)(Lis->last_terminal->data))->expresion_id=OPERAND;
-	((Precedence_table_element *)(Lis->last_terminal->data))->terminal=false; 
-	FindLastTerminal(Lis); /* nastavim novy terminal */
+	if(Lis->last_terminal->next != NULL)
+	{
+		int typ = ((Precedence_table_element *)(Lis->last_terminal->next->data))->id;
+		DeleteLast(Lis); /* odstranim operand */
+		((Precedence_table_element *)(Lis->last_terminal->data))->id=typ;
+		((Precedence_table_element *)(Lis->last_terminal->data))->expresion_id=OPERAND;
+		((Precedence_table_element *)(Lis->last_terminal->data))->terminal=false; 
+		FindLastTerminal(Lis); /* nastavim novy terminal */
+		return OK_ERR;
+	}
+	else
+	{
+		return SYN_ERR;
+	}
 }
 
 /* shift vlastne iba pushne znak z input na list */
@@ -359,6 +370,13 @@ ERROR_CODE Shift(ListPointer *Lis,int id,char *attribute)
 				((Precedence_table_element *)(Lis->last_terminal->data))->id=sDouble;
 			break;
 		}
+	}
+
+	if(Lis->last_terminal->prev->data!=NULL)
+	{
+		/* nemozem shiftovat ak na vrchole je OPERAND a na vstupre je OPERAND */
+		if( (((Precedence_table_element *)(Lis->last_terminal->data))->expresion_id == OPERAND) && ((((Precedence_table_element *)(Lis->last_terminal->prev->data))->expresion_id == OPERAND)) )
+			return SYN_ERR;
 	}
 	return (Lis->last_terminal==NULL)?INTERN_ERR:OK_ERR;
 }
