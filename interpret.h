@@ -22,7 +22,6 @@
 #include "parser.h"
 #include "stack.h"
 #include "list.h"
-#include "bintree.h"
 #include "frames.h"
 #include "scaner.h"
 #include "ial.h"

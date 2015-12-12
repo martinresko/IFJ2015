@@ -20,10 +20,23 @@
 
 #include "garbage.h"
 #include "error.h"
-
-#include "bintree.h"
 #include "stack.h"
 #include "list.h"
+
+/* STRUKTURY binarneho stromu */
+
+/* element stromu */
+typedef struct tree {
+	struct tree *left;
+	struct tree *right;
+	void *data;
+	char *key;
+} *Tree;
+
+/* struktura stromu */
+typedef struct {
+	Tree root;
+} TreePointer;
 
 /* Struktura funkcie v globalnej tabulke symbolov, len pre funkcie */
 typedef struct function_GTS {
@@ -53,6 +66,7 @@ typedef struct table_symbols{
 	TreePointer functions; /* strom funkcii */
 	Function_GTS *actual_function; /* ukazatel na aktualnu funkciu */
 } Table_symbols;
+
 
 /**Prototypy funkcii**/
 int KMP_Find(char *string, char *pattern);
@@ -85,5 +99,13 @@ ERROR_CODE nodesTree(Tree,int);
 void destroyGTS(Table_symbols *);
 
 ERROR_CODE finalFunctionCheckout(Table_symbols *);
+
+/* funkcie binarneho stromu */
+void treeInit(TreePointer *);
+void treeDestroy(TreePointer *);
+Tree treeSearch(TreePointer *, char *);
+ERROR_CODE treeInsert(TreePointer *,char *,void *);
+Tree treeNodesSearch(Tree, char *key);
+void treeNodesDestroy(Tree);
 
 #endif

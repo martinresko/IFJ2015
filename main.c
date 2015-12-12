@@ -14,6 +14,7 @@
 //Hlavickove subory
  #include <stdlib.h>
  #include <stdio.h>
+
  #include "scaner.h"
  #include "parser.h"
  #include "ial.h"

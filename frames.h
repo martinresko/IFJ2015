@@ -21,8 +21,8 @@
 
 #include"error.h"
 #include"garbage.h"
-#include"bintree.h"
 #include"stack.h"
+#include"ial.h"
 #include"scaner.h"
 #include"list.h"
 
