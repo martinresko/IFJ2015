@@ -276,7 +276,7 @@ ERROR_CODE params(Function_GTS * previous_function_id)
         /*ak nema funkcia ziadny parameter*/
         else {
             if (getFunctionParam(symbol_table.actual_function,TRUE) != NULL) {
-                error = SEM_TYPE_ERR;
+                error = SEM_UNDEF_ERR;
                 return error;
             }
 
@@ -318,13 +318,13 @@ ERROR_CODE params(Function_GTS * previous_function_id)
                 printf("tu som 1\n");
                 if ((The_First->typ != (int)(type_of_element_to_table_of_symbols)) || (strcmp(The_First->name,token.attribute))) {
                     printf("tu som 3\n");
-                    error = SEM_TYPE_ERR;
+                    error = SEM_UNDEF_ERR;
                     return error;
                 }
             }
             else {
                 printf("tu som 2\n");
-                error = SEM_TYPE_ERR;
+                error = SEM_UNDEF_ERR;
                 return error;
             }
         }
@@ -416,12 +416,12 @@ ERROR_CODE multi_params(Function_GTS * previous_function_id)
                 Variable *The_First = getFunctionParam(symbol_table.actual_function,CONTINUE);
                 if (The_First != NULL) {
                     if ((The_First->typ != (int)(type_of_element_to_table_of_symbols)) || (strcmp(The_First->name,token.attribute))) {
-                        error = SEM_TYPE_ERR;
+                        error = SEM_UNDEF_ERR;
                         return error;
                     }
                 }
                 else {
-                    error = SEM_TYPE_ERR;
+                    error = SEM_UNDEF_ERR;
                     return error;
                 }
             }
