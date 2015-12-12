@@ -32,11 +32,13 @@ int main(int argc, char **argv){
 
 	if(argc != 2){
 		fprintf(stderr, "Bol zadany nespravny pocet argumentov.\n");
+		memallfree(); /* volanie garbage aby upratal */
 		return INTERN_ERR;
 	}
 
 	if(!(file = fopen(argv[1], "r"))){
 		fprintf(stderr, "Subor sa nepodarilo otvorit.\n");
+		memallfree(); /* volanie garbage aby upratal */
 		return INTERN_ERR;
 	}
 	
