@@ -42,14 +42,12 @@ int main(int argc, char **argv){
 	
 	error = prog();
 
-	if (error != OK_ERR) {
-        return error;
-    }
+	
     printf("PARSER OK\n");
-    //error = interpret(&symbol_table);
+    
 
     if (error != OK_ERR) {
-        return error;
+        error = interpret(&symbol_table);
     }
 
 	printf(" koniec programu navratovi kod je %d\n",error );
