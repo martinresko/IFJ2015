@@ -27,7 +27,8 @@ extern int typ_pre_auto; // navratovy typ z expression pri odvodzovani auto
 
 tState type_of_element_to_table_of_symbols; // typ pre tabulku symbolov
 int type_for_expression; // typ id pre expression kvoli kontrolovaniu semantickej analyzy
-char * identificator_for_generating_instruction_in_assign;
+char * identificator_for_generating_instruction_in_assign_on_left_side;
+int LABEL = 0;
 
 
 /* hlavna funkcia na spustenie parseru
@@ -607,11 +608,12 @@ ERROR_CODE command()
          * id<funkcia_priradenie>;
         */
         case sIdent :
+            identificator_for_generating_instruction_in_assign_on_left_side = token.attribute;          
             printf("idem do funkcia_priradenie\n");
             ;
             Variable *premenna_na_odvodenie_typu = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
 
-            if(premenna_na_odvodenie_typu != NULL){
+            if (premenna_na_odvodenie_typu != NULL) {
             	type_for_expression = premenna_na_odvodenie_typu->typ;
             }
             error = funkcia_priradenie(token.attribute);
@@ -629,6 +631,7 @@ ERROR_CODE command()
                 /*pokial dostaanem ";"*/
                 case sSemicolon :
                     printf("dostal som ;\n");
+                    //error = insertFunctionInstruction(Function_GTS *, iMOV, void *, void *, identificator_for_generating_instruction_in_assign_on_left_side); // pridane generovanie
                     error = OK_ERR;
                     return error;
                 break;
@@ -637,6 +640,7 @@ ERROR_CODE command()
                     error = SYN_ERR;
                     return error;
                 break;
+
             }
         break;
         case sResWord :
@@ -719,7 +723,7 @@ ERROR_CODE command()
                 }
                 printf("je (\n");
 
-                error = expression(NOT_TAKEN_FIRST_TOKEN, sEnd); // expression
+                error = expression(NOT_TAKEN_FIRST_TOKEN, sInteger); // expression
                 token = token_expression;
                 
                 if (error != OK_ERR) { 
@@ -915,7 +919,7 @@ ERROR_CODE command()
                 }
                 printf("dostal som ;\n");
 
-                error = expression(NOT_TAKEN_FIRST_TOKEN, sEnd); // expression opravit este
+                error = expression(NOT_TAKEN_FIRST_TOKEN, sInteger); // expression opravit este
                 token = token_expression;
 
                 if (error != OK_ERR) {
@@ -1568,8 +1572,9 @@ ERROR_CODE hodnota_priradenia()
                 }
         	}
         	else {
-
-                if (function_control_type->return_type != type_for_expression ) {
+                // kontrola typov pri volani funkcii
+                
+                if (typeControl(function_control_type->return_type, type_for_expression) != OK_ERR) {
                     error = SEM_TYPE_ERR;
                     return error;
                 }
