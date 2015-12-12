@@ -21,6 +21,7 @@
  #include "expression.h"
  #include "ial.h"
  #include "scaner.h"
+ #include "interpret.h"
 
  ERROR_CODE prog();
  ERROR_CODE body();
@@ -39,7 +40,7 @@
  ERROR_CODE multi_cin();
  ERROR_CODE hodnota_priradenia();
  ERROR_CODE multi_cout();
- ERROR_CODE term();
+ ERROR_CODE term(char *);
  ERROR_CODE fun_auto();
  ERROR_CODE inicialization();
  ERROR_CODE declaration_or();

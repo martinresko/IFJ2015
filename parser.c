@@ -33,7 +33,7 @@ int LABEL = 0;
 
 /* hlavna funkcia na spustenie parseru
  * @info:<prog> ->  <body> ; $
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE prog()
@@ -78,7 +78,7 @@ ERROR_CODE prog()
 
 /*
  * @info:<body> -> <function><body> /empty
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE body()
@@ -125,7 +125,7 @@ ERROR_CODE body()
 
 /*
  * @info:function> -> <typ> id (<params>) <protype_or_definition>
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE function()
@@ -203,7 +203,7 @@ ERROR_CODE function()
 
 /*
  * @info:<typ> -> int / string / double 
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE typ()
@@ -249,7 +249,7 @@ ERROR_CODE typ()
 
 /*
  * @info:<params> -> <typ> id <multi_params> / empty
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE params(Function_GTS * previous_function_id)
@@ -341,7 +341,7 @@ ERROR_CODE params(Function_GTS * previous_function_id)
 
 /*
  * @info:<multi_params> -> , <typ> id <multi_params> / empty
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE multi_params(Function_GTS * previous_function_id)
@@ -449,7 +449,7 @@ ERROR_CODE multi_params(Function_GTS * previous_function_id)
 
 /*
  * @info:<prototype_or_definition> -> { <stat_list> } / ;
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE prototype_of_definition()
@@ -504,7 +504,7 @@ ERROR_CODE prototype_of_definition()
 
 /*
  * @info:<stat_list> -> <command> <stat_list> /empty
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE stat_list()
@@ -568,7 +568,7 @@ ERROR_CODE stat_list()
  *  for (<for_definice> ; expresion ; <premenna>) { <stat_list>}
  *  cin >> id <multi_cin>;
  *  cout << <term> <multi_cout>;
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE command()
@@ -680,7 +680,7 @@ ERROR_CODE command()
                 printf("volam expression\n");
                 symbol_table.actual_function->return_occured = TRUE;
                 // predam do expression aktualny typ funkcie
-                printf("navratova hodnota funkcie   %d\n",symbol_table.actual_function->return_type );
+                printf("@navratova hodnota funkcie   %d\n",symbol_table.actual_function->return_type );
                 error = expression(NOT_TAKEN_FIRST_TOKEN, symbol_table.actual_function->return_type);
                 token = token_expression;
 
@@ -842,6 +842,12 @@ ERROR_CODE command()
                                 }
                             	printf("dostal som ID\n");
                                 error = OK_ERR;
+
+                                error = insertFunctionInstruction(symbol_table.actual_function, iREAD, NULL, token.attribute, NULL);
+
+                                if (error != OK_ERR) {
+                                    return error;
+                                }
                             break;
                             default :
                                 error = SYN_ERR;
@@ -1008,7 +1014,8 @@ ERROR_CODE command()
             else if(!(strcmp(token.attribute, "cout"))){
             	printf("som v cout\n");
                 token = get_Token ();
-
+                //token pre count na ziskanie hodnoty tokenu z term
+                char *token_for_emmiting_instruction = NULL;
                 switch (token.id) {
                     /*pokial lexer vrati lex error*/
                     case sError: 
@@ -1018,11 +1025,18 @@ ERROR_CODE command()
                     case sCout :
                     	printf("dostal som <<\n");
                     	printf("idem do term\n");
-                        error = term();
+                        error = term(token_for_emmiting_instruction);
 
                         if (error != OK_ERR) {
                             return error;
                         }
+
+                        error = insertFunctionInstruction(symbol_table.actual_function, iWRITE, NULL, token_for_emmiting_instruction, NULL);
+
+                        if (error != OK_ERR) {
+                            return error;
+                        }
+
                     break;
                     default :
                     	printf("chyba v cout\n");
@@ -1069,7 +1083,7 @@ ERROR_CODE command()
  * @info:  <funkcia_ priradenie>
  *  (<arguments>)
  *  <deklaracia>
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE funkcia_priradenie(char *previous_token_atributte)
@@ -1136,7 +1150,7 @@ ERROR_CODE funkcia_priradenie(char *previous_token_atributte)
 /*
  * @info:  <arguments> 
  * id <multi_arguments>
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE arguments(char *previous_token_atributte)
@@ -1232,7 +1246,7 @@ ERROR_CODE arguments(char *previous_token_atributte)
  * @info: <multi_arguments>
  *  , id <multi_arguments>
  * empty
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE multi_arguments(char *previous_token_atributte)
@@ -1344,7 +1358,7 @@ ERROR_CODE multi_arguments(char *previous_token_atributte)
  * @info: <multi_cin>  
  *  >> id <multi_cin>
  *  empty
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE multi_cin()
@@ -1417,7 +1431,7 @@ ERROR_CODE multi_cin()
  * @info: <multi_cout> 
  *  << <term> <multi_count>
  *  empty
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE multi_cout()
@@ -1425,6 +1439,7 @@ ERROR_CODE multi_cout()
 	printf("som v multi_cout\n");
     ERROR_CODE error;
     token = get_Token ();
+    char *token_for_emmiting_instruction = NULL;
 
     switch (token.id) {
         /*pokial lexer vrati lex error*/
@@ -1439,7 +1454,13 @@ ERROR_CODE multi_cout()
         break;
         case sCout :
         	printf("dostal som <<\n");
-            error = term();
+            error = term(token_for_emmiting_instruction);
+
+            if (error != OK_ERR) {
+                return error;
+            }
+
+            error = insertFunctionInstruction(symbol_table.actual_function, iWRITE, NULL, token_for_emmiting_instruction, NULL);
 
             if (error != OK_ERR) {
                 return error;
@@ -1469,7 +1490,7 @@ ERROR_CODE multi_cout()
  * @info: <assign> 
  *  <auto>;
  *  <inicializacia>;
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE assign()
@@ -1510,7 +1531,7 @@ ERROR_CODE assign()
 /*
  * @info: <deklaracia>
  *  = <hodnota_priradenia>
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE declaration()
@@ -1539,7 +1560,7 @@ ERROR_CODE declaration()
  * @info: <hodnota_priradenia> 
  *  expression
  *  id( < arguments > ) 
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE hodnota_priradenia()
@@ -1632,15 +1653,19 @@ ERROR_CODE hodnota_priradenia()
 
 /*
  * @info: <term> 
+ * @param: hodnota/id/string pre cout
  * id / cislo / retazec 
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
-ERROR_CODE term()
+ERROR_CODE term(char * token_for_count)
 {
 	printf("som v term\n");
     ERROR_CODE error;
     token = get_Token ();
+    // 
+    token_for_count = token.attribute;
+    token_for_count = token_for_count;
     // ak dostanem lexiklanu chybu LEX_ERR
     if (token.id == sError) {
         error = LEX_ERR;
@@ -1676,7 +1701,7 @@ ERROR_CODE term()
 /*
  * @info: <auto> 
  *  auto id = expression 
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE fun_auto()
@@ -1782,7 +1807,7 @@ ERROR_CODE fun_auto()
 /*
  * @info: <inicialization> 
  *  <typ> id <deklaracia alebo ;>
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE inicialization()
@@ -1843,7 +1868,7 @@ ERROR_CODE inicialization()
  * @info: <declaration_or> 
  *  <deklaracia>
  *  empty
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE declaration_or()
@@ -1881,7 +1906,7 @@ ERROR_CODE declaration_or()
 /*
  * @info: <for_definition>
  *  = <hodnota_priradenia>
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE for_definition()
@@ -1917,7 +1942,7 @@ ERROR_CODE for_definition()
  * @info: <for_deklaration>
  *  id <deklaracia>
  *  <typ> id <deklaracia>
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE for_deklaration() 
@@ -1977,7 +2002,7 @@ ERROR_CODE for_deklaration()
  * @info: <foo>
  *  empty
  *  = expresion
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE foo() 
@@ -2031,7 +2056,7 @@ ERROR_CODE foo()
  *  sort
  * type_control znaci ci sa bude kontrolovat typ TRUE/FALSE
  * type_for_build_in_function
- * navratova hodnota return: ERROR CODE
+ * @navratova hodnota return: ERROR CODE
  */
 
 ERROR_CODE build_in_function(int type_control)
@@ -2185,6 +2210,9 @@ ERROR_CODE build_in_function(int type_control)
                     case sInteger :
                         error = OK_ERR;
                     break;
+                    case sDouble :
+                        error = OK_ERR;
+                    break;
                     // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
                     case sIdent :
                         ;
@@ -2226,6 +2254,9 @@ ERROR_CODE build_in_function(int type_control)
                         return error;
                     break;
                     case sInteger :
+                        error = OK_ERR;
+                    break;
+                    case sDouble :
                         error = OK_ERR;
                     break;
                     // ak dostanem ID pozriem sa do tabulky symbolov ci bola definovana
