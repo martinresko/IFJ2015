@@ -1159,7 +1159,7 @@ ERROR_CODE arguments(char *previous_token_atributte)
                    error = SEM_UNDEF_ERR;
                    return error;
                 }
-                if (The_First->typ != argument_ID->typ) {
+                if (typeControl(The_First->typ, argument_ID->typ)!=OK_ERR) {
                     error = SEM_TYPE_ERR;
                     return error;
                 }
@@ -1192,7 +1192,7 @@ ERROR_CODE arguments(char *previous_token_atributte)
                 Variable *The_First = getFunctionParam(searchFunction(&symbol_table,previous_token_atributte),TRUE);
                 //ak nejaky ma
                 if (The_First != NULL) {
-                    if (The_First->typ != token.id) {
+                    if (typeControl(The_First->typ,token.id)!=OK_ERR) {
                         error = SEM_TYPE_ERR;
                         return error;
                     }
@@ -1266,7 +1266,7 @@ ERROR_CODE multi_arguments(char *previous_token_atributte)
                            error = SEM_TYPE_ERR;
                            return error;
                         }
-                        if (The_First->typ != argument_ID->typ) {
+                        if ((typeControl(The_First->typ, argument_ID->typ)!=OK_ERR)) {
                             error = SEM_TYPE_ERR;
                             return error;
                         }
@@ -1284,7 +1284,7 @@ ERROR_CODE multi_arguments(char *previous_token_atributte)
                         Variable *The_First = getFunctionParam(searchFunction(&symbol_table,previous_token_atributte),CONTINUE);
                         //ak nejaky ma
                         if (The_First != NULL) {
-                            if (The_First->typ != token.id) {
+                            if (typeControl(The_First->typ, token.id)!=OK_ERR) {
                                 error = SEM_TYPE_ERR;
                                 return error;
                             }
