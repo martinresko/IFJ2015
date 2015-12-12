@@ -46,7 +46,7 @@ int main(int argc, char **argv){
 	
     printf("PARSER OK\n");
     
-    if (error != OK_ERR) {
+    if (error == OK_ERR) {
         error = interpret(&symbol_table);
     }
 

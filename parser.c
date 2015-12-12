@@ -2084,10 +2084,10 @@ ERROR_CODE build_in_function(int type_control)
 
         if(type_control == TRUE) {
 
-            if(type_for_expression != sInteger) {
-                error = SEM_TYPE_ERR;
-                return error;
-            }
+            if (typeControl(type_for_expression, sInteger) != OK_ERR) {
+                    error = SEM_TYPE_ERR;
+                    return error;
+                }
         }
         token = get_Token();
 
@@ -2156,10 +2156,10 @@ ERROR_CODE build_in_function(int type_control)
 
         if(type_control == TRUE) {
 
-            if(type_for_expression != sString) {
-                error = SEM_TYPE_ERR;
-                return error;
-            }
+            if (typeControl(type_for_expression, sString) != OK_ERR) {
+                    error = SEM_TYPE_ERR;
+                    return error;
+                }
         }
 
         token = get_Token();
@@ -2321,7 +2321,7 @@ ERROR_CODE build_in_function(int type_control)
     else if(!(strcmp(token.attribute, "concat"))){
         if(type_control == TRUE) {
 
-            if(type_for_expression != sString) {
+            if (typeControl(type_for_expression, sString) != OK_ERR) {
                 error = SEM_TYPE_ERR;
                 return error;
             }
@@ -2438,7 +2438,7 @@ ERROR_CODE build_in_function(int type_control)
 
         if(type_control == TRUE) {
 
-            if(type_for_expression != sInteger) {
+            if (typeControl(type_for_expression, sInteger) != OK_ERR) {
                 error = SEM_TYPE_ERR;
                 return error;
             }
@@ -2555,7 +2555,7 @@ ERROR_CODE build_in_function(int type_control)
 
         if(type_control == TRUE) {
 
-            if(type_for_expression != sString) {
+            if (typeControl(type_for_expression, sString) != OK_ERR) {
                 error = SEM_TYPE_ERR;
                 return error;
             }
