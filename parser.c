@@ -131,6 +131,7 @@ ERROR_CODE body()
 ERROR_CODE function()
 {
     // skontrolovat este rezzervovane slova
+    int main_detection = FALSE;
     printf("som vo funkcion\n");
     ERROR_CODE error;
 
@@ -157,6 +158,9 @@ ERROR_CODE function()
         printf("Nieje id\n");
         error = SYN_ERR;
         return error;
+    }
+    if(!(strcmp(token.attribute, "main"))) {
+        main_detection = TRUE;
     }
     // kontrola na redefiniciu funkcie
     Function_GTS *function_for_searching = searchFunction(&symbol_table,token.attribute);
@@ -192,7 +196,7 @@ ERROR_CODE function()
         return error;
     }
    	printf("idem do prototype_of_definition\n");
-    error = prototype_of_definition();
+    error = prototype_of_definition(main_detection);
 
     if (error != OK_ERR) {
         return error;
@@ -452,13 +456,24 @@ ERROR_CODE multi_params(Function_GTS * previous_function_id)
  * @navratova hodnota return: ERROR CODE
  */
 
-ERROR_CODE prototype_of_definition()
+ERROR_CODE prototype_of_definition(int main_detection)
 {
     printf("som v prototype_of_definition\n");
     ERROR_CODE error;
 
     token = get_Token();
     printf("%s\n",token.attribute);
+
+    if (main_detection == TRUE) {
+        printf("v maine davam instrukciu %d\n", iPUSHFR );
+        error = insertFunctionInstruction(symbol_table.actual_function, iPUSHFR, NULL, NULL, NULL);  
+        printf("v maine davam instrukciu %d\n", iSETBASEFR );
+        error = insertFunctionInstruction(symbol_table.actual_function, iSETBASEFR, NULL, &symbol_table.actual_function->return_type, NULL);
+
+        if (error != OK_ERR) {
+            return error;
+        }
+    }
 
     switch (token.id) {
         /*pokila lexer vrati lex error*/
@@ -842,7 +857,7 @@ ERROR_CODE command()
                                 }
                             	printf("dostal som ID\n");
                                 error = OK_ERR;
-
+                                printf("v cin davam instrukciu %d\n", iREAD );
                                 error = insertFunctionInstruction(symbol_table.actual_function, iREAD, NULL, token.attribute, NULL);
 
                                 if (error != OK_ERR) {
@@ -1015,7 +1030,7 @@ ERROR_CODE command()
             	printf("som v cout\n");
                 token = get_Token ();
                 //token pre count na ziskanie hodnoty tokenu z term
-                char *token_for_emmiting_instruction = NULL;
+                tToken token_for_emmiting_instruction;
                 switch (token.id) {
                     /*pokial lexer vrati lex error*/
                     case sError: 
@@ -1025,13 +1040,13 @@ ERROR_CODE command()
                     case sCout :
                     	printf("dostal som <<\n");
                     	printf("idem do term\n");
-                        error = term(token_for_emmiting_instruction);
+                        error = term(&token_for_emmiting_instruction);
 
                         if (error != OK_ERR) {
                             return error;
                         }
-
-                        error = insertFunctionInstruction(symbol_table.actual_function, iWRITE, NULL, token_for_emmiting_instruction, NULL);
+                        printf("v cout davam instrukciu %d\n", iWRITE );
+                        error = insertFunctionInstruction(symbol_table.actual_function, iWRITE, NULL, &token_for_emmiting_instruction.attribute, &token_for_emmiting_instruction.id);
 
                         if (error != OK_ERR) {
                             return error;
@@ -1439,7 +1454,7 @@ ERROR_CODE multi_cout()
 	printf("som v multi_cout\n");
     ERROR_CODE error;
     token = get_Token ();
-    char *token_for_emmiting_instruction = NULL;
+    tToken token_for_emmiting_instruction;
 
     switch (token.id) {
         /*pokial lexer vrati lex error*/
@@ -1454,13 +1469,13 @@ ERROR_CODE multi_cout()
         break;
         case sCout :
         	printf("dostal som <<\n");
-            error = term(token_for_emmiting_instruction);
+            error = term(&token_for_emmiting_instruction);
 
             if (error != OK_ERR) {
                 return error;
             }
-
-            error = insertFunctionInstruction(symbol_table.actual_function, iWRITE, NULL, token_for_emmiting_instruction, NULL);
+             printf("v cout davam instrukciu %d\n", iWRITE );
+            error = insertFunctionInstruction(symbol_table.actual_function, iWRITE, NULL, &token_for_emmiting_instruction.attribute, &token_for_emmiting_instruction.id);
 
             if (error != OK_ERR) {
                 return error;
@@ -1658,13 +1673,13 @@ ERROR_CODE hodnota_priradenia()
  * @navratova hodnota return: ERROR CODE
  */
 
-ERROR_CODE term(char * token_for_count)
+ERROR_CODE term(tToken* token_for_count)
 {
 	printf("som v term\n");
     ERROR_CODE error;
     token = get_Token ();
     // 
-    token_for_count = token.attribute;
+    token_for_count = &token;
     token_for_count = token_for_count;
     // ak dostanem lexiklanu chybu LEX_ERR
     if (token.id == sError) {

@@ -41,11 +41,9 @@ int main(int argc, char **argv){
 	}
 	
 	error = prog();
-
 	
     printf("PARSER OK\n");
     
-
     if (error != OK_ERR) {
         error = interpret(&symbol_table);
     }

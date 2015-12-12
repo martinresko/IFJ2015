@@ -27,7 +27,7 @@
  ERROR_CODE body();
  ERROR_CODE function();
  ERROR_CODE typ();
- ERROR_CODE prototype_of_definition();
+ ERROR_CODE prototype_of_definition(int);
  ERROR_CODE params(Function_GTS *);
  ERROR_CODE multi_params(Function_GTS *);
  ERROR_CODE stat_list();
@@ -40,7 +40,7 @@
  ERROR_CODE multi_cin();
  ERROR_CODE hodnota_priradenia();
  ERROR_CODE multi_cout();
- ERROR_CODE term(char *);
+ ERROR_CODE term(tToken *);
  ERROR_CODE fun_auto();
  ERROR_CODE inicialization();
  ERROR_CODE declaration_or();
