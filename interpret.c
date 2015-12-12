@@ -485,27 +485,52 @@ int res_int;
 			/* Instrukcie I/O Vstupu a Vystupu */
 			case iWRITE:
 				//source1 = meno toho co ideme vypisovat.
+				//source2 = typ sInteger, sDouble, sString
+
+				
 				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->source1);
+				
+				if(Act_Var1 != NULL){
+					/* Potrebujeme zistit co ideme vypisovat */
+					if(!(Act_Var1->inicialized)){
+						run_error = UNINITI_ERR;
+						return run_error;
+					}
 
-				/* Potrebujeme zistit co ideme vypisovat */
-				if(!(Act_Var1->inicialized)){
-					run_error = UNINITI_ERR;
-					return run_error;
+					switch(Act_Var1->frame_var_type){
+						case sInteger:
+							printf("%d", Act_Var1->frame_var_value.I);
+						break;
+
+						case sDouble:
+							printf("%g", Act_Var1->frame_var_value.D);
+						break;
+
+						case sString:
+							printf("%s", Act_Var1->frame_var_value.S);
+						break;
 				}
 
-				switch(Act_Var1->frame_var_type){
-					case sInteger:
-						printf("%d", Act_Var1->frame_var_value.I);
-					break;
-
-					case sDouble:
-						printf("%g", Act_Var1->frame_var_value.D);
-					break;
-
-					case sString:
-						printf("%s", Act_Var1->frame_var_value.S);
-					break;
+				} else{
+					switch(*((int *)(Act_Instr->source2))){
+						case sInteger:
+							;
+							int pom_int = atoi(((char *)(Act_Instr->source1)));
+							printf("%d", pom_int);
+						break;
+						
+						case sDouble:
+							;
+							double pom_doub = strtod(((char *)(Act_Instr->source1)), NULL);
+							printf("%g", pom_doub);
+						break;
+	
+						case sString:
+							printf("%s", (char *)Act_Instr->source1);
+						break;
+					}
 				}
+
 			break;
 
 			case iREAD:
@@ -746,6 +771,8 @@ int res_int;
 			case iSETBASEFR:
 				//NextIP - premenna typu List
 				//ret_value_func - navratovy typ - integer
+				ret_value_func = *((int *)(Act_Instr->source1));
+				NextIP = Act_Instr->source2;
 				fromPreparationDoBase(&Fr_Stack, ret_value_func, NextIP);
 			break;
 
