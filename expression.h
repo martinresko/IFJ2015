@@ -19,7 +19,7 @@
 #include "list.h"
 #include "scaner.h"
 #include "error.h"
-#include "table_of_symbols.h"
+#include "ial.h"
 #include "garbage.h"
 
 #define SIZE 14
@@ -67,5 +67,6 @@ List insertElement(ListPointer *,int,char *);
 int expressionIdChose(int);
 int convertIdToTableAccess(int);
 int changeTypeOf(int,int,int);
+ERROR_CODE typeControl(int,int);
 
 #endif

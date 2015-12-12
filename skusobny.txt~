@@ -1,5 +1,0 @@
-
-int main() {
-int x = find("as","asd");
-return 0;
-}

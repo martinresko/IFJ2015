@@ -19,7 +19,7 @@
  
  #include "error.h"
  #include "expression.h"
- #include "table_of_symbols.h"
+ #include "ial.h"
  #include "scaner.h"
 
  ERROR_CODE prog();

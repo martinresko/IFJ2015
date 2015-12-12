@@ -144,7 +144,7 @@ ERROR_CODE Analysis(ListPointer *Lis,int first_token,int type_control)
 						typ_pre_auto = ((Precedence_table_element *)(Lis->first_list_element->next->data))->id;
 						return OK_ERR;
 					}
-					if( ((Precedence_table_element *)(Lis->first_list_element->next->data))->id != type_control ) /* ak nesedia typy na lavej a pravej strane */
+					if( typeControl(((Precedence_table_element *)(Lis->first_list_element->next->data))->id,type_control)!=OK_ERR) /* ak nesedia typy na lavej a pravej strane */
 					{
 						printf("nesedia typy lavej a pravej strane\n");
 						return SEM_TYPE_ERR;
@@ -177,7 +177,7 @@ ERROR_CODE Analysis(ListPointer *Lis,int first_token,int type_control)
 					return OK_ERR;
 				}
 				printf("vrchol %d typ_control %d\n",((Precedence_table_element *)(Lis->first_list_element->next->data))->id, type_control);
-				if( ((Precedence_table_element *)(Lis->first_list_element->next->data))->id != type_control ) /* ak nesedia typy na lavej a pravej strane */
+				if( typeControl(((Precedence_table_element *)(Lis->first_list_element->next->data))->id,type_control)!=OK_ERR) /* ak nesedia typy na lavej a pravej strane */
 				{
 					printf("nesedia typy lavej a pravej strane\n");
 					return SEM_TYPE_ERR;
@@ -527,7 +527,7 @@ int changeTypeOf(int left_id,int right_id,int operator)
 			return sDouble;
 		}
 	}
-	else if(OPERAND==DIV)
+	else if(operator==DIV)
 	{
 		if(left_id==sInteger && right_id==sInteger)
 			return sInteger;
@@ -539,7 +539,21 @@ int changeTypeOf(int left_id,int right_id,int operator)
 		if(left_id==right_id)
 			return sInteger;
 		else /* ak je porovnavane int<->double alebo vice versa */
-			return sDouble;
+			return sInteger;
 	}
 	return sError; /* tu by sa nemalo dostat nikdy */
+}
+
+/* zisti ci je mozne priradiit pravu stranu vyrazu do typu laveho operandu 
+ * return - OK_Err alebo SEM_TYPE_ERR
+ * right_side - typ vpravej strany
+ * left_side  - typ lavej strany */
+ERROR_CODE typeControl(int right_side,int left_side)
+{	
+	if(right_side==left_side) /* ak su strany rovnake nemam co riesit */
+		return OK_ERR;
+	else if( right_side==sString || left_side==sString ) /* rovnake niesu tak ak je jeden string druhy string nieje tak err */
+		return SEM_TYPE_ERR;
+	else /* ak su typy double alebo int a vice versa to nieje chyba */
+		return OK_ERR;
 }

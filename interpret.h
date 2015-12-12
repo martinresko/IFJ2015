@@ -19,7 +19,6 @@
 #include <string.h>
 
 #include "error.h"
-#include "table_of_symbols.h"
 #include "parser.h"
 #include "stack.h"
 #include "list.h"

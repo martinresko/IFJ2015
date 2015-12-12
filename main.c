@@ -16,7 +16,7 @@
  #include <stdio.h>
  #include "scaner.h"
  #include "parser.h"
- #include "table_of_symbols.h"
+ #include "ial.h"
  #include "garbage.h"
 
  #define OK_ERR 0
