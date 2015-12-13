@@ -44,6 +44,7 @@ const char PRECEDENCE_TABLE[SIZE][SIZE] =
 };
 
 
+
 /* funkcia volana z rekuzivneho zostupu 
  * return - navratova hodnota z error.h */
 ERROR_CODE expression(int first_token,int control_type)
@@ -185,8 +186,32 @@ ERROR_CODE InitExpressionList(ListPointer *Lis)
 ERROR_CODE Reduce(ListPointer *Lis)
 {
 	int rule = ((struct precedence_table_element*)(Lis->last_terminal->data))->expresion_id;
+
+	//char *c = ((Precedence_table_element *)(Lis->last_terminal->data))->attribute;
+	InsVal val;
+	char * err = NULL;
+	int i = (int)strtoll(((Precedence_table_element *)(Lis->last_terminal->data))->attribute, &err, 0);
+	if (*err) {
+		double d = strtod(((Precedence_table_element *)(Lis->last_terminal->data))->attribute, &err);
+		if (*err) {
+			val.VarType = sString;
+			val.Str = ((Precedence_table_element *)(Lis->last_terminal->data))->attribute;
+		} else {
+			val.VarType = sDouble;
+			val.Dnum = d;
+		}
+	} else {
+		val.VarType = sInteger;
+		val.Inum = i;
+	}
+
+	
 	if(rule==OPERAND) /* terminal je i*/
 	{
+
+		//val.VarType = ((Precedence_table_element *)(Lis->last_terminal->data))->id;
+	   	insertFunctionInstruction(symbol_table.actual_function, iPUSH, NULL, &val, NULL);
+		
 		((Precedence_table_element *)(Lis->last_terminal->data))->terminal=false;
 		FindLastTerminal(Lis); /* najdenie noveho terminalu */
 		return OK_ERR;
@@ -211,60 +236,72 @@ ERROR_CODE Reduce(ListPointer *Lis)
 					if( left_id==sString || right_id==sString)
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,MUL); /* pretypovanie */
+					insertFunctionInstruction(symbol_table.actual_function, iMUL, NULL, &val, NULL);
 					/* Doplnit instrukciu */
 					break;
 				case(DIV):
 					if( left_id==sString || right_id==sString )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,DIV); /* pretypovanie */
+					insertFunctionInstruction(symbol_table.actual_function, iDIV, NULL, &val, NULL);
 					/* Doplnit instrukciu */
 					break;
 				case(PLUS):
 					if( left_id==sString || right_id==sString )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,PLUS); /* pretypovanie */
+					insertFunctionInstruction(symbol_table.actual_function, iADD, NULL, &val, NULL);
+					//insertFunctionInstruction(symbol_table.actual_function, iTOPPOP, NULL, NULL, NULL);
+					//insertFunctionInstruction(symbol_table.actual_function, iSETVALUE, NULL, &val, NULL);
 					/* Doplnit instrukciu */
 					break;
 				case(MINUS):
 					if( left_id==sString || right_id==sString )
 						return SEM_TYPE_ERR; /* chyba v pripade ze jeden alebo oba operatory su string */
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,MINUS); /* pretypovanie */
+					insertFunctionInstruction(symbol_table.actual_function, iSUB, NULL, &val, NULL);
 					/* Doplnit instrukciu */
 					break;
 				case(LT):
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,LT); /* pretypovanie */
+					insertFunctionInstruction(symbol_table.actual_function, iLESS, NULL, &val, NULL);
 					/* Doplnit instrukciu */
 					break;
 				case(GT):
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,GT); /* pretypovanie */
+					insertFunctionInstruction(symbol_table.actual_function, iGREATER, NULL, &val, NULL);
 					/* Doplnit instrukciu */
 					break;
 				case(LE):
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,LE); /* pretypovanie */
+					insertFunctionInstruction(symbol_table.actual_function, iELESS, NULL, &val, NULL);
 					/* Doplnit instrukciu */
 					break;
 				case(GE):
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,GE); /* pretypovanie */
+					insertFunctionInstruction(symbol_table.actual_function, iEGREATER, NULL, &val, NULL);
 					/* Doplnit instrukciu */
 					break;
 				case(EQ):
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,EQ); /* pretypovanie */
+					insertFunctionInstruction(symbol_table.actual_function, iEQUAL, NULL, &val, NULL);
 					/* Doplnit instrukciu */
 					break;
 				case(NE):
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,NE); /* pretypovanie */
+					insertFunctionInstruction(symbol_table.actual_function, iNEQUAL, NULL, &val, NULL);
 					/* Doplnit semanticku akciu */
 					break;
 			}

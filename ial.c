@@ -105,32 +105,31 @@ char* substring(char *string, int i, int n)
 
 	strncpy(result,string+i,n);
 return result;
-// opravit
 }
-
 
 char* shell(char *items)  
   {  
- 
+  
   char* pom = memmalloc(sizeof(strlen(items)+1));
   strcpy(pom,items);
- 
+
      int count = strlen(items);
     register int i, j, gap;  
     char x;
- 
- 
+
+  
     for (gap = count/2; gap > 0; gap = gap/2) {
      
       for(i=gap; i < count; ++i) {  
         x = pom[i];  
-        for(j=i-gap; (x < pom[j]) && (j >= 0); j=j-gap)
+        for(j=i-gap; (x < pom[j]) && (j >= 0); j=j-gap) 
           pom[j+gap] = pom[j];  
         pom[j+gap] = x;  
       }  
     }  
 return pom;
-}
+}  
+
 
 ////////////////////// TABLE OF SYMBOLS ///////////////////////////////
 // tabulka symbolov zavisi nad stack.h list.h garbage.h
@@ -279,6 +278,7 @@ void popBlock(Function_GTS *function)
 		if(stackEmpty(&(function->symbol_table_of_block)))
 		{
 			;
+			//printf("chces popnut prazdny zasobnik \n");
 		}
 		else /* zasobnik prazdny nieje mozem popnut blok */
 		{

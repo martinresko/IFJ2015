@@ -21,6 +21,7 @@
 #include "error.h"
 #include "ial.h"
 #include "garbage.h"
+#include "interpret.h"
 
 #define SIZE 14
 

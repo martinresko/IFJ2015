@@ -29,7 +29,7 @@ tState type_of_element_to_table_of_symbols; // typ pre tabulku symbolov
 int type_for_expression; // typ id pre expression kvoli kontrolovaniu semantickej analyzy
 char * identificator_for_generating_instruction_in_assign_on_left_side;
 int LABEL = 0;
-
+tToken very_helpfull_variable;
 
 /* hlavna funkcia na spustenie parseru
  * @info:<prog> ->  <body> ; $
@@ -39,8 +39,7 @@ int LABEL = 0;
 ERROR_CODE prog()
 {
     globalTableOfSymbolsInit(&symbol_table);
-
-	ERROR_CODE error = OK_ERR;
+    ERROR_CODE error = OK_ERR;
 	token = get_Token();
 
     switch (token.id) {
@@ -111,7 +110,6 @@ ERROR_CODE body()
     if (error != OK_ERR) {
         return error;
     }
-
     return OK_ERR;
 }
 
@@ -181,7 +179,6 @@ ERROR_CODE function()
     if (error != OK_ERR){
         return error;
     }
-
     error = prototype_of_definition(main_detection);
 
     if (error != OK_ERR) {
@@ -427,9 +424,8 @@ ERROR_CODE prototype_of_definition(int main_detection)
 {
     ERROR_CODE error;
     token = get_Token();
-
     if (main_detection == TRUE) {
-        error = insertFunctionInstruction(symbol_table.actual_function, iPUSHFR, NULL, NULL, NULL);  
+        error = insertFunctionInstruction(symbol_table.actual_function, iPUSHFR, NULL, NULL, NULL); 
         InsVal Val;
         Val.VarType = sInteger;
         Val.Inum = symbol_table.actual_function->return_type;
@@ -463,11 +459,11 @@ ERROR_CODE prototype_of_definition(int main_detection)
             symbol_table.actual_function->defined = TRUE;
             // pushnem blok
             error = pushBlock(symbol_table.actual_function);
-
             if (error != OK_ERR) {
                 return error;
             }
-            error = stat_list();
+
+            error = stat_list(main_detection);
         break;
         default :
             error = SYN_ERR;
@@ -487,7 +483,7 @@ ERROR_CODE prototype_of_definition(int main_detection)
  * @navratova hodnota return: ERROR CODE
  */
 
-ERROR_CODE stat_list()
+ERROR_CODE stat_list(int main_detection)
 {
     token = get_Token();
     ERROR_CODE error;
@@ -515,16 +511,15 @@ ERROR_CODE stat_list()
             error = SYN_ERR;
             return error;
         break;
-        default :		
-            error = command();
-
+        default :
+           error = command(main_detection);
             if (error != OK_ERR) {
                 return error;
             }
         break;
     }
 
-    error = stat_list();
+    error = stat_list(main_detection);
 
     if (error != OK_ERR) {
         return error;
@@ -547,9 +542,11 @@ ERROR_CODE stat_list()
  * @navratova hodnota return: ERROR CODE
  */
 
-ERROR_CODE command()
+ERROR_CODE command(int main_detection)
 {
+    main_detection = main_detection;
     ERROR_CODE error;
+    InsVal val;
     switch (token.id) {
         /*pokila lexer vrati lex error*/
         case sError: 
@@ -570,7 +567,7 @@ ERROR_CODE command()
             if (error != OK_ERR) {
                 return error;
             }
-        	error = stat_list();
+        	error = stat_list(main_detection);
 
         	if (error != OK_ERR) {
                 return error;
@@ -581,6 +578,7 @@ ERROR_CODE command()
         */
         case sIdent :
             identificator_for_generating_instruction_in_assign_on_left_side = token.attribute;          
+            ;
             Variable *premenna_na_odvodenie_typu = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
 
             if (premenna_na_odvodenie_typu != NULL) {
@@ -604,7 +602,7 @@ ERROR_CODE command()
                     error = OK_ERR;
                     return error;
                 break;
-                default :               
+                default : 
                     error = SYN_ERR;
                     return error;
                 break;
@@ -631,8 +629,8 @@ ERROR_CODE command()
                     error = OK_ERR;
                     return error;
                 break;
-                default :          
-                    error = SYN_ERR;
+                default :
+                 error = SYN_ERR;
                     return error;
                 break;
             }
@@ -641,7 +639,7 @@ ERROR_CODE command()
             /*
              *return expresion ;
              */
-            if(!(strcmp(token.attribute, "return"))) {
+            if(!(strcmp(token.attribute, "return"))){
                 symbol_table.actual_function->return_occured = TRUE;
                 // predam do expression aktualny typ funkcie
                 error = expression(NOT_TAKEN_FIRST_TOKEN, symbol_table.actual_function->return_type);
@@ -658,6 +656,15 @@ ERROR_CODE command()
                     return error;
                 // ak bol zadany ;
                 } else if (token.id == sSemicolon) {
+                    if (main_detection == TRUE) {
+                        val.VarType = sInteger;
+                        val.Inum = TRUE;
+                        error = insertFunctionInstruction(symbol_table.actual_function, iRET, NULL, &val, NULL);
+
+                        if (error != OK_ERR) {
+                            return error;
+                        }
+                    }
                     error = OK_ERR;
                     return error;
                 // inak chyba
@@ -669,7 +676,7 @@ ERROR_CODE command()
             /*
              *if ( expresion ) {<stat_list>} else { <stat_list>}
              */
-            else if(!(strcmp(token.attribute, "if"))) {
+            else if(!(strcmp(token.attribute, "if"))){
                 token = get_Token();
 
                 if (token.id == sError) {
@@ -681,7 +688,6 @@ ERROR_CODE command()
                     error = SYN_ERR;
                     return error;
                 }
-
                 error = expression(NOT_TAKEN_FIRST_TOKEN, sInteger); // expression
                 token = token_expression;
                 
@@ -717,7 +723,9 @@ ERROR_CODE command()
                 if (error != OK_ERR) {
                     return error;
                 }
-                error = stat_list();
+
+
+                error = stat_list(main_detection);
 
                 if (error != OK_ERR) {
                     return error;
@@ -730,10 +738,13 @@ ERROR_CODE command()
                     return error;
                 }
 
-                if((strcmp(token.attribute, "else"))) {
+                if((strcmp(token.attribute, "else"))){
+
                     error = SYN_ERR;
                     return error;
                 }
+
+
                 // ak dostanem {
                 token = get_Token();
 
@@ -743,16 +754,20 @@ ERROR_CODE command()
                 }
 
                 if(token.id != sLSetPar) {
+
                     error = SYN_ERR;
+                    
+
                     return error;
                 }
 
-                error = pushBlock(symbol_table.actual_function);
+                	error = pushBlock(symbol_table.actual_function);
 
-                if (error != OK_ERR) {
-                    return error;
-                }
-                error = stat_list();
+		            if (error != OK_ERR) {
+		                return error;
+		            }
+
+                error = stat_list(main_detection);
 
                 if (error != OK_ERR) {
                     return error;
@@ -763,7 +778,7 @@ ERROR_CODE command()
             /*
              *<command> -> cin >> id <multi_cin>;
              */   
-            else if(!(strcmp(token.attribute, "cin"))) {
+            else if(!(strcmp(token.attribute, "cin"))){
                 token = get_Token ();
 
                 switch (token.id) {
@@ -788,6 +803,7 @@ ERROR_CODE command()
                                 }
                                 error = OK_ERR;
                                 //error = insertFunctionInstruction(symbol_table.actual_function, iREAD, NULL, token.attribute, NULL);
+
                                 if (error != OK_ERR) {
                                     return error;
                                 }
@@ -823,7 +839,7 @@ ERROR_CODE command()
             /*
              * for (<for_definice> ; expresion ; id = expression) { <stat_list>}
              */ 
-            else if(!(strcmp(token.attribute, "for"))) {
+            else if(!(strcmp(token.attribute, "for"))){
 
             	// pushnem blok
                 error = pushBlock(symbol_table.actual_function);
@@ -849,7 +865,6 @@ ERROR_CODE command()
                     error = LEX_ERR;
                     return error;
                 }
-
                 error = for_definition();
 
                 if (error != OK_ERR) {
@@ -885,7 +900,6 @@ ERROR_CODE command()
                     error = SYN_ERR;
                     return error;
                 }
-
                 Variable *variable_for_search = searchFunctionVariableInStack(symbol_table.actual_function,token.attribute);
                 if(variable_for_search == NULL) {
                 	error = SEM_UNDEF_ERR;
@@ -929,7 +943,7 @@ ERROR_CODE command()
                     return error;
                 }
 
-                error = stat_list();
+                error = stat_list(main_detection);
 
                 if (error != OK_ERR) {
                     return error;
@@ -940,11 +954,10 @@ ERROR_CODE command()
             /*
              * cout << <term> <multi_cout>;
              */
-            else if(!(strcmp(token.attribute, "cout"))) {
+            else if(!(strcmp(token.attribute, "cout"))){
                 token = get_Token ();
                 //token pre count na ziskanie hodnoty tokenu z term
                 tToken token_for_emmiting_instruction;
-                InsVal val;
                 switch (token.id) {
                     /*pokial lexer vrati lex error*/
                     case sError: 
@@ -958,13 +971,31 @@ ERROR_CODE command()
                             return error;
                         }
 
-                        val.VarType = token_for_emmiting_instruction.id;
-                        val.Str = token_for_emmiting_instruction.attribute;
+                        //===========================================================================
+                                            char *c = token_for_emmiting_instruction.attribute;
+                                          InsVal val;
+                        char * err = NULL;
+                        int i = (int)strtoll(c, &err, 0);
+                        if (*err) {
+                            double d = strtod(c, &err);
+                            if (*err) {
+                                val.VarType = sString;
+                                val.Str = c;
+                            } else {
+                                val.VarType = sDouble;
+                                val.Dnum = d;
+                            }
+                        } else {
+                            val.VarType = sInteger;
+                                                val.Inum = i;
+                                            }
+                        //===========================================================================
                         error = insertFunctionInstruction(symbol_table.actual_function, iWRITE, NULL, &val, NULL);
 
                         if (error != OK_ERR) {
                             return error;
                         }
+
                     break;
                     default :
                         error = SYN_ERR;
@@ -982,8 +1013,7 @@ ERROR_CODE command()
                 }
 
                 return OK_ERR;
-            } 
-            else {
+            } else {
                 error = assign();
 
                 if (error != OK_ERR) {
@@ -1013,6 +1043,7 @@ ERROR_CODE command()
 
 ERROR_CODE funkcia_priradenie(char *previous_token_atributte)
 {
+
     ERROR_CODE error;
     token = get_Token();
 
@@ -1049,6 +1080,7 @@ ERROR_CODE funkcia_priradenie(char *previous_token_atributte)
             if (error != OK_ERR) {
                 return error;
             }
+
         break;
         default :
             error = SYN_ERR;
@@ -1163,7 +1195,6 @@ ERROR_CODE multi_arguments(char *previous_token_atributte)
 {
     ERROR_CODE error;
     token = get_Token();
-
     switch (token.id) {
         /*pokial lexer vrati lex error*/
         case sError: 
@@ -1173,7 +1204,6 @@ ERROR_CODE multi_arguments(char *previous_token_atributte)
         // ak som dostal ciarku
         case sComma :
             token = get_Token();
-
             switch (token.id) {
                 /*pokial lexer vrati lex error*/
                 case sError: 
@@ -1181,7 +1211,8 @@ ERROR_CODE multi_arguments(char *previous_token_atributte)
                     return error;
                 break;
                 case sIdent :
-                    ;// vyhladame prvy parameter funkcie
+                    ;
+                    // vyhladame prvy parameter funkcie
                     Variable *The_First = getFunctionParam(searchFunction(&symbol_table,previous_token_atributte),CONTINUE);
                     //ak nejaky ma
                     if (The_First != NULL) {
@@ -1225,6 +1256,7 @@ ERROR_CODE multi_arguments(char *previous_token_atributte)
                     }
                 break;
             }
+
             if (error != OK_ERR) {
                 return error;
             }
@@ -1393,6 +1425,7 @@ ERROR_CODE assign()
 
     error = typ();
     if (error == OK_ERR) {
+
         error = inicialization();
 
         if (error != OK_ERR) {
@@ -1425,11 +1458,12 @@ ERROR_CODE declaration()
 {
     ERROR_CODE error;
 
+   
+
     if (token.id != sAssign) {
         error = SYN_ERR;
         return error;
     }
-
     error = hodnota_priradenia();
 
     if (error != OK_ERR) {
@@ -1448,6 +1482,9 @@ ERROR_CODE declaration()
 
 ERROR_CODE hodnota_priradenia()
 {	
+    InsVal val;
+
+	
     ERROR_CODE error;
     token = get_Token();
     // ak dostanem lexiklanu chybu LEX_ERR
@@ -1465,15 +1502,25 @@ ERROR_CODE hodnota_priradenia()
             Function_GTS *function_control_type = searchFunction(&symbol_table,token.attribute);
 
 			if (function_control_type == NULL) {
+
         		error = expression(TAKEN_FIRST_TOKEN,type_for_expression); 
                 token = token_expression;
+
+                if (token.id != sSemicolon) {
+                    error = SYN_ERR;
+                    return error;
+                }
+
+                val.Str = very_helpfull_variable.attribute;
+                val.VarType = very_helpfull_variable.id;
+                error = insertFunctionInstruction(symbol_table.actual_function, iTOPPOP, NULL, &val, NULL);
 
                 if (error != OK_ERR) {
                     return error;
                 }
 
-                if (token.id != sSemicolon) {
-                    error = SYN_ERR;
+
+                if (error != OK_ERR) {
                     return error;
                 }
         	}
@@ -1521,14 +1568,20 @@ ERROR_CODE hodnota_priradenia()
         	error = expression(TAKEN_FIRST_TOKEN,type_for_expression); 
             token = token_expression;
 
-            if (error != OK_ERR) {
-                return error;
-            }
 
             if (token.id != sSemicolon) {
                 error = SYN_ERR;
                 return error;
             }
+
+            val.Str = very_helpfull_variable.attribute;
+            val.VarType = very_helpfull_variable.id;
+            error = insertFunctionInstruction(symbol_table.actual_function, iTOPPOP, NULL, &val, NULL);
+
+            if (error != OK_ERR) {
+                return error;
+            }
+
         break;
     }    
 
@@ -1594,6 +1647,8 @@ ERROR_CODE fun_auto()
 {
     ERROR_CODE error;
     
+    
+
     if(!(strcmp(token.attribute, "auto"))) {
         token = get_Token();
 
@@ -1618,6 +1673,7 @@ ERROR_CODE fun_auto()
             error = SEM_UNDEF_ERR;
             return error;
         }
+
         // vlozime premennu na zasobnik
         error = insertFunctionVariableToStack(symbol_table.actual_function,token.attribute,AUTO);
         
@@ -1638,7 +1694,6 @@ ERROR_CODE fun_auto()
             error = DATA_TYPE_ERR;
             return error;
         }
-
         error = expression(NOT_TAKEN_FIRST_TOKEN,AUTO);
         
         if (error != OK_ERR) {
@@ -1691,9 +1746,10 @@ ERROR_CODE fun_auto()
 ERROR_CODE inicialization()
 {
     ERROR_CODE error;
-
+    InsVal val;
     error = typ();
     type_for_expression = type_of_element_to_table_of_symbols;
+    very_helpfull_variable.id = type_of_element_to_table_of_symbols;
 
     if (error != OK_ERR) {
         error = SYN_ERR;
@@ -1711,19 +1767,24 @@ ERROR_CODE inicialization()
         error = SYN_ERR;
         return error;
     }
-
     if (searchFunction(&symbol_table,token.attribute) != NULL) {
         error = SEM_UNDEF_ERR;
         return error;
     }
-
+    very_helpfull_variable.attribute = token.attribute;
     Variable *premenna_inicialization = searchFunctionVariableInActualLevel(symbol_table.actual_function,token.attribute);
 
     if (premenna_inicialization != NULL){
         error = SEM_UNDEF_ERR;
         return error;
     }
-
+    // volozenie instrukcia pre vlozenie premmenej do ramca
+    val.VarType = type_of_element_to_table_of_symbols;
+    val.Str = token.attribute;
+    error = insertFunctionInstruction(symbol_table.actual_function, iINSERT_TO_FR, NULL, &val, NULL);
+    if (error != OK_ERR) {
+        return error;
+    }
     // vkladam do tabulky symbolov typ a id
     error = insertFunctionVariableToStack(symbol_table.actual_function,token.attribute,type_of_element_to_table_of_symbols);
 

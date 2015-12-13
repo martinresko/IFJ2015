@@ -35,55 +35,56 @@ char *str_value;
 
 typedef enum{
 //Presun
-	iMOV,
+	iMOV=0,
 //Aritmeticke operacie
-	iADD,
-	iSUB,
-	iMUL,
-	iDIV,
+	iADD, 			//01
+	iSUB,			//02
+	iMUL,			//03
+	iDIV,			//04
 //Logicke operacie
-	iGREATER,
-	iLESS,
-	iEGREATER,
-	iELESS,
-	iEQUAL,
-	iNEQUAL,
+	iGREATER,		//05
+	iLESS,			//06
+	iEGREATER,		//07
+	iELESS,			//08
+	iEQUAL,			//09
+	iNEQUAL,		//10
 //Skoky
-	iJMP,
-	iJZ,
-	iJNZ,
+	iJMP,			//11
+	iJZ,			//12
+	iJNZ,			//13
 //Volania funkcii
-	iCALL,
-//Vstavane funkcie
-	iSORT,
-	iLEN,
-	iSUBSTR,
-	iFIND,
-	iCONCAT,
+	iCALL,			//14
+//Vstavane funkcie	
+	iSORT,			//15
+	iLEN,			//16
+	iSUBSTR,		//17
+	iFIND,			//18
+	iCONCAT,		//19
 //Vstupno-vystupne operacie
-	iWRITE,
-	iREAD,
+	iWRITE, 		//20
+	iREAD,			//21
 //Zasobnikove operacie
-	iDISPSTPOST,
-	iPUSH,
-	iPOP,
-	iTOP,
-	iTOPPOP,
+	iDISPSTPOST,	//22
+	iPUSH,			//23
+	iPOP,			//24
+	iTOP,			//25
+	iTOPPOP,		//26
 //Navratova hodnota
-	iRET,
+	iRET,			//27
 //Navestia
-	iLABEL,
+	iLABEL,			//28
 //Operacie s ramcami
-	iPUSHFR,
-	iPOPFR,
-	iDISPFR,
-	iINSERT_TO_FR,
-	iREADFR,
-	iSETBASEFR,
-	iDISPOSEALL,
-	iBASE_TO_END,
-	iCOPY_VALUE
-} tInstrT;
+	iPUSHFR,		//29
+	iPOPFR,			//30
+	iDISPFR,		//31
+	iINSERT_TO_FR,	//32
+	iREADFR,		//33
+	iSETBASEFR,		//34
+	iDISPOSEALL,	//35
+	iBASE_TO_END,	//36
+	iCOPY_VALUE,	//37
+	iSETVALUE		//38
+} tInstrT;	
 
 ERROR_CODE interpret(Table_symbols *table);
 

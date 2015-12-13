@@ -44,67 +44,13 @@ int main(int argc, char **argv){
 	
 	error = prog();
 
-	switch (error) {
-	case OK_ERR:
-        	error = interpret(&symbol_table);
-		if (error != OK_ERR) {
-			destroyGTS(&symbol_table);
-			fclose(file);
-			memallfree(); /* volanie garbage aby upratal */
-			return error;	
-		}
-	break;
-        //CHYBA V LEXIKALNEJ ANALYZE
-        case LEX_ERR: 
-        	fprintf(stderr,"ERROR CHYBA V LEXIKALNEJ ANALYZE\n");
-        break;
-        //CHYBA V SYNTAKTICKEJ ANALYZE
-        case SYN_ERR: 
-        	fprintf(stderr,"ERROR CHYBA V SYNTAKTICKEJ ANALYZE\n");
-        break;
-        //CHYBA V SEMANTICKEJ ANALYZE
-        case SEM_UNDEF_ERR: 
-        	fprintf(stderr,"ERROR CHYBA V SEMANTICKEJ ANALYZE NEDEFINOVANA/REDEFINOVANA FUKCIA/PREMENNA\n");
-        break;
-        //CHYBA V SEMANTICKEJ ANALYZE
-        case SEM_TYPE_ERR: 
-        	fprintf(stderr,"ERROR CHYBA V SEMANTICKEJ ANALYZE ZLA TYPOVA KOMPATIBILITA\n");
-        break;
-        //CHYBA V SEMANTICKEJ ANALYZE
-        case DATA_TYPE_ERR: 
-        	fprintf(stderr,"ERROR CHYBA V SEMANTICKEJ ANALYZE CHYBA PRI ODVODZOVANI DATOEHO TYPU\n");
-        break;
-        //CHYBA V SEMANTICKEJ ANALYZE
-        case SEM_OTHER_ERR: 
-        	fprintf(stderr,"ERROR CHYBA V SEMANTICKEJ ANALYZE OSTATNE SEMANTICKE CHYBY\n");
-        break;
-        //BEHOVA CHYBA
-        case NUMERIC_ERR: 
-        	fprintf(stderr,"ERROR BEHOVA CHYBA PRI NACITANI CISELNEJ HODNOTY ZO VSTUPU\n");
-        break;
-        //BEHOVA CHYBA
-        case UNINITI_ERR: 
-        	fprintf(stderr,"ERROR BEHOVA CHYBA PRI PRACI S NEINIICILIZOVANOU PREMENNOU\n");
-        break;
-        //BEHOVA CHYBA
-        case ZERO_DIV_ERR: 
-        	fprintf(stderr,"ERROR BEHOVA CHYBA PRI DELENNI NULOU\n");
-        break;
-        //BEHOVA CHYBA
-        case RUNNING_ERR: 
-        	fprintf(stderr,"ERROR OSTATNE BEHOVE CHYBY\n");
-        break;
-        case INTERN_ERR: 
-        	fprintf(stderr,"ERROR INTERNNA CHYBA INTERPRETU\n");
-        break;
+    if (error == OK_ERR) {
+        error = interpret(&symbol_table);
     }
-	
-
-	printf("koniec programu navratovi kod je %d\n",error );
 
 	destroyGTS(&symbol_table);
 	fclose(file);
-	
 	memallfree(); /* volanie garbage aby upratal */
+
 return error;
 }

@@ -11,7 +11,7 @@
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
 **/
 
-#include "stack.h"
+#include"stack.h"
 
 
 /* inicializuje zasobnik */

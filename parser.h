@@ -30,8 +30,8 @@
  ERROR_CODE prototype_of_definition(int);
  ERROR_CODE params(Function_GTS *);
  ERROR_CODE multi_params(Function_GTS *);
- ERROR_CODE stat_list();
- ERROR_CODE command();
+ ERROR_CODE stat_list(int);
+ ERROR_CODE command(int);
  ERROR_CODE funkcia_priradenie(char *);
  ERROR_CODE assign();
  ERROR_CODE arguments(char *);

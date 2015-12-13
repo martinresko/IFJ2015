@@ -89,8 +89,9 @@ void* GetLast(ListPointer *Lis)
 void PrintList(ListPointer *Lis)
 {
 	if (EmptyList(Lis))
+	{
 		;
-		//printf("list je prazdny\n");
+	}
 	else
 	{
 		List help = Lis->first_list_element;

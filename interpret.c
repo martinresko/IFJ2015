@@ -76,14 +76,16 @@ Instruction *Act_Instr = get_next_instr(NextIP);
 //Premenna ramca...
 Frame_variable *Act_Var1 = NULL;
 Frame_variable *Act_Var2 = NULL;
-Frame_variable *Act_Res = NULL; 
+Frame_variable *Act_Res = memmalloc(sizeof(struct frame_variable));
 
 //Pomocne premenne
 char *res_str = NULL;
 int res_int;
+//int i=0;
 
 	while((run_error == OK_ERR) && (NextIP != NULL)){
 		switch(Act_Instr->type){
+
 			/* Operacie PRIRADENIA a ZISKANIA HODNOT */
 			case iMOV:
 			// source1 = meno termu pravej strany
@@ -107,6 +109,7 @@ int res_int;
 			case iDIV:
 				//Ocakava len samotnu instrukciu, vie co treba robit ak tak
 
+
 				Act_Var2 = stackTop(&Postfix_stack);
 				stackPop(&Postfix_stack);
 				Act_Var1 = stackTop(&Postfix_stack);
@@ -116,9 +119,12 @@ int res_int;
 					run_error = UNINITI_ERR;
 					return run_error;
 				}
+				//printf("SOM V  %d + %d\n", Act_Var1->frame_var_value.I, Act_Var2->frame_var_value.I);
+				//printf("TYP11 %d TYP 2 %d\n", Act_Var1->frame_var_type, Act_Var2->frame_var_type);
 
 				if((Act_Var1->frame_var_type == sInteger) && (Act_Var2->frame_var_type == sInteger)){
 					Act_Res->frame_var_type = sInteger;
+
 					switch(Act_Instr->type){
 						case iADD:
 							Act_Res->frame_var_value.I = Act_Var1->frame_var_value.I + Act_Var2->frame_var_value.I;
@@ -220,7 +226,7 @@ int res_int;
 			//////////////////////////////////////////
 
 			/* RELACNE operatory (logicke) --> vysledok TRUE || FALSE reprezentovane int */
-			case iGREATER:
+			case iGREATER:		
 			case iLESS:
 			case iEGREATER:
 			case iELESS:
@@ -488,47 +494,49 @@ int res_int;
 			case iWRITE:
 				//source1 = meno toho co ideme vypisovat.
 				//source2 = typ sInteger, sDouble, sString
-				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
-				if(Act_Var1 != NULL)
-				{
-   						if(!(Act_Var1->inicialized)){
-   							run_error=UNINITI_ERR;
-   							return run_error;
-   						}
 
-						switch(Act_Var1->frame_var_type){
-						case sInteger:
-							printf("%d", Act_Var1->frame_var_value.I);
-						break;
-
-						case sDouble:
-							printf("%g", Act_Var1->frame_var_value.D);
-						break;
-
-						case sString:
-							printf("%s", Act_Var1->frame_var_value.S);
-						break;
-						}
-				} 
-				else{
 					switch(Act_Instr->src1.VarType){
 						case sInteger:
 							;
-							int pom_int = atoi(((char *)(Act_Instr->src1.Str)));
-							printf("%d", pom_int);
+							printf("%d", Act_Instr->src1.Inum);
 						break;
 						
 						case sDouble:
 							;
-							double pom_doub = strtod(((char *)(Act_Instr->src1.Str)), NULL);
-							printf("%g", pom_doub);
+							printf("%g", Act_Instr->src1.Dnum);
 						break;
 	
-						case sString:
-							printf("%s", (char *)Act_Instr->src1.Str);
+						case sString: {
+
+							Frame_variable *var = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
+							if (var!=NULL) 
+							{
+								if(!(Act_Var1->inicialized)){
+		   							run_error = UNINITI_ERR;
+		   							return run_error;
+		   						}
+								switch(Act_Var1->frame_var_type){
+								case sInteger:
+									printf("%d",var->frame_var_value.I);
+								break;
+
+								case sDouble:
+									printf("%g", var->frame_var_value.D);
+								break;
+
+								case sString:
+									printf("%s", var->frame_var_value.S);
+								break;
+								}
+							} 
+							else 
+							{
+								printf("%s", Act_Instr->src1.Str);
+							}
+						}
+							
 						break;
 					}
-				}
 
 			break;
 
@@ -701,11 +709,41 @@ int res_int;
 			case iPUSH:
 				/*
 				* source1 = meno premennej
-				* source2 = ??
-				* destination = ?? 
 				*/
-					Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
-					run_error = stackPush(&Postfix_stack, Act_Var1);
+					;
+					bool prepinac = false;
+					 		
+					Act_Var1 = memmalloc(sizeof(struct frame_variable));
+					Act_Var1->inicialized = 1;
+					switch (Act_Instr->src1.VarType)
+					{
+						case sInteger:
+							Act_Var1->frame_var_value.I = Act_Instr->src1.Inum;
+						break;
+						case sDouble: 
+							Act_Var1->frame_var_value.D = Act_Instr->src1.Dnum;
+						break;
+						case sString: {
+							Frame_variable *var = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
+							if(var != NULL){
+								memfree(Act_Var1);
+								run_error = stackPush(&Postfix_stack, var);
+							} else {
+								prepinac = true;
+								Act_Var1->frame_var_value.S = Act_Instr->src1.Str;
+							}
+						}
+									
+						break;
+					}
+
+					if(Act_Instr->src1.VarType != sString || prepinac == true){
+						Act_Var1->frame_var_type = Act_Instr->src1.VarType;
+						run_error = stackPush(&Postfix_stack, Act_Var1);
+					}
+
+					prepinac = false;
+					 	
 			break;
 
 			case iPOP:
@@ -720,7 +758,22 @@ int res_int;
 
 			case iTOPPOP:
 				//Len instrukcia
-				Act_Var1 = stackTop(&Postfix_stack);
+				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
+				Act_Var2 = stackTop(&Postfix_stack);
+				switch(Act_Instr->src1.VarType){
+					case sInteger:				
+						Act_Var1->frame_var_value.I = Act_Var2->frame_var_value.I;
+					break;
+
+					case sDouble:
+						Act_Var1->frame_var_value.D = Act_Var2->frame_var_value.D;
+					break;
+
+					case sString:
+						Act_Var1->frame_var_value.S = Act_Var2->frame_var_value.S;
+					break;
+				}
+				Act_Var1->inicialized = 1;
 				stackPop(&Postfix_stack);
 			break;
 			//////////////////////////////////////
@@ -728,9 +781,11 @@ int res_int;
 			/* Praca s navestiami instrukcnej pasky */
 			case iRET:
 				//len instrukcia
-
 				//next_instruction je asi len v base Frame
-				NextIP = Act_Var1->next_instruction;
+					Act_Var1 = stackTop(&Postfix_stack);
+					stackPop(&Postfix_stack);
+					if(Act_Instr->src1.Inum == 1)
+						Act_Var1->frame_var_value.I = Act_Var1->frame_var_value.I;
 			break;
 
 			case iLABEL:
@@ -771,6 +826,7 @@ int res_int;
 				//ret_value_func - navratovy typ - integer
 				//ret_value_func = *((int *)(Act_Instr->src1.Str));
 				//NextIP = Act_Instr->source2;
+			
 				fromPreparationDoBase(&Fr_Stack, Act_Instr->src1.Inum, Act_Instr->src2.Void);
 			break;
 
@@ -791,6 +847,15 @@ int res_int;
 				Act_Var2 = searchVariableInFrames(&Fr_Stack, Act_Instr->src2.Str);
 				run_error = copyValue(&Fr_Stack, Act_Var1, Act_Var2);
 			break;
+
+			case iSETVALUE:
+				//source1 = Meno premennej
+				//source2 = Hodnota co ideme priradit
+				;
+				Frame_variable *var = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
+				copyValue(&Fr_Stack, Act_Var1, var);
+				//run_error = setValueVariable(&Fr_Stack, Act_Instr->src1.Str, Act_Instr->src2.Str);
+			break;
 			//////////////////////////////////////
 		}
 
@@ -798,6 +863,23 @@ int res_int;
 		NextIP = NextIP->next;
 		//Poziadame o nasledujucu instrukciu
 		Act_Instr = get_next_instr(NextIP);
+
+	    /*if(i>=2)
+	    {	
+	    	Frame_variable *TEST1 = searchVariableInFrames(&Fr_Stack,"a");
+	    	if(TEST1!=NULL)
+	    		printf("PREMENNNA a :%g\n", TEST1->frame_var_value.D);
+			Frame_variable *TEST2 = searchVariableInFrames(&Fr_Stack,"b");
+			if(TEST2!=NULL)
+	    		printf("PREMENNNA b :%g\n", TEST2->frame_var_value.D);
+			Frame_variable *TEST3 = searchVariableInFrames(&Fr_Stack,"c");
+			if(TEST3!=NULL)
+	    		printf("PREMENNNA c :%g\n", TEST3->frame_var_value.D);
+	   		Frame_variable *TEST4 = searchVariableInFrames(&Fr_Stack,"d");
+			if(TEST4!=NULL)
+	    			printf("PREMENNNA d :%g\n", TEST4->frame_var_value.D); 
+		}
+	 i++;*/	
 	}
 	return run_error;
 }

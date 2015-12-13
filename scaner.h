@@ -23,7 +23,7 @@
 #include "garbage.h"
 /* States of the FSM */
 typedef enum{
-	sStart,				// 00 - Start
+	sStart = 0,				// 00 - Start
 	sIdent,				// 01 - Identifikator				//Koncovy stav
 	sInteger,			// 02 - Celociselny Literal 		//Koncovy stav
 	sDouble,			// 03 - Desatinny Literal 			//KOncovy stav

@@ -26,7 +26,7 @@
 /* Prvok zoznamu */
 typedef struct list {
     struct list *next;
-	struct list *prev;
+	struct list *prev;	
     void *data;
 } *List;	               
 

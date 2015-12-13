@@ -15,6 +15,7 @@
 #define TRUE 1
 #define FALSE 0
 
+
 /* funkcia prida na zasobnik ramcov novy blokovy ramec
  * return - INTERN_ERR,OK_ERR
  * Stac - ukazatel na zasobnik ramcov */
@@ -113,7 +114,9 @@ Frame_variable *searchVariableInFrames(StackPointer *Stac, char *var_name)
 		/* v pripade ze helpful pointer je rovny zakladnemu ramcu este treba pozriet ci sa premenna nenachadza v nom */
 		Tree searched_variable = treeSearch(&((Frame *)(helpful_pointer->data))->frame_tree,var_name);
 		if(searched_variable!=NULL)
+		{
 			return searched_variable->data;
+		}
 	}
 	return NULL;
 }
