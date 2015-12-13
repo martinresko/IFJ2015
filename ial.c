@@ -673,7 +673,7 @@ Variable *getFromList(ListPointer *Lis,int state)
  * destination - prvy prarameter instrukcie
  * source1 - druhy parameter instrukcie
  * source2 - treti parameter instrukcie */
-ERROR_CODE insertFunctionInstruction(Function_GTS *function, int type, void *destination, void *source1, void *source2)
+ERROR_CODE insertFunctionInstruction(Function_GTS *function, int type, InsVal *dest, InsVal *src1, InsVal *src2)
 {
 	if(function!=NULL)
 	{
@@ -681,9 +681,13 @@ ERROR_CODE insertFunctionInstruction(Function_GTS *function, int type, void *des
 		if(instruct!=NULL)
 		{
 			instruct->type=type;
-			instruct->destination=destination;
-			instruct->source1=source1;
-			instruct->source2=source2;
+			if(dest!=NULL)
+				instruct->des=*dest;
+			if(src1!=NULL)
+				instruct->src1=*src1;
+			if(src2!=NULL)
+				instruct->src2=*src2;
+
 			InsertLast(&(function->instructions),instruct);
 			printf("PRIDAVAM INSTRUKCIU\n"); 
 			return OK_ERR;

@@ -16,6 +16,8 @@
 
 /* Nacitanie nasledujucej instrukcie */
 Instruction * get_next_instr(List NextIP){
+	if (!NextIP)
+		return NULL;
 	Instruction *Act_Instr = (Instruction *) NextIP->data;
 	return Act_Instr;
 }
@@ -52,8 +54,8 @@ static void init_string(int *i){
 /* Spusta interpretaciu programu v IFJ15 */
 ERROR_CODE interpret(Table_symbols *table){
 run_error = OK_ERR;
-int ret_value_func = 0;
-int var_type = 0;
+//int ret_value_func = 0;
+//int var_type = 0;
 
 //Inicializujeme zasobnik na ramce
 StackPointer Fr_Stack;
@@ -80,19 +82,19 @@ Frame_variable *Act_Res = NULL;
 char *res_str = NULL;
 int res_int;
 
-	while((run_error == OK_ERR) && (NextIP->next != NULL)){
+	while((run_error == OK_ERR) && (NextIP != NULL)){
 		switch(Act_Instr->type){
 			/* Operacie PRIRADENIA a ZISKANIA HODNOT */
 			case iMOV:
 			// source1 = meno termu pravej strany
 			// source2 = meno termu do ktorej chceme priradit
-				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->source1);
+				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
 				if(Act_Var1->inicialized == 0){
 					run_error = UNINITI_ERR;
 					return run_error;
 				}
 
-				Act_Var2 = searchVariableInFrames(&Fr_Stack, Act_Instr->destination);
+				Act_Var2 = searchVariableInFrames(&Fr_Stack, Act_Instr->des.Str);
 				run_error = copyValue(&Fr_Stack, Act_Var1, Act_Var2);
 			break;
 
@@ -397,7 +399,7 @@ int res_int;
 
 			case iCALL:
 				//source1 = meno funkcie ktora sa ide vykonavat.
-				current_function = searchFunction(table, Act_Instr->source1);
+				current_function = searchFunction(table, Act_Instr->src1.Str);
 				Instr_tape = current_function->instructions;
 				NextIP = Instr_tape.first_list_element;
 			break;
@@ -407,7 +409,7 @@ int res_int;
 			case iSORT:
 				//source1 = meno premennej - 1. parameter vstavanej funkcie
 				//destination = meno premennej do ktorej ukladame navratovu hodnotu vstavanej funkcie
-				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->source1);
+				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
 
 				if(Act_Var1->inicialized == 0){
 					run_error = UNINITI_ERR;
@@ -415,7 +417,7 @@ int res_int;
 				}
 
 				res_str = shell(Act_Var1->frame_var_value.S);
-				Act_Res = searchVariableInFrames(&Fr_Stack, Act_Instr->destination);
+				Act_Res = searchVariableInFrames(&Fr_Stack, Act_Instr->des.Str);
 
 				run_error = setValueVariable(&Fr_Stack, Act_Res->frame_var_name, res_str);
 			break;
@@ -423,7 +425,7 @@ int res_int;
 			case iLEN:
 				//source1 = meno premennej - 1. parameter vstavanej funkcie
 				//destination = meno premennej do ktorej ukladame navratovu hodnotu vstavanej funkcie
-				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->source1);
+				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
 
 				if(Act_Var1->inicialized == 0){
 					run_error = UNINITI_ERR;
@@ -431,7 +433,7 @@ int res_int;
 				}
 
 				res_int = length_of_string(Act_Var1->frame_var_value.S);
-				Act_Res = searchVariableInFrames(&Fr_Stack, Act_Instr->destination);
+				Act_Res = searchVariableInFrames(&Fr_Stack, Act_Instr->des.Str);
 
 				sprintf(res_str, "%d", res_int);
 
@@ -446,8 +448,8 @@ int res_int;
 				//source1 = meno premennej - 1. parameter vstavanej funkcie
 				//source2 = meno premennej - 2. parameter vst. funkcie
 				//destination = meno premennej do ktorej ukladame navratovu hodnotu vstavanej funkcie
-				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->source1);
-				Act_Var2 = searchVariableInFrames(&Fr_Stack, Act_Instr->source2);
+				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
+				Act_Var2 = searchVariableInFrames(&Fr_Stack, Act_Instr->src2.Str);
 
 				if((Act_Var1->inicialized == 0) || (Act_Var2->inicialized == 0)){
 					run_error = UNINITI_ERR;
@@ -455,7 +457,7 @@ int res_int;
 				}
 
 				res_int = KMP_Find(Act_Var1->frame_var_value.S, Act_Var2->frame_var_value.S);
-				Act_Res = searchVariableInFrames(&Fr_Stack, Act_Instr->destination);
+				Act_Res = searchVariableInFrames(&Fr_Stack, Act_Instr->des.Str);
 
 				sprintf(res_str, "%d", res_int);
 
@@ -467,8 +469,8 @@ int res_int;
 				//source2 = meno premennej - 2. parameter vst. funkcie
 				//destination = meno premennej do ktorej ukladame navratovu hodnotu vstavanej funkcieT:
 
-				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->source1);
-				Act_Var2 = searchVariableInFrames(&Fr_Stack, Act_Instr->source2);
+				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
+				Act_Var2 = searchVariableInFrames(&Fr_Stack, Act_Instr->src2.Str);
 
 				if((Act_Var1->inicialized == 0) || (Act_Var2->inicialized == 0)){
 					run_error = UNINITI_ERR;
@@ -476,7 +478,7 @@ int res_int;
 				}
 
 				res_str = concatenation(Act_Var1->frame_var_value.S, Act_Var2->frame_var_value.S);
-				Act_Res = searchVariableInFrames(&Fr_Stack, Act_Instr->destination);
+				Act_Res = searchVariableInFrames(&Fr_Stack, Act_Instr->des.Str);
 
 				run_error = setValueVariable(&Fr_Stack, Act_Res->frame_var_name, res_str);
 			break;	
@@ -486,18 +488,15 @@ int res_int;
 			case iWRITE:
 				//source1 = meno toho co ideme vypisovat.
 				//source2 = typ sInteger, sDouble, sString
+				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
+				if(Act_Var1 != NULL)
+				{
+   						if(!(Act_Var1->inicialized)){
+   							run_error=UNINITI_ERR;
+   							return run_error;
+   						}
 
-				
-				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->source1);
-				
-				if(Act_Var1 != NULL){
-					/* Potrebujeme zistit co ideme vypisovat */
-					if(!(Act_Var1->inicialized)){
-						run_error = UNINITI_ERR;
-						return run_error;
-					}
-
-					switch(Act_Var1->frame_var_type){
+						switch(Act_Var1->frame_var_type){
 						case sInteger:
 							printf("%d", Act_Var1->frame_var_value.I);
 						break;
@@ -509,24 +508,24 @@ int res_int;
 						case sString:
 							printf("%s", Act_Var1->frame_var_value.S);
 						break;
-				}
-
-				} else{
-					switch(*((int *)(Act_Instr->source2))){
+						}
+				} 
+				else{
+					switch(Act_Instr->src1.VarType){
 						case sInteger:
 							;
-							int pom_int = atoi(((char *)(Act_Instr->source1)));
+							int pom_int = atoi(((char *)(Act_Instr->src1.Str)));
 							printf("%d", pom_int);
 						break;
 						
 						case sDouble:
 							;
-							double pom_doub = strtod(((char *)(Act_Instr->source1)), NULL);
+							double pom_doub = strtod(((char *)(Act_Instr->src1.Str)), NULL);
 							printf("%g", pom_doub);
 						break;
 	
 						case sString:
-							printf("%s", (char *)Act_Instr->source1);
+							printf("%s", (char *)Act_Instr->src1.Str);
 						break;
 					}
 				}
@@ -658,7 +657,7 @@ int res_int;
 					}
 				}
 
-				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->source1);
+				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
 
 				switch(state_of_str){
 					case sInteger:
@@ -705,7 +704,7 @@ int res_int;
 				* source2 = ??
 				* destination = ?? 
 				*/
-					Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->source1);
+					Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
 					run_error = stackPush(&Postfix_stack, Act_Var1);
 			break;
 
@@ -759,21 +758,20 @@ int res_int;
 			case iINSERT_TO_FR:
 				//source1 = meno premennej ktoru ideme predavat do ramca
 				//source2 = integer - akeho typu je premenna ktoru ideme pridavat {sInteger, sDouble, sString}
-				var_type = *((int *)(Act_Instr->source2));
-				Act_Var1 = insertVariableToFrame(&Fr_Stack, Act_Instr->source1 , var_type);
+				Act_Var1 = insertVariableToFrame(&Fr_Stack, Act_Instr->src1.Str , Act_Instr->src1.VarType);
 			break;
 
 			case iREADFR:
 				//source1 = meno toho co ideme vyhladavat
-				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->source1);
+				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
 			break;
 
 			case iSETBASEFR:
 				//NextIP - premenna typu List
 				//ret_value_func - navratovy typ - integer
-				ret_value_func = *((int *)(Act_Instr->source1));
-				NextIP = Act_Instr->source2;
-				fromPreparationDoBase(&Fr_Stack, ret_value_func, NextIP);
+				//ret_value_func = *((int *)(Act_Instr->src1.Str));
+				//NextIP = Act_Instr->source2;
+				fromPreparationDoBase(&Fr_Stack, Act_Instr->src1.Inum, Act_Instr->src2.Void);
 			break;
 
 			case iDISPOSEALL:
@@ -789,12 +787,13 @@ int res_int;
 			case iCOPY_VALUE:
 				//source1 = z coho ideme kopirovat
 				//source2 = do coho ideme kopirovat
-				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->source1);
-				Act_Var2 = searchVariableInFrames(&Fr_Stack, Act_Instr->source2);
+				Act_Var1 = searchVariableInFrames(&Fr_Stack, Act_Instr->src1.Str);
+				Act_Var2 = searchVariableInFrames(&Fr_Stack, Act_Instr->src2.Str);
 				run_error = copyValue(&Fr_Stack, Act_Var1, Act_Var2);
 			break;
 			//////////////////////////////////////
 		}
+
 		//Posunieme sa na instrukcnej paske
 		NextIP = NextIP->next;
 		//Poziadame o nasledujucu instrukciu

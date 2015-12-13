@@ -1,5 +1,6 @@
 int main() {
-double x = 4 > 5.3;
-
+int a = 5;
+cout << a << " afjadsklfj " << 5.54;
+cout << "\n";
 return 0.0;
 }

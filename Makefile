@@ -2,7 +2,7 @@
 
 
 CC = gcc
-CFLAGS = -Wall -std=c99 -pedantic -W
+CFLAGS = -Wall -std=c11 -pedantic -W
 BIN = projekt
 RM=rm -f -v
 OBJECTS = main.o scaner.o parser.o list.o expression.o stack.o garbage.o interpret.o frames.o ial.o

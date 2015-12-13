@@ -468,7 +468,13 @@ ERROR_CODE prototype_of_definition(int main_detection)
         printf("v maine davam instrukciu %d\n", iPUSHFR );
         error = insertFunctionInstruction(symbol_table.actual_function, iPUSHFR, NULL, NULL, NULL);  
         printf("v maine davam instrukciu %d\n", iSETBASEFR );
-        error = insertFunctionInstruction(symbol_table.actual_function, iSETBASEFR, NULL, &symbol_table.actual_function->return_type, NULL);
+        InsVal Val;
+        Val.VarType = sInteger;
+        Val.Inum = symbol_table.actual_function->return_type;
+
+        InsVal Val2;
+        Val2.Void = NULL;
+        error = insertFunctionInstruction(symbol_table.actual_function, iSETBASEFR, NULL, &Val, &Val2);
 
         if (error != OK_ERR) {
             return error;
@@ -858,7 +864,7 @@ ERROR_CODE command()
                             	printf("dostal som ID\n");
                                 error = OK_ERR;
                                 printf("v cin davam instrukciu %d\n", iREAD );
-                                error = insertFunctionInstruction(symbol_table.actual_function, iREAD, NULL, token.attribute, NULL);
+                                //error = insertFunctionInstruction(symbol_table.actual_function, iREAD, NULL, token.attribute, NULL);
 
                                 if (error != OK_ERR) {
                                     return error;
@@ -1031,6 +1037,7 @@ ERROR_CODE command()
                 token = get_Token ();
                 //token pre count na ziskanie hodnoty tokenu z term
                 tToken token_for_emmiting_instruction;
+                InsVal val;
                 switch (token.id) {
                     /*pokial lexer vrati lex error*/
                     case sError: 
@@ -1046,7 +1053,9 @@ ERROR_CODE command()
                             return error;
                         }
                         printf("v cout davam instrukciu %d\n", iWRITE );
-                        error = insertFunctionInstruction(symbol_table.actual_function, iWRITE, NULL, &token_for_emmiting_instruction.attribute, &token_for_emmiting_instruction.id);
+                        val.VarType=token_for_emmiting_instruction.id;
+                        val.Str = token_for_emmiting_instruction.attribute;
+                        error = insertFunctionInstruction(symbol_table.actual_function, iWRITE, NULL, &val, NULL);
 
                         if (error != OK_ERR) {
                             return error;
@@ -1455,6 +1464,7 @@ ERROR_CODE multi_cout()
     ERROR_CODE error;
     token = get_Token ();
     tToken token_for_emmiting_instruction;
+    InsVal val;
 
     switch (token.id) {
         /*pokial lexer vrati lex error*/
@@ -1475,7 +1485,10 @@ ERROR_CODE multi_cout()
                 return error;
             }
              printf("v cout davam instrukciu %d\n", iWRITE );
-            error = insertFunctionInstruction(symbol_table.actual_function, iWRITE, NULL, &token_for_emmiting_instruction.attribute, &token_for_emmiting_instruction.id);
+            val.VarType=token_for_emmiting_instruction.id;
+            val.Str = token_for_emmiting_instruction.attribute;
+            printf("STRING :%s\n",val.Str);
+            error = insertFunctionInstruction(symbol_table.actual_function, iWRITE, NULL, &val, NULL);
 
             if (error != OK_ERR) {
                 return error;
@@ -1679,7 +1692,8 @@ ERROR_CODE term(tToken* token_for_count)
     ERROR_CODE error;
     token = get_Token ();
     // 
-    token_for_count = &token;
+    token_for_count->id = token.id;
+    token_for_count->attribute = token.attribute;
     token_for_count = token_for_count;
     // ak dostanem lexiklanu chybu LEX_ERR
     if (token.id == sError) {

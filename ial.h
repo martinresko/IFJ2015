@@ -54,12 +54,25 @@ typedef struct variable {
 	char *name;
 } Variable;
 
+
+typedef struct 
+{
+ 	union
+	{
+		int Inum;
+		double Dnum;
+		char * Str;
+		void * Void;
+	};	
+	int VarType;
+}InsVal; 
+
 /* struktura instrukcie */
 typedef struct instruction {
 	int type;
-	void *destination;
-	void *source1;
-	void *source2;
+	InsVal des;
+	InsVal src1;
+	InsVal src2;
 } Instruction;
 
 typedef struct table_symbols{
@@ -89,7 +102,7 @@ Variable *searchFunctionVariableInStack(Function_GTS *,char *);
 Variable *searchFunctionVariableInActualLevel(Function_GTS *,char *);
 Variable *findInList(ListPointer *, char *);
 Variable *getFromList(ListPointer *,int);
-ERROR_CODE insertFunctionInstruction(Function_GTS *, int, void *, void *, void *);
+ERROR_CODE insertFunctionInstruction(Function_GTS *, int, InsVal *, InsVal *, InsVal *);
 
 void SymbolTableStackDestoy(Function_GTS *);
 void functionInGlobalTableDestroy(Function_GTS *);
