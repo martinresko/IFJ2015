@@ -1053,14 +1053,13 @@ ERROR_CODE command()
                             return error;
                         }
                         printf("v cout davam instrukciu %d\n", iWRITE );
-                        val.VarType=token_for_emmiting_instruction.id;
+                        val.VarType = token_for_emmiting_instruction.id;
                         val.Str = token_for_emmiting_instruction.attribute;
                         error = insertFunctionInstruction(symbol_table.actual_function, iWRITE, NULL, &val, NULL);
 
                         if (error != OK_ERR) {
                             return error;
                         }
-
                     break;
                     default :
                     	printf("chyba v cout\n");
@@ -1526,8 +1525,6 @@ ERROR_CODE assign()
 	printf("som v assign\n");
     ERROR_CODE error;
 
-    
-
     error = typ();
     printf("%s\n", token.attribute );
     if (error == OK_ERR) {
@@ -1566,8 +1563,6 @@ ERROR_CODE declaration()
 {
 	printf("som v declaration\n");
     ERROR_CODE error;
-
-   
 
     if (token.id != sAssign) {
     	printf("nedostal som =\n");
@@ -1616,6 +1611,11 @@ ERROR_CODE hodnota_priradenia()
         		printf("volam expression\n");
         		error = expression(TAKEN_FIRST_TOKEN,type_for_expression); 
                 token = token_expression;
+
+                if (token.id != sSemicolon) {
+                    error = SYN_ERR;
+                    return error;
+                }
 
                 if (error != OK_ERR) {
                     return error;
@@ -1667,6 +1667,12 @@ ERROR_CODE hodnota_priradenia()
         default :
         	error = expression(TAKEN_FIRST_TOKEN,type_for_expression); 
             token = token_expression;
+
+            if (token.id != sSemicolon) {
+                    error = SYN_ERR;
+                    return error;
+                }
+                
             if (error != OK_ERR) {
                 return error;
             }
