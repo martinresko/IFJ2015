@@ -109,31 +109,26 @@ return result;
 }
 
 
-char* shell(char *items){
+char* shell(char *items)  
+  {  
+ 
+  char* pom = memmalloc(sizeof(strlen(items)+1));
+  strcpy(pom,items);
+ 
+     int count = strlen(items);
+    register int i, j, gap;  
+    char x;
  
  
-char* pom = memmalloc(sizeof(strlen(items)+1));
-strcpy(pom,items);
-int size = strlen(items);
-int gap = strlen(items)/2;
- 
-while( gap > 0 ) {
-        for (int i = 0; i <  size - gap; i ++) {
-                int j = i + gap;
-                int tmp = pom[j];
-                while ( j >= gap && tmp > pom[j - gap]) {
-                        pom[j] = pom[j - gap];
-                        j = j - gap;
-                }
-                pom[j] = tmp;
-        }
-        if ( gap == 2) {
-                gap = 1;
-        }
-        else  {
-                gap = gap/2;
-        }      
-}
+    for (gap = count/2; gap > 0; gap = gap/2) {
+     
+      for(i=gap; i < count; ++i) {  
+        x = pom[i];  
+        for(j=i-gap; (x < pom[j]) && (j >= 0); j=j-gap)
+          pom[j+gap] = pom[j];  
+        pom[j+gap] = x;  
+      }  
+    }  
 return pom;
 }
 
