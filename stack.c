@@ -11,27 +11,8 @@
  *            <xbaric01@stud.fit.vutbr.cz>, Filip Barič
 **/
 
-#include"stack.h"
+#include "stack.h"
 
-//struct x
-//{
-//	int a;
-//	char *b;
-//} struktura_x = {4,"ahoj"};
-//int main()
-//{
-//	printf("%d cislo a\n",struktura_x.a);
-//	
-//	StackPointer zasobnik;
-//	stackInit(&zasobnik);
-//	stackPush(&zasobnik,&struktura_x);
-//	// plati pre premennu
-//	//printf("%d cislo a zo zasobniku",*((int *)(zasobnik.top_of_stack->data)));
-//	// plati pre strukturu
-//	//printf("%d cislo a zo zasobniku",((struct x*)(zasobnik.top_of_stack->data))->a);
-//	stackPop(&zasobnik);
-//	return 0;
-//}
 
 /* inicializuje zasobnik */
 /* Stac - ukazatel na zasobnik */
@@ -69,8 +50,6 @@ void stackPop(StackPointer *Stac)
 		memfree(helpful_pointer->data); // POZOR to iste ako v stact destroy 
 		memfree(helpful_pointer);
 	}
-	else
-		printf("Pop z prazdneho zasobniku \n");
 }
 /* vrati vrchol zasobniku 
  * return - ukazatel na cokolvek

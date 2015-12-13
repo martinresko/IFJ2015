@@ -108,159 +108,34 @@ return result;
 // opravit
 }
 
-//////////////////////////////**ShellSort**/////////////////////////////////////
-/*
-char* ShellSort(char *string)
-{
-int i,j,step;
-int string_length = strlen(string); // dlzka retazca
-int *result = memmalloc(sizeof(char) * string_length);
-step = string_length / 2;
 
-while (step > 0) {
-
-   for (i = 0; i < string_length - step  ; i++) {
-       j =i+step;
-       char tmp = string[j];
-       while ((j >= step) && (string[j] > string[j - step])){
-           string[j] = string[j - step];
-           j -=  step;
-       }
-        string[j] = tmp;
-    }
-    if (gap == 2) { //zmena velikosti mezery
-        gap = 1;
-    } 
-    else {
-        gap = gap / 2;
-    }
-}
-*/
-
-///////////////////////**MY SHELLSORT**///////////////////////////////////
-/*
-void shellsort(char *string){
-
-int i,gap;
-int j = 0;
-int string_length = strlen(string);
-char pom;
-gap = string_length / 2;
-
-printf("%d\n",string_length);
-printf("%d\n",gap);
-
-
-while ( gap > 0 ) {
-
-	for( i = 0; i < string_length - gap ; i++) {
-		j= i + gap;
-		pom = string[j];
-		printf("pred while\n");
-		while (j >= gap && string[j] > string[j-gap]) {
-			string[j] = string[j-gap];
-			printf("po while");
-			j = j-gap;
-		}
-		string[j] = pom;
-	}
-	if ( gap == 2) {
-		gap = 1;
-	}
-	else {
-		gap = gap / 2;
-	}
- 	}
-//return string;
-}*/
-
-char* shell(char *items)  
-  {  
-  
-  char* pom = memmalloc(sizeof(strlen(items)+1));
-  strcpy(pom,items);
-
-     int count = strlen(items);
-    register int i, j, gap;  
-    char x;
-
-  
-    for (gap = count/2; gap > 0; gap = gap/2) {
-     
-      for(i=gap; i < count; ++i) {  
-        x = pom[i];  
-        for(j=i-gap; (x < pom[j]) && (j >= 0); j=j-gap) 
-          pom[j+gap] = pom[j];  
-        pom[j+gap] = x;  
-      }  
-    }  
-printf("string je %s\n",items);
-return pom;
-}  
-
-
-/*void strsort (char *array)
-{
-      int string_length = strlen(array);	
-      int gap, i, j;
-      char *a, *b, tmp;
+char* shell(char *items){
  
-      for (gap = 0; ++gap < string_length ; )
-            gap *= 2;
-      while (gap /= 2)
-      {
-            for (i = gap; i < string_length ; i++)
-            {
-                  for (j = i - gap; ;j -= gap)
-                  {
-                        a = array + j;
-                        b = a + gap;
-                        if (strcmp(*a, *b) <= 0)
-                              break;
-                        tmp = *a;
-                        *a = *b;
-                        *b = tmp;
-                        if (j < gap)
-                              break;
-                  }
-            }
-      }
-printf("%s\n",array);
-}*/
-/*
-int main() 
-{
-	meminitialization();
-	char* a;
-	char* tt = substring("hatatitla",2,5); //neriesi free...
-	printf("%s\n",tt );
-	if (tt != "")
-		memfree(tt);
-
-	char* s = "98761";
-	printf("string je %s\n",s);	
-	char* vysl;
-	vysl = shell(s);
-	//shellsort(s);
-	printf("string je %s\n",vysl);
-
-	
-	//printf("%s\n",shellsort("987654321"));
-	char * str = concatenation("ahoj", "jano");
-	printf("%s\n",str );
-	memfree (str);
-
-	printf("%d\n", length_of_string("xhos"));
-	printf("%d\n", KMP_Find("cabcabcab", "ab"));
-	printf("%d\n", KMP_Find("cccabcdefab", "de"));
-	printf("%d\n", KMP_Find("cccabcdefab", "c"));
-	printf("%d\n", KMP_Find("cccabcdefab", "aasdasdasda"));
-	printf("%d\n", KMP_Find("cccabcdefab", "fab")); 
-	memallfree();
-	return 0;
+ 
+char* pom = memmalloc(sizeof(strlen(items)+1));
+strcpy(pom,items);
+int size = strlen(items);
+int gap = strlen(items)/2;
+ 
+while( gap > 0 ) {
+        for (int i = 0; i <  size - gap; i ++) {
+                int j = i + gap;
+                int tmp = pom[j];
+                while ( j >= gap && tmp > pom[j - gap]) {
+                        pom[j] = pom[j - gap];
+                        j = j - gap;
+                }
+                pom[j] = tmp;
+        }
+        if ( gap == 2) {
+                gap = 1;
+        }
+        else  {
+                gap = gap/2;
+        }      
 }
-*/
-
+return pom;
+}
 
 ////////////////////// TABLE OF SYMBOLS ///////////////////////////////
 // tabulka symbolov zavisi nad stack.h list.h garbage.h
@@ -303,7 +178,6 @@ ERROR_CODE insertFunction(Table_symbols *gts_table,char *function_name,int retur
 			if( (treeInsert(&(gts_table->functions),function_name,func))==INTERN_ERR) /* do GTS stromu vlozim strukturu Function_GTS pod klucom meno danej funkcie */
 				return INTERN_ERR;
 			gts_table->actual_function=func; /* ulozim si vlozenu funkciu do aktualnej */
-			printf("PRIDAL SOM FUNKCIU\n"); 
 			return OK_ERR;
 		}
 		else
@@ -324,7 +198,6 @@ Function_GTS *searchFunction(Table_symbols *gts_table, char *function_name)
 	{
 		Tree helpful_pointer=NULL;
 		helpful_pointer=treeSearch(&(gts_table->functions),function_name);
-		printf("HLADAM FUNKCIU\n"); 
 		return (helpful_pointer!=NULL)?(Function_GTS*)(helpful_pointer->data):NULL; /* ak som funkciu nasiel tak vratim ukazatel na Function_GTS strukturu ak som nenasiel tak vratim NULL */
 	}
 	return NULL;
@@ -345,7 +218,6 @@ ERROR_CODE insertFunctionParam(Function_GTS *function,char *variable_name,int va
 			param->name=variable_name;
 			param->typ=variable_typ;
 			InsertLast(&(function->params),param);
-			printf("PRIDAVAM PARAMETER\n"); 
 			return OK_ERR;
 		}
 		else
@@ -366,7 +238,6 @@ Variable *searchFunctionParam(Function_GTS *function,char *variable_name)
 	{
 		Variable *helpful_pointer=NULL;
 		helpful_pointer=findInList(&(function->params),variable_name);
-		printf("HLADAM PARAMETER\n"); 
 		return (helpful_pointer!=NULL)?(Variable *)(helpful_pointer):NULL;
 	}
 	return NULL;
@@ -378,7 +249,6 @@ Variable *getFunctionParam(Function_GTS *function,int state)
 	{
 		Variable *helpful_pointer=NULL;
 		helpful_pointer=getFromList(&(function->params),state);
-		printf("VRACIAM PARAMETER\n"); 
 		return (helpful_pointer!=NULL)?(Variable *)(helpful_pointer):NULL;
 	}
 	return NULL;
@@ -397,7 +267,6 @@ ERROR_CODE pushBlock(Function_GTS *function)
 			treeInit(zasobnik);
 			if((stackPush(&(function->symbol_table_of_block),zasobnik)==INTERN_ERR))
 					return INTERN_ERR;
-			printf("PUSHOL SOM OK\n");
 			return OK_ERR;
 		}
 		else
@@ -415,13 +284,11 @@ void popBlock(Function_GTS *function)
 		if(stackEmpty(&(function->symbol_table_of_block)))
 		{
 			;
-			//printf("chces popnut prazdny zasobnik \n");
 		}
 		else /* zasobnik prazdny nieje mozem popnut blok */
 		{
 			treeDestroy(stackTop(&(function->symbol_table_of_block)));
 			stackPop(&(function->symbol_table_of_block));
-			printf("POPOL SOM OK\n");
 		}
 	}
 }
@@ -443,7 +310,6 @@ ERROR_CODE insertFunctionVariableToStack(Function_GTS *function, char *variable_
 			var->name=variable_name;
 			if((treeInsert(stackTop(&(function->symbol_table_of_block)),variable_name,var)==INTERN_ERR))
 					return INTERN_ERR;
-			printf("VKLADAM PREMENNU MENOM %s \n",variable_name); 
 			return OK_ERR;
 		}
 		else
@@ -486,7 +352,6 @@ Variable *searchFunctionVariableInActualLevel(Function_GTS *function, char *vari
  * variable_name - meno hladanej premennej */
 Variable *searchFunctionVariableInStack(Function_GTS *function, char *variable_name)
 {
-	printf("CHECEM NAJT PREMENNU V STACK MENOM %s\n",variable_name );
 	if(function!=NULL)
 	{
 		Variable *found_param = findInList(&(function->params),variable_name);
@@ -502,7 +367,6 @@ Variable *searchFunctionVariableInStack(Function_GTS *function, char *variable_n
 			if(helpful_pointer!=NULL)
 			{
 				function->symbol_table_of_block.top_of_stack=store_top_stack; /* nastavim originaly vrchol */
-				printf("NASIEL SOM PREMENNU\n"); 
 				return (Variable *)(helpful_pointer->data); /* nasiel som */
 			}
 			else
@@ -511,7 +375,6 @@ Variable *searchFunctionVariableInStack(Function_GTS *function, char *variable_n
 			}
 		}
 		function->symbol_table_of_block.top_of_stack=store_top_stack; /* prenastavim vrchol zasobnika ak nenajdem */
-		printf("NENASIEL SOM PREMENNU\n"); 
 		return NULL;
 	}
 	return NULL;
@@ -634,7 +497,6 @@ Variable *getFromList(ListPointer *Lis,int state)
 {
 	if(EmptyList(Lis))
 	{
-		printf("zoznam parametrov je prazdny \n");
 		return NULL; /* zoznam je prazdny nemam co vratit */
 	}
 	if(state==FALSE) /* reset */
@@ -658,7 +520,6 @@ Variable *getFromList(ListPointer *Lis,int state)
 			}
 			else
 			{
-				printf("ziaden dalsi parameter nieje vraciam NULL \n");
 				return NULL;
 			}
 		}
@@ -689,7 +550,6 @@ ERROR_CODE insertFunctionInstruction(Function_GTS *function, int type, InsVal *d
 				instruct->src2=*src2;
 
 			InsertLast(&(function->instructions),instruct);
-			printf("PRIDAVAM INSTRUKCIU\n"); 
 			return OK_ERR;
 		}
 		else

@@ -43,22 +43,6 @@ const char PRECEDENCE_TABLE[SIZE][SIZE] =
 	[DOLLAR] 	={'S','S','S','S','S','S','S','S','S','S','S','P','S','X'}
 };
 
-//FILE *file;
-//
-//tToken token;
-//
-//int main()
-//{
-//	file = fopen("test","r");
-//	token.attribute="2";
-//	token.id=sInteger;
-//	int control=sDouble;
-//	ERROR_CODE ret=expression(NOT_TAKEN_FIRST_TOKEN,control);
-//	printf("skoncil som s navratovym kodom %d, token s atributom %s\n",ret,token_expression.attribute);
-//
-//	fclose(file);
-//	return EXIT_SUCCESS;
-//}
 
 /* funkcia volana z rekuzivneho zostupu 
  * return - navratova hodnota z error.h */
@@ -88,7 +72,6 @@ ERROR_CODE Analysis(ListPointer *Lis,int first_token,int type_control)
 		token_expression=token;
 		if(token_expression.id==sError)
 			return LEX_ERR;
-		printf("id tokenu:%d token:%s\n",token_expression.id,token_expression.attribute);
 	}
 
 	bool vykonavanie_cyklu=true;
@@ -100,7 +83,6 @@ ERROR_CODE Analysis(ListPointer *Lis,int first_token,int type_control)
 			ERROR_CODE return_reduce = Reduce(Lis);
 			if(return_reduce!=OK_ERR)
 			{
-				printf("Redukcia neprabehla\n");
 				vykonavanie_cyklu=false;
 				return return_reduce;
 			}
@@ -123,7 +105,6 @@ ERROR_CODE Analysis(ListPointer *Lis,int first_token,int type_control)
 		}
 		else if(next_step=='T')
 		{
-			printf("pravidlo T:\n");
 			if(ReduceT(Lis)!=OK_ERR)
 				return SYN_ERR;
 			token_expression = get_Token(); /* aktualizujem token za ')' */
@@ -146,22 +127,18 @@ ERROR_CODE Analysis(ListPointer *Lis,int first_token,int type_control)
 					}
 					if( typeControl(((Precedence_table_element *)(Lis->first_list_element->next->data))->id,type_control)!=OK_ERR) /* ak nesedia typy na lavej a pravej strane */
 					{
-						printf("nesedia typy lavej a pravej strane\n");
 						return SEM_TYPE_ERR;
 					}
 				}
-				printf("koncim uspesne\n");
 				return OK_ERR; /* koncim uspechom */
 			}
 			else
 			{
-				printf("pravidlo P ale bez opedandu \n");
 				return SYN_ERR;
 			}
 		}
 		else /* next_step==X */
 		{
-			printf("Syntakticka chyba pravidlo X \n");
 			vykonavanie_cyklu=false;
 			return SYN_ERR; /* vratim chybu */
 		}
@@ -176,14 +153,11 @@ ERROR_CODE Analysis(ListPointer *Lis,int first_token,int type_control)
 					typ_pre_auto = ((Precedence_table_element *)(Lis->first_list_element->next->data))->id;
 					return OK_ERR;
 				}
-				printf("vrchol %d typ_control %d\n",((Precedence_table_element *)(Lis->first_list_element->next->data))->id, type_control);
 				if( typeControl(((Precedence_table_element *)(Lis->first_list_element->next->data))->id,type_control)!=OK_ERR) /* ak nesedia typy na lavej a pravej strane */
 				{
-					printf("nesedia typy lavej a pravej strane\n");
 					return SEM_TYPE_ERR;
 				}
 			}
-			printf("koncim uspesne\n");
 			return OK_ERR; /* koncim uspechom */
 		}
 	}
@@ -213,7 +187,6 @@ ERROR_CODE Reduce(ListPointer *Lis)
 	int rule = ((struct precedence_table_element*)(Lis->last_terminal->data))->expresion_id;
 	if(rule==OPERAND) /* terminal je i*/
 	{
-		printf(" i -> D \n");
 		((Precedence_table_element *)(Lis->last_terminal->data))->terminal=false;
 		FindLastTerminal(Lis); /* najdenie noveho terminalu */
 		return OK_ERR;
@@ -228,7 +201,6 @@ ERROR_CODE Reduce(ListPointer *Lis)
 		List left_operand = Lis->last_terminal->prev;
 		List right_operand = Lis->last_terminal->next;
 
-		printf("pravy je %d \n",((Precedence_table_element *)(right_operand->data))->expresion_id);
 		if( ( (left_operand!=NULL) && (((Precedence_table_element *)(left_operand->data))->expresion_id==OPERAND) ) && ( (right_operand!=NULL) && (((Precedence_table_element *)(right_operand->data))->expresion_id==OPERAND) ) )/* ci okolo operatoru nieco je a ci su to operandy */
 		{
 			int left_id=((Precedence_table_element *)(left_operand->data))->id;
@@ -236,70 +208,60 @@ ERROR_CODE Reduce(ListPointer *Lis)
 			switch(rule)
 			{
 				case(MUL):
-					printf("MUL\n");
 					if( left_id==sString || right_id==sString)
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,MUL); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(DIV):
-					printf("DIV\n");
 					if( left_id==sString || right_id==sString )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,DIV); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(PLUS):
-					printf("PLUS\n");
 					if( left_id==sString || right_id==sString )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,PLUS); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(MINUS):
-					printf("MINUS\n");
 					if( left_id==sString || right_id==sString )
 						return SEM_TYPE_ERR; /* chyba v pripade ze jeden alebo oba operatory su string */
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,MINUS); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(LT):
-					printf("LT\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,LT); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(GT):
-					printf("GT\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,GT); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(LE):
-					printf("LE\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,LE); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(GE):
-					printf("GE\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,GE); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(EQ):
-					printf("EQ\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,EQ); /* pretypovanie */
 					/* Doplnit instrukciu */
 					break;
 				case(NE):
-					printf("NE\n");
 					if( (left_id==sString && right_id!=sString) || ( (left_id!=sString && right_id==sString) ) )
 						return SEM_TYPE_ERR;
 					((Precedence_table_element *)(left_operand->data))->id=changeTypeOf(left_id,right_id,NE); /* pretypovanie */
@@ -313,13 +275,11 @@ ERROR_CODE Reduce(ListPointer *Lis)
 		}
 		else
 		{
-			printf("ERRROR chyba operator\n");
 			return SYN_ERR;
 		}
 	}
 	else
 	{
-		printf("koniec else \n");
 		return SYN_ERR;
 	}
 }
@@ -328,7 +288,6 @@ ERROR_CODE Reduce(ListPointer *Lis)
  * Lis - ukazatel na zoznam */
 ERROR_CODE ReduceT(ListPointer *Lis)
 {
-	printf("(D) -> D\n");
 	if(Lis->last_terminal->next != NULL)
 	{
 		int typ = ((Precedence_table_element *)(Lis->last_terminal->next->data))->id;
@@ -389,7 +348,6 @@ char DecideShiftOrReduce(ListPointer *Lis,int id)
 {
 	int list_terminal = ((Precedence_table_element *)(Lis->last_terminal->data))->expresion_id;
 	int token_symbol = expressionIdChose(id);
-	printf("%s <-> %s\n",((Precedence_table_element *)(Lis->last_terminal->data))->attribute,token_expression.attribute);
 	if(token_symbol!=UNKNOWN)
 		return PRECEDENCE_TABLE[list_terminal][token_symbol];
 	else

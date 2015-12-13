@@ -15,60 +15,6 @@
 #define TRUE 1
 #define FALSE 0
 
-//int main()
-//{
-//	meminitialization();
-//
-//	char *menoInstrukcie = "GOTO";
-//	List dalsiaInstrukcia = memmalloc(sizeof(struct list));
-//	dalsiaInstrukcia->data = menoInstrukcie;
-//	dalsiaInstrukcia->next = NULL;
-//	dalsiaInstrukcia->prev = NULL;
-//
-//	StackPointer zasobnik;
-//	stackInit(&zasobnik);
-//	pushFrame(&zasobnik);
-//	fromPreparationDoBase(&zasobnik,sString,dalsiaInstrukcia);
-//	Frame_variable *F_var = insertVariableToFrame(&zasobnik,"premenna",sInteger);
-//	insertVariableToFrame(&zasobnik,"return_test",sString);
-//	setValueVariable(&zasobnik,"premenna","4");
-//	F_var=F_var;
-//
-//	pushFrame(&zasobnik);
-//	fromPreparationDoBase(&zasobnik,sString,NULL);
-//	insertVariableToFrame(&zasobnik,"premenna2",sString);
-//	setValueVariable(&zasobnik,"$return","navratova hodnota STRING");
-//	Frame_variable *ret  = searchVariableInFrames(&zasobnik,"$return");
-//	fromBaseDoEnded(&zasobnik);
-//	Frame_variable *S_var = searchVariableInFramesAfterEnded(&zasobnik,"return_test");
-//	copyValue(&zasobnik,ret,S_var);
-//	popFrame(&zasobnik);
-//	if(S_var!=NULL)
-//		printf("hodnota premennej: %s\n",S_var->frame_var_value.S);
-//	else
-//		printf("Nenasiel som \n");
-//
-//	Frame_variable *instrukc = searchVariableInFrames(&zasobnik,"$next_instruction");
-//	if(instrukc!=NULL)
-//		printf("nasledujuca instrukcia je %s",(char *)(instrukc->next_instruction->data));
-//	else
-//		printf("nenasiel som instrukciu\n");
-//
-//	//setValueVariable(&zasobnik,"premenna2","AHOJ");
-//	//copyValue(&zasobnik,"premenna2","$return");
-//	//popFrame(&zasobnik);			
-//	//Frame_variable *S_var = searchVariableInFrames(&zasobnik,"$return");
-//	//if(S_var!=NULL)
-//	//	printf("hodnota premennej: %s\n",S_var->frame_var_value.S);
-//	//else
-//	//	printf("Nenasiel som \n");
-//	//
-//
-//	destroyAllFrames(&zasobnik);
-//	memallfree();
-//	return 0;
-//}
-
 /* funkcia prida na zasobnik ramcov novy blokovy ramec
  * return - INTERN_ERR,OK_ERR
  * Stac - ukazatel na zasobnik ramcov */
