@@ -1569,9 +1569,10 @@ ERROR_CODE declaration()
 
    
 
-    if(token.id != sAssign) {
+    if (token.id != sAssign) {
     	printf("nedostal som =\n");
         error = SYN_ERR;
+        return error;
     }
     printf("dostal som =\n");
     printf("idem do hodnota_priradenia\n");
