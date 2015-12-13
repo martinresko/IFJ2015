@@ -45,8 +45,15 @@ int main(int argc, char **argv){
 	error = prog();
 
 	switch (error) {
-		case OK_ERR:
+	case OK_ERR:
         	error = interpret(&symbol_table);
+		if (error != OK_ERR) {
+			destroyGTS(&symbol_table);
+			fclose(file);
+			memallfree(); /* volanie garbage aby upratal */
+			return error;	
+		}
+	break;
         //CHYBA V LEXIKALNEJ ANALYZE
         case LEX_ERR: 
         	fprintf(stderr,"ERROR CHYBA V LEXIKALNEJ ANALYZE\n");
